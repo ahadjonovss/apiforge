@@ -1,6 +1,9 @@
 import { useEffect } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Group, Panel, Separator } from 'react-resizable-panels'
+import { Plus, Zap } from 'lucide-react'
+import { Button } from '@/shared/ui/button'
+import { RequireAuth } from '@/features/auth'
 import { useTabsStore } from '@/features/tabs'
 import { Sidebar } from '@/features/collections/presentation/sidebar'
 import { TabBar } from '@/features/tabs/presentation/tab-bar'
@@ -16,6 +19,24 @@ function ResizeHandle({ orientation }: { orientation: 'horizontal' | 'vertical' 
           : 'h-px shrink-0 bg-border transition-colors hover:bg-primary data-[state=dragging]:bg-primary'
       }
     />
+  )
+}
+
+function EmptyWorkbench({ onCreate }: { onCreate: () => void }) {
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+      <Zap className="size-8 text-muted-foreground/40" />
+      <div>
+        <p className="text-sm font-medium">Ochiq so'rov yo'q</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Yangi so'rov oching va uni yuborib ko'ring
+        </p>
+      </div>
+      <Button size="sm" onClick={onCreate}>
+        <Plus className="size-3.5" />
+        Yangi so'rov
+      </Button>
+    </div>
   )
 }
 
@@ -55,9 +76,7 @@ function Workbench() {
               </Panel>
             </Group>
           ) : (
-            <div className="flex flex-1 items-center justify-center">
-              <p className="text-xs text-muted-foreground">Ochiq tab yo'q</p>
-            </div>
+            <EmptyWorkbench onCreate={() => openTab()} />
           )}
         </div>
       </Panel>
@@ -66,5 +85,9 @@ function Workbench() {
 }
 
 export const Route = createFileRoute('/')({
-  component: Workbench,
+  component: () => (
+    <RequireAuth>
+      <Workbench />
+    </RequireAuth>
+  ),
 })

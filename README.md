@@ -58,16 +58,32 @@ src/
   shared/
     ui/                       method-badge, key-value-editor
   features/
+    auth/
+      domain/                 AuthUser, AuthGateway, AuthFailure
+      application/            schemas (zod), auth-service
+      infrastructure/         firebase-auth-gateway
+      presentation/           login-page, register-page, auth-store, require-auth, user-menu
+      composition.ts          createAuthService(firebaseAuthGateway)
     request/
       domain/                 RequestDef, ResponseResult, RequestGateway
       application/            build-http-call, send-request, interpolate, request-factory
       infrastructure/         fetch-request-gateway
       presentation/           request-panel, response-panel
       index.ts                feature'ning ochiq API'si + kompozitsiya
+    profile/                  presentation (profile-page)
     tabs/                     domain, presentation (tabs-store, tab-bar)
     collections/              domain, presentation (sidebar)
     environments/             domain
 ```
+
+## Marshrutlar
+
+| Yo'l | Sahifa | Himoya |
+|---|---|---|
+| `/` | Ish stoli (so'rov yuborish) | Auth talab qilinadi |
+| `/login` | Kirish + parolni tiklash | Ochiq |
+| `/register` | Ro'yxatdan o'tish | Ochiq |
+| `/profile` | Profil, parol almashtirish | Auth talab qilinadi |
 
 Bog'liqlik yo'nalishi ichkariga: `presentation`/`infrastructure` → `application` → `domain`.
 `core` va `shared` hech qachon `features` ga bog'lanmaydi.
@@ -87,6 +103,16 @@ Ishlaydi:
 - Light/dark tema
 
 - CORS'siz so'rovlar — dev proxy orqali (pastga qarang)
+- Auth: kirish, ro'yxatdan o'tish, parolni tiklash, profil, parol almashtirish
+
+⚠️ `apiforge-dev` da Firebase Authentication xizmati hali yoqilmagan
+(`CONFIGURATION_NOT_FOUND`). Konsolda **Authentication → Get started → Email/Password**
+ni yoqmaguningizcha login/register faqat emulyatorda ishlaydi:
+
+```bash
+echo "VITE_USE_EMULATORS=true" > .env.development.local
+npm run emulators
+```
 
 Hali yo'q:
 

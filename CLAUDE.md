@@ -40,7 +40,9 @@ src/
   core/         yadro: domen primitivlari, config, utilitalar (feature'larga bog'liq emas)
   shared/       qayta ishlatiladigan "soqov" UI
   features/
+    auth/         domain → application → infrastructure → presentation
     request/      domain → application → infrastructure → presentation
+    profile/
     tabs/
     collections/
     environments/
@@ -75,6 +77,31 @@ faqat ochiq API'siga (`features/<nom>/index.ts`) yoki `domain/` iga murojaat qil
 Cloud Function proxy qo'shilganda **yangi gateway yoziladi va `index.ts` da bitta qator
 almashadi** — `build-http-call`, use case va butun UI tegilmaydi.
 
+## Auth
+
+`features/auth` xuddi `request` kabi tuzilgan: `AuthGateway` interfeysi domain'da,
+`firebaseAuthGateway` infrastructure'da, `createAuthService(gateway)` esa validatsiyani
+qo'shib beradi. Kompozitsiya `features/auth/composition.ts` da (index.ts da emas —
+`auth-store` uni import qilgani uchun sikl hosil bo'lardi).
+
+Validatsiya zod sxemalari `application/schemas.ts` da. Formalar react-hook-form +
+`zodResolver` orqali o'sha sxemalarni ishlatadi, ya'ni qoidalar bir joyda.
+
+Firebase xato kodlari (`auth/invalid-credential` va h.k.) gateway ichida
+`AuthErrorKind` ga xaritalanadi — UI hech qachon Firebase kodini ko'rmaydi.
+
+**Marshrut himoyasi:** `RequireAuth` komponenti `status` ga qaraydi va `anonymous`
+bo'lsa `/login` ga yo'naltiradi. Router `beforeLoad` ishlatilmaydi, chunki auth holati
+Firebase'dan asinxron keladi.
+
+**5 soniyalik timeout.** `auth-store.init` obunani qo'yadi va taymer ishga tushiradi;
+Firebase 5s ichida javob bermasa status `anonymous` ga o'tadi. Sababi: Firebase Auth
+IndexedDB'ga tayanadi va u bloklangan muhitlarda (private rejim, ba'zi ichki brauzerlar,
+headless Chrome) na xato, na javob qaytaradi — bunda ilova abadiy spinnerda qolardi.
+Kechikkan javob kelsa status o'zi to'g'rilanadi.
+
+## Proxy
+
 Dev server'da so'rov `vite.config.ts` dagi `apiforge-dev-proxy` plagini orqali o'tadi
 (`/__apiforge_proxy?target=…`), shuning uchun CORS to'sqinlik qilmaydi. Yo'nalishni
 `resolveTarget` tanlaydi.
@@ -96,9 +123,11 @@ ulanadi.
 
 ## Keyingi qadamlar
 
-1. Cloud Function proxy (SSRF himoyasi bilan) — README'dagi cheklovlarga qarang
+1. **Firebase konsolida Authentication'ni yoqish** — `apiforge-dev` da xizmat hali
+   provisioning qilinmagan (`CONFIGURATION_NOT_FOUND`). Email/parol usuli yoqilmaguncha
+   login va register real project'da ishlamaydi; emulyatorda ishlaydi.
 2. Firestore persistence: collection'lar, environment'lar, history
-3. Firebase Auth ekranlari
+3. Cloud Function proxy (SSRF himoyasi bilan) — README'dagi cheklovlarga qarang
 4. Environment tanlash UI + `{{var}}` autocomplete
-5. Auth muharriri UI, form-data body
+5. Auth muharriri UI (so'rov auth'i), form-data body
 6. cURL import/export
