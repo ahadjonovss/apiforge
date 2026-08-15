@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { AlertCircle, Clock, HardDrive } from 'lucide-react'
+import { AlertCircle, Clock, HardDrive, Lightbulb } from 'lucide-react'
 import { cn } from '@/core/lib/cn'
 import { useTheme } from '@/app/providers/theme-provider'
 import type { Tab } from '@/features/tabs'
@@ -41,10 +41,27 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
 
   if (error) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center">
-        <AlertCircle className="size-6 text-destructive" />
-        <p className="text-sm font-medium text-destructive">So'rov bajarilmadi</p>
-        <p className="max-w-md text-xs text-muted-foreground">{error.message}</p>
+      <div className="flex h-full items-center justify-center p-6">
+        <div className="w-full max-w-md rounded-lg border border-destructive/30 bg-destructive/5 p-5">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="mt-0.5 size-5 shrink-0 text-destructive" />
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-destructive">{error.title}</p>
+              <p className="mt-1 break-words text-xs text-foreground">{error.message}</p>
+
+              {error.hint && (
+                <div className="mt-3 flex items-start gap-2 border-t border-destructive/20 pt-3">
+                  <Lightbulb className="mt-px size-3.5 shrink-0 text-muted-foreground" />
+                  <p className="text-[11px] text-muted-foreground">{error.hint}</p>
+                </div>
+              )}
+
+              <span className="mt-3 inline-block rounded border border-border px-1.5 py-0.5 font-mono text-[10px] uppercase text-muted-foreground">
+                {error.kind}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }

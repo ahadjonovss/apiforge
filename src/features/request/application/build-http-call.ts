@@ -39,7 +39,12 @@ function buildUrl(
   const raw = joinUrl(baseUrl, interpolate(request.url, scope))
 
   if (!raw) {
-    throw new HttpRequestFailure({ kind: 'invalid', message: 'URL kiritilmagan' })
+    throw new HttpRequestFailure({
+      kind: 'invalid',
+      title: 'URL kiritilmagan',
+      message: "So'rov manzili bo'sh",
+      hint: "Manzil yozing yoki to'plam sozlamalarida base URL belgilang.",
+    })
   }
 
   const withScheme = ABSOLUTE_URL.test(raw) ? raw : `https://${raw}`
@@ -48,7 +53,12 @@ function buildUrl(
   try {
     url = new URL(withScheme)
   } catch {
-    throw new HttpRequestFailure({ kind: 'invalid', message: `URL noto'g'ri: ${raw}` })
+    throw new HttpRequestFailure({
+      kind: 'invalid',
+      title: "URL noto'g'ri",
+      message: `«${raw}» manzil sifatida o'qilmadi`,
+      hint: 'Manzilda ortiqcha bo‘sh joy yoki belgi bormi tekshiring.',
+    })
   }
 
   for (const [key, value] of activePairs(request.params, scope)) {

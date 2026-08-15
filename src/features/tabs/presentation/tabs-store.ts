@@ -1,5 +1,10 @@
 import { create } from 'zustand'
-import { createRequest, sendRequest, HttpRequestFailure } from '@/features/request'
+import {
+  createRequest,
+  describeRawError,
+  sendRequest,
+  HttpRequestFailure,
+} from '@/features/request'
 import type { RequestDef, RequestError } from '@/features/request'
 import type { InheritedConfig } from '@/features/request/domain/request'
 import type { Tab } from '../domain/tab'
@@ -87,7 +92,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       const detail: RequestError =
         error instanceof HttpRequestFailure
           ? error.detail
-          : { kind: 'unknown', message: String(error) }
+          : describeRawError(String(error), 0)
       patchTab({ error: detail, response: null, isSending: false })
     }
   },

@@ -9,9 +9,23 @@ export interface ResponseResult {
   receivedAt: number
 }
 
+export type RequestErrorKind =
+  | 'invalid'
+  | 'dns'
+  | 'refused'
+  | 'unreachable'
+  | 'tls'
+  | 'timeout'
+  | 'cors'
+  | 'network'
+  | 'blocked'
+  | 'unknown'
+
 export interface RequestError {
-  kind: 'network' | 'timeout' | 'blocked' | 'invalid' | 'unknown'
+  kind: RequestErrorKind
+  title: string
   message: string
+  hint?: string
 }
 
 export class HttpRequestFailure extends Error {

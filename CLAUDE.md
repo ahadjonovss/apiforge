@@ -175,6 +175,21 @@ murojaat qilardi. Ya'ni proxy har qanday build'da o'chiq, faqat dev server'da yo
 Proxy xatolari `x-apiforge-proxy-error` header'i bilan belgilanadi va `HttpRequestFailure`
 ga aylantiriladi — ular target'ning javobi emas, shuning uchun response sifatida ko'rsatilmaydi.
 
+## Xatolarni tasniflash
+
+`RequestError` da `kind`, `title`, `message` va ixtiyoriy `hint` bor. Foydalanuvchi
+hech qachon xom tizim xatosini ko'rmaydi (`getaddrinfo ENOTFOUND …` kabi).
+
+Proxy tarmoq xatosi yuz berganda kodni `x-apiforge-error-code` header'ida qaytaradi
+(`ENOTFOUND`, `ECONNREFUSED`, `CERT_HAS_EXPIRED` va h.k.).
+`application/describe-error.ts` uni o'qiladigan xabarga aylantiradi. Bu sof funksiya —
+tarmoqqa ham, React'ga ham bog'liq emas.
+
+Notanish kod uchraganda funksiya yiqilmaydi: `network` turiga tushadi va baribir
+host nomi bilan ma'noli xabar beradi. Proxy ishlatilmayotgan bo'lsa (production build),
+brauzerning `Failed to fetch` xatosi `cors` deb tasniflanadi — sababi deyarli har doim
+shu.
+
 `features/request/application/interpolate.ts` — `{{variable}}` almashtirish. URL, header,
 param, body — hammasida ishlatiladi, `build-http-call` ichida chaqiriladi.
 

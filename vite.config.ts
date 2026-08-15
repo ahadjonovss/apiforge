@@ -42,9 +42,10 @@ function devProxy(): Plugin {
 
         const target = new URL(req.url, 'http://localhost').searchParams.get('target')
 
-        const fail = (status: number, message: string) => {
+        const fail = (status: number, message: string, code = '') => {
           res.statusCode = status
           res.setHeader('x-apiforge-proxy-error', '1')
+          if (code) res.setHeader('x-apiforge-error-code', code)
           res.setHeader('content-type', 'text/plain; charset=utf-8')
           res.end(message)
         }
@@ -83,8 +84,13 @@ function devProxy(): Plugin {
           })
         } catch (error) {
           const cause = error instanceof Error && error.cause instanceof Error ? error.cause : null
-          const detail = cause?.message ?? (error instanceof Error ? error.message : String(error))
-          return fail(502, detail)
+          const carrier = cause ?? error
+          const detail = carrier instanceof Error ? carrier.message : String(error)
+          const code =
+            typeof carrier === 'object' && carrier !== null && 'code' in carrier
+              ? String((carrier as { code: unknown }).code)
+              : ''
+          return fail(502, detail, code)
         }
 
         res.statusCode = upstream.status
