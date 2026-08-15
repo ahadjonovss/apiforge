@@ -33,6 +33,9 @@ const STRIPPED_RESPONSE_HEADERS = new Set([
 function devProxy(): Plugin {
   return {
     name: 'apiforge-dev-proxy',
+    config: (_config, { command }) => ({
+      define: { __DEV_PROXY__: JSON.stringify(command === 'serve') },
+    }),
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         if (!req.url?.startsWith(DEV_PROXY_PATH)) return next()
@@ -103,7 +106,12 @@ function devProxy(): Plugin {
 
 export default defineConfig({
   plugins: [
-    tanstackRouter({ target: 'react', autoCodeSplitting: true }),
+    tanstackRouter({
+      target: 'react',
+      autoCodeSplitting: true,
+      routesDirectory: 'src/app/routes',
+      generatedRouteTree: 'src/app/route-tree.gen.ts',
+    }),
     react(),
     tailwindcss(),
     devProxy(),

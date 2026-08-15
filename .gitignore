@@ -23,13 +23,14 @@ dist-ssr
 *.sln
 *.sw?
 
-# local env
+# local env (mode fayllari — .env.development / .env.production — commit qilinadi)
 .env
 .env.local
+.env.*.local
 
 # firebase
 .firebase/
 firebase-debug.log
 
 # generated routes
-src/routeTree.gen.ts
+src/app/route-tree.gen.ts

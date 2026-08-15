@@ -16,24 +16,63 @@ Web-based API client (Postman analogi). Firebase backend.
 
 ```bash
 npm install
-cp .env.example .env      # Firebase konsolidan qiymatlarni to'ldiring
 npm run dev
+```
+
+## Muhitlar
+
+Ikki muhit, Vite mode fayllari orqali ajratilgan:
+
+| Muhit | Fayl | Firebase project | Buyruq |
+|---|---|---|---|
+| dev | `.env.development` | `apiforge-dev` | `npm run dev`, `npm run build:dev`, `npm run deploy:dev` |
+| prod | `.env.production` | `apiforge-prod` | `npm run build`, `npm run deploy:prod` |
+
+Firebase web konfiguratsiyasi (`apiKey` va boshqalar) maxfiy emas — u baribir brauzer
+bundle'iga tushadi. Himoya `firestore.rules` va Auth orqali bo'ladi. Shuning uchun mode
+fayllari repoga commit qilinadi; faqat `.env.*.local` gitignore'da.
+
+Lokal ravishda emulyatorlarga o'tish uchun `.env.development.local` yarating:
+
+```bash
+echo "VITE_USE_EMULATORS=true" > .env.development.local
+npm run emulators
 ```
 
 `npm run build` — typecheck (`tsc -b`) + production build.
 
 ## Loyiha strukturasi
 
+Feature-first, har bir feature ichida clean architecture qatlamlari:
+
 ```
 src/
-  components/     UI (sidebar, tab-bar, request-panel, response-panel, ...)
-  lib/            firebase, http-client, interpolate, request-factory, utils
-  routes/         TanStack Router fayl-marshrutlari
-  stores/         Zustand store'lar
-  types/          domen modellari (RequestDef, ResponseResult, Environment, ...)
+  app/                        ilova qobig'i
+    main.tsx
+    providers/                theme
+    routes/                   TanStack Router fayl-marshrutlari
+  core/                       yadro — feature'larga bog'liq emas
+    domain/                   HttpMethod, KeyValue, VariableScope
+    config/                   firebase
+    lib/                      cn, id, key-value
+  shared/
+    ui/                       method-badge, key-value-editor
+  features/
+    request/
+      domain/                 RequestDef, ResponseResult, RequestGateway
+      application/            build-http-call, send-request, interpolate, request-factory
+      infrastructure/         fetch-request-gateway
+      presentation/           request-panel, response-panel
+      index.ts                feature'ning ochiq API'si + kompozitsiya
+    tabs/                     domain, presentation (tabs-store, tab-bar)
+    collections/              domain, presentation (sidebar)
+    environments/             domain
 ```
 
-`src/routeTree.gen.ts` avtomatik generatsiya qilinadi (gitignore'da).
+Bog'liqlik yo'nalishi ichkariga: `presentation`/`infrastructure` → `application` → `domain`.
+`core` va `shared` hech qachon `features` ga bog'lanmaydi.
+
+`src/app/route-tree.gen.ts` avtomatik generatsiya qilinadi (gitignore'da).
 
 ## Hozirgi holat
 
