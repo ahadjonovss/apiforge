@@ -23,6 +23,15 @@ export const endpointSchema = z.object({
     .max(80, 'Nom 80 belgidan oshmasligi kerak'),
 })
 
+export const folderSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Nom kiritilmagan')
+    .max(60, 'Nom 60 belgidan oshmasligi kerak'),
+})
+
+export type FolderValues = z.infer<typeof folderSchema>
 export type CollectionValues = z.infer<typeof collectionSchema>
 export type CollectionSettingsValues = z.infer<typeof collectionSettingsSchema>
 export type EndpointValues = z.infer<typeof endpointSchema>

@@ -1,5 +1,6 @@
 import type { RequestDef } from '@/features/request/domain/request'
 import type { ApiCollection } from './collection'
+import type { Folder } from './folder'
 
 export interface CreateCollectionInput {
   workspaceId: string
@@ -25,4 +26,9 @@ export interface CollectionGateway {
   listEndpoints(workspaceId: string, collectionId: string): Promise<RequestDef[]>
   saveEndpoint(workspaceId: string, collectionId: string, endpoint: RequestDef): Promise<void>
   removeEndpoint(workspaceId: string, collectionId: string, endpointId: string): Promise<void>
+
+  listFolders(workspaceId: string, collectionId: string): Promise<Folder[]>
+  saveFolder(workspaceId: string, collectionId: string, folder: Folder): Promise<void>
+  removeFolders(workspaceId: string, collectionId: string, folderIds: string[]): Promise<void>
+  removeEndpoints(workspaceId: string, collectionId: string, endpointIds: string[]): Promise<void>
 }

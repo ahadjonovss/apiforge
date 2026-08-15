@@ -1,9 +1,12 @@
 import { DataFailure } from '@/core/domain/data-error'
+import { newId } from '@/core/lib/id'
 import { createRequest } from '@/features/request/application/request-factory'
 import type { RequestDef } from '@/features/request/domain/request'
 import type { ApiCollection } from '../domain/collection'
 import type { CollectionGateway, CollectionPatch } from '../domain/collection-gateway'
-import { collectionSchema, collectionSettingsSchema, endpointSchema } from './schemas'
+import type { Folder } from '../domain/folder'
+import { collectionSchema, collectionSettingsSchema, endpointSchema, folderSchema } from './schemas'
+import { descendantFolderIds, isDescendant } from './tree'
 
 function assertValid(result: { success: boolean; error?: { issues: { message: string }[] } }) {
   if (!result.success) {
@@ -69,6 +72,7 @@ export function createCollectionService(gateway: CollectionGateway) {
       collection: ApiCollection,
       name: string,
       order: number,
+      folderId: string | null,
     ): Promise<RequestDef> {
       assertValid(endpointSchema.safeParse({ name }))
 
@@ -76,11 +80,107 @@ export function createCollectionService(gateway: CollectionGateway) {
         name: name.trim(),
         url: collection.baseUrl,
         collectionId: collection.id,
+        folderId,
         order,
       })
 
       await gateway.saveEndpoint(workspaceId, collection.id, endpoint)
       return endpoint
+    },
+
+    listFolders(workspaceId: string, collectionId: string): Promise<Folder[]> {
+      return gateway.listFolders(workspaceId, collectionId)
+    },
+
+    async addFolder(
+      workspaceId: string,
+      collectionId: string,
+      name: string,
+      parentId: string | null,
+      order: number,
+    ): Promise<Folder> {
+      assertValid(folderSchema.safeParse({ name }))
+
+      const now = Date.now()
+      const folder: Folder = {
+        id: newId(),
+        collectionId,
+        parentId,
+        name: name.trim(),
+        order,
+        createdAt: now,
+        updatedAt: now,
+      }
+
+      await gateway.saveFolder(workspaceId, collectionId, folder)
+      return folder
+    },
+
+    async renameFolder(
+      workspaceId: string,
+      folder: Folder,
+      name: string,
+    ): Promise<Folder> {
+      assertValid(folderSchema.safeParse({ name }))
+      const next = { ...folder, name: name.trim(), updatedAt: Date.now() }
+      await gateway.saveFolder(workspaceId, folder.collectionId, next)
+      return next
+    },
+
+    async moveFolder(
+      workspaceId: string,
+      folders: Folder[],
+      folder: Folder,
+      parentId: string | null,
+    ): Promise<Folder> {
+      if (parentId === folder.id) {
+        throw new DataFailure({
+          kind: 'validation',
+          message: 'Papkani o‘z ichiga ko‘chirib bo‘lmaydi',
+        })
+      }
+      if (parentId && isDescendant(folders, folder.id, parentId)) {
+        throw new DataFailure({
+          kind: 'validation',
+          message: 'Papkani o‘z ichki papkasiga ko‘chirib bo‘lmaydi',
+        })
+      }
+
+      const next = { ...folder, parentId, updatedAt: Date.now() }
+      await gateway.saveFolder(workspaceId, folder.collectionId, next)
+      return next
+    },
+
+    async removeFolder(
+      workspaceId: string,
+      collectionId: string,
+      folders: Folder[],
+      endpoints: RequestDef[],
+      folderId: string,
+    ): Promise<{ folderIds: string[]; endpointIds: string[] }> {
+      const folderIds = [folderId, ...descendantFolderIds(folders, folderId)]
+      const doomed = new Set(folderIds)
+      const endpointIds = endpoints
+        .filter((endpoint) => endpoint.folderId && doomed.has(endpoint.folderId))
+        .map((endpoint) => endpoint.id)
+
+      if (endpointIds.length > 0) {
+        await gateway.removeEndpoints(workspaceId, collectionId, endpointIds)
+      }
+      await gateway.removeFolders(workspaceId, collectionId, folderIds)
+
+      return { folderIds, endpointIds }
+    },
+
+    async moveEndpoint(
+      workspaceId: string,
+      collectionId: string,
+      endpoint: RequestDef,
+      folderId: string | null,
+    ): Promise<RequestDef> {
+      const next = { ...endpoint, folderId, updatedAt: Date.now() }
+      await gateway.saveEndpoint(workspaceId, collectionId, next)
+      return next
     },
 
     saveEndpoint(

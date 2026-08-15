@@ -1,67 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Group, Panel, Separator } from 'react-resizable-panels'
-import { ArrowLeft, Plus, Save, Settings, Trash2 } from 'lucide-react'
-import { cn } from '@/core/lib/cn'
+import { ArrowLeft, FilePlus2, FolderPlus, Save, Settings } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
-import { Modal } from '@/shared/ui/modal'
-import { TextField } from '@/shared/ui/text-field'
 import { DataErrorNote } from '@/shared/ui/data-error-note'
-import { MethodBadge } from '@/shared/ui/method-badge'
+import type { RequestDef } from '@/features/request/domain/request'
 import { useTabsStore } from '@/features/tabs'
 import { RequestPanel } from '@/features/request/presentation/request-panel'
 import { ResponsePanel } from '@/features/request/presentation/response-panel'
+import { buildTree } from '../application/tree'
+import type { Folder } from '../domain/folder'
 import { useCollectionsStore } from './collections-store'
 import { CollectionSettingsModal } from './collection-settings-modal'
-
-function AddEndpointModal({
-  workspaceId,
-  open,
-  onClose,
-}: {
-  workspaceId: string
-  open: boolean
-  onClose: () => void
-}) {
-  const pending = useCollectionsStore((state) => state.pending)
-  const error = useCollectionsStore((state) => state.error)
-  const addEndpoint = useCollectionsStore((state) => state.addEndpoint)
-  const [name, setName] = useState('')
-
-  const submit = async () => {
-    if (await addEndpoint(workspaceId, name)) {
-      setName('')
-      onClose()
-    }
-  }
-
-  return (
-    <Modal open={open} title="Yangi endpoint" onClose={onClose}>
-      <div className="flex flex-col gap-3">
-        <TextField
-          label="Nomi"
-          placeholder="Foydalanuvchilar ro'yxati"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') void submit()
-          }}
-        />
-
-        <DataErrorNote error={error} />
-
-        <div className="flex justify-end gap-2">
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            Bekor qilish
-          </Button>
-          <Button size="sm" loading={pending} onClick={() => void submit()}>
-            Qo'shish
-          </Button>
-        </div>
-      </div>
-    </Modal>
-  )
-}
+import { CollectionTree, type TreeHandlers } from './collection-tree'
+import { EndpointModal } from './endpoint-modal'
+import { FolderModal } from './folder-modal'
 
 export function CollectionPage({
   workspaceId,
@@ -72,11 +25,13 @@ export function CollectionPage({
 }) {
   const current = useCollectionsStore((state) => state.current)
   const endpoints = useCollectionsStore((state) => state.endpoints)
+  const folders = useCollectionsStore((state) => state.folders)
   const loading = useCollectionsStore((state) => state.loading)
   const pending = useCollectionsStore((state) => state.pending)
   const error = useCollectionsStore((state) => state.error)
   const openCollection = useCollectionsStore((state) => state.openCollection)
   const removeEndpoint = useCollectionsStore((state) => state.removeEndpoint)
+  const removeFolder = useCollectionsStore((state) => state.removeFolder)
   const saveEndpoint = useCollectionsStore((state) => state.saveEndpoint)
 
   const tabs = useTabsStore((state) => state.tabs)
@@ -84,23 +39,47 @@ export function CollectionPage({
   const openTab = useTabsStore((state) => state.openTab)
   const setActiveTab = useTabsStore((state) => state.setActiveTab)
 
-  const [adding, setAdding] = useState(false)
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [folderModal, setFolderModal] = useState<{ folder: Folder | null; parentId: string | null } | null>(null)
+  const [endpointModal, setEndpointModal] = useState<{ endpoint: RequestDef | null; parentId: string | null } | null>(null)
 
   useEffect(() => {
     void openCollection(workspaceId, collectionId)
   }, [workspaceId, collectionId, openCollection])
 
+  const tree = useMemo(() => buildTree(folders, endpoints), [folders, endpoints])
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null
 
-  const open = (endpointId: string) => {
-    const existing = tabs.find((tab) => tab.id === endpointId)
-    if (existing) {
-      setActiveTab(existing.id)
-      return
-    }
-    const endpoint = endpoints.find((item) => item.id === endpointId)
-    if (endpoint) openTab(endpoint)
+  const openEndpoint = (endpoint: RequestDef) => {
+    const existing = tabs.find((tab) => tab.id === endpoint.id)
+    if (existing) setActiveTab(existing.id)
+    else openTab(endpoint)
+  }
+
+  const handlers: TreeHandlers = {
+    activeId: activeTabId,
+    expanded,
+    onToggle: (folderId) =>
+      setExpanded((current) => {
+        const next = new Set(current)
+        if (next.has(folderId)) next.delete(folderId)
+        else next.add(folderId)
+        return next
+      }),
+    onOpenEndpoint: openEndpoint,
+    onCreateFolder: (parentId) => {
+      if (parentId) setExpanded((current) => new Set(current).add(parentId))
+      setFolderModal({ folder: null, parentId })
+    },
+    onCreateEndpoint: (parentId) => {
+      if (parentId) setExpanded((current) => new Set(current).add(parentId))
+      setEndpointModal({ endpoint: null, parentId })
+    },
+    onEditFolder: (folder) => setFolderModal({ folder, parentId: folder.parentId }),
+    onDeleteFolder: (folderId) => void removeFolder(workspaceId, folderId),
+    onEditEndpoint: (endpoint) => setEndpointModal({ endpoint, parentId: endpoint.folderId }),
+    onDeleteEndpoint: (endpointId) => void removeEndpoint(workspaceId, endpointId),
   }
 
   if (loading && !current) {
@@ -147,14 +126,27 @@ export function CollectionPage({
           </div>
 
           <div className="flex items-center gap-1 border-b border-border px-2 py-2">
-            <Button size="sm" variant="ghost" block onClick={() => setAdding(true)}>
-              <Plus className="size-3.5" />
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setFolderModal({ folder: null, parentId: null })}
+            >
+              <FolderPlus className="size-3.5" />
+              Papka
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setEndpointModal({ endpoint: null, parentId: null })}
+            >
+              <FilePlus2 className="size-3.5" />
               Endpoint
             </Button>
             <Button
               size="sm"
               variant="ghost"
               aria-label="Sozlamalar"
+              className="ml-auto"
               onClick={() => setSettingsOpen(true)}
             >
               <Settings className="size-3.5" />
@@ -162,43 +154,20 @@ export function CollectionPage({
           </div>
 
           <div className="min-h-0 flex-1 overflow-auto p-1">
-            {endpoints.length === 0 && (
+            {tree.length === 0 ? (
               <p className="px-2 py-3 text-center text-[11px] text-muted-foreground">
-                Hali endpoint yo'q
+                Bo'sh — papka yoki endpoint qo'shing
               </p>
+            ) : (
+              <CollectionTree nodes={tree} handlers={handlers} />
             )}
-
-            {endpoints.map((endpoint) => (
-              <div
-                key={endpoint.id}
-                className={cn(
-                  'group flex items-center gap-2 rounded-md px-2 py-1.5 transition',
-                  endpoint.id === activeTabId ? 'bg-accent' : 'hover:bg-accent/50',
-                )}
-              >
-                <button
-                  type="button"
-                  onClick={() => open(endpoint.id)}
-                  className="flex min-w-0 flex-1 items-center gap-2 text-left"
-                >
-                  <MethodBadge method={endpoint.method} className="w-12 shrink-0" />
-                  <span className="truncate text-xs">{endpoint.name}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void removeEndpoint(workspaceId, endpoint.id)}
-                  aria-label="O'chirish"
-                  className="rounded p-1 text-muted-foreground opacity-0 transition hover:text-destructive group-hover:opacity-100"
-                >
-                  <Trash2 className="size-3" />
-                </button>
-              </div>
-            ))}
           </div>
 
-          <div className="border-t border-border p-2">
-            <DataErrorNote error={error} />
-          </div>
+          {error && (
+            <div className="border-t border-border p-2">
+              <DataErrorNote error={error} />
+            </div>
+          )}
         </aside>
       </Panel>
 
@@ -244,10 +213,20 @@ export function CollectionPage({
         )}
       </Panel>
 
-      <AddEndpointModal
+      <FolderModal
         workspaceId={workspaceId}
-        open={adding}
-        onClose={() => setAdding(false)}
+        open={folderModal !== null}
+        folder={folderModal?.folder ?? null}
+        parentId={folderModal?.parentId ?? null}
+        onClose={() => setFolderModal(null)}
+      />
+      <EndpointModal
+        workspaceId={workspaceId}
+        open={endpointModal !== null}
+        endpoint={endpointModal?.endpoint ?? null}
+        parentId={endpointModal?.parentId ?? null}
+        onClose={() => setEndpointModal(null)}
+        onCreated={openEndpoint}
       />
       <CollectionSettingsModal
         workspaceId={workspaceId}

@@ -108,8 +108,22 @@ workspaces/{wid}                                         name, ownerId, memberId
 workspaces/{wid}/members/{uid}                           email, displayName, role
 workspaces/{wid}/teams/{tid}                             name, memberIds[]
 workspaces/{wid}/collections/{cid}                       name, baseUrl, headers, auth, variables
-workspaces/{wid}/collections/{cid}/endpoints/{eid}       RequestDef
+workspaces/{wid}/collections/{cid}/folders/{fid}         parentId, name, order
+workspaces/{wid}/collections/{cid}/endpoints/{eid}       RequestDef (folderId bilan)
 ```
+
+**Papkalar daraxti tekis saqlanadi.** Har bir papkada faqat `parentId` bor, ichma-ich
+hujjat yo'q — shuning uchun ixtiyoriy chuqurlik bepul chiqadi va bitta `getDocs` butun
+daraxtni oladi. Daraxt `application/tree.ts` da xotirada quriladi.
+
+`buildTree` ikki xil buzuq holatga chidamli: **sikl** (a→b→a) va **yetim** (mavjud
+bo'lmagan `parentId`). Ikkalasida ham tegishli tugun ildizga chiqariladi, ya'ni
+ma'lumot ko'rinmay qolmaydi va rekursiya cheksizlikka ketmaydi. Papkani o'z avlodiga
+ko'chirish `moveFolder` da rad etiladi.
+
+Papkani o'chirish kaskadli: `descendantFolderIds` butun ostki daraxtni yig'adi,
+undagi endpointlar ham o'chadi. Bu mantiq application qatlamida, gateway esa faqat
+berilgan id'lar ro'yxatini o'chiradi.
 
 `memberIds` massivi workspace hujjatining o'zida turadi, chunki `firestore.rules`
 a'zolikni aynan shundan tekshiradi (`request.auth.uid in workspace.data.memberIds`).

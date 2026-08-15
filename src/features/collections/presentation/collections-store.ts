@@ -4,11 +4,13 @@ import type { RequestDef } from '@/features/request/domain/request'
 import { collectionService } from '../composition'
 import type { ApiCollection } from '../domain/collection'
 import type { CollectionPatch } from '../domain/collection-gateway'
+import type { Folder } from '../domain/folder'
 
 interface CollectionsState {
   collections: ApiCollection[]
   current: ApiCollection | null
   endpoints: RequestDef[]
+  folders: Folder[]
   loading: boolean
   pending: boolean
   error: DataErrorDetail | null
@@ -30,9 +32,23 @@ interface CollectionsState {
     patch: CollectionPatch,
   ) => Promise<boolean>
 
-  addEndpoint: (workspaceId: string, name: string) => Promise<RequestDef | null>
+  addEndpoint: (
+    workspaceId: string,
+    name: string,
+    folderId: string | null,
+  ) => Promise<RequestDef | null>
   saveEndpoint: (workspaceId: string, endpoint: RequestDef) => Promise<boolean>
   removeEndpoint: (workspaceId: string, endpointId: string) => Promise<boolean>
+  moveEndpoint: (
+    workspaceId: string,
+    endpoint: RequestDef,
+    folderId: string | null,
+  ) => Promise<boolean>
+
+  addFolder: (workspaceId: string, name: string, parentId: string | null) => Promise<boolean>
+  renameFolder: (workspaceId: string, folder: Folder, name: string) => Promise<boolean>
+  moveFolder: (workspaceId: string, folder: Folder, parentId: string | null) => Promise<boolean>
+  removeFolder: (workspaceId: string, folderId: string) => Promise<boolean>
 }
 
 function toDetail(error: unknown): DataErrorDetail {
@@ -59,6 +75,7 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => {
     collections: [],
     current: null,
     endpoints: [],
+    folders: [],
     loading: false,
     pending: false,
     error: null,
@@ -94,11 +111,12 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => {
     openCollection: async (workspaceId, collectionId) => {
       set({ loading: true, error: null })
       try {
-        const [current, endpoints] = await Promise.all([
+        const [current, endpoints, folders] = await Promise.all([
           collectionService.get(workspaceId, collectionId),
           collectionService.listEndpoints(workspaceId, collectionId),
+          collectionService.listFolders(workspaceId, collectionId),
         ])
-        set({ current, endpoints, loading: false })
+        set({ current, endpoints, folders, loading: false })
       } catch (error) {
         set({ loading: false, error: toDetail(error) })
       }
@@ -110,7 +128,7 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => {
         set({ current: await collectionService.get(workspaceId, collectionId) })
       }),
 
-    addEndpoint: async (workspaceId, name) => {
+    addEndpoint: async (workspaceId, name, folderId) => {
       const collection = get().current
       if (!collection) return null
 
@@ -121,6 +139,7 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => {
           collection,
           name,
           get().endpoints.length,
+          folderId,
         )
         set((state) => ({ endpoints: [...state.endpoints, created as RequestDef] }))
       })
@@ -146,6 +165,75 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => {
         await collectionService.removeEndpoint(workspaceId, collection.id, endpointId)
         set((state) => ({
           endpoints: state.endpoints.filter((item) => item.id !== endpointId),
+        }))
+      }),
+
+    moveEndpoint: (workspaceId, endpoint, folderId) =>
+      run(async () => {
+        const collection = get().current
+        if (!collection) return
+        const next = await collectionService.moveEndpoint(
+          workspaceId,
+          collection.id,
+          endpoint,
+          folderId,
+        )
+        set((state) => ({
+          endpoints: state.endpoints.map((item) => (item.id === next.id ? next : item)),
+        }))
+      }),
+
+    addFolder: (workspaceId, name, parentId) =>
+      run(async () => {
+        const collection = get().current
+        if (!collection) return
+        const folder = await collectionService.addFolder(
+          workspaceId,
+          collection.id,
+          name,
+          parentId,
+          get().folders.length,
+        )
+        set((state) => ({ folders: [...state.folders, folder] }))
+      }),
+
+    renameFolder: (workspaceId, folder, name) =>
+      run(async () => {
+        const next = await collectionService.renameFolder(workspaceId, folder, name)
+        set((state) => ({
+          folders: state.folders.map((item) => (item.id === next.id ? next : item)),
+        }))
+      }),
+
+    moveFolder: (workspaceId, folder, parentId) =>
+      run(async () => {
+        const next = await collectionService.moveFolder(
+          workspaceId,
+          get().folders,
+          folder,
+          parentId,
+        )
+        set((state) => ({
+          folders: state.folders.map((item) => (item.id === next.id ? next : item)),
+        }))
+      }),
+
+    removeFolder: (workspaceId, folderId) =>
+      run(async () => {
+        const collection = get().current
+        if (!collection) return
+        const { folderIds, endpointIds } = await collectionService.removeFolder(
+          workspaceId,
+          collection.id,
+          get().folders,
+          get().endpoints,
+          folderId,
+        )
+        const goneFolders = new Set(folderIds)
+        const goneEndpoints = new Set(endpointIds)
+        set((state) => ({
+          folders: state.folders.filter((item) => !goneFolders.has(item.id)),
+          endpoints: state.endpoints.filter((item) => !goneEndpoints.has(item.id)),
         }))
       }),
   }

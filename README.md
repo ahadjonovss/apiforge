@@ -70,9 +70,19 @@ src/
       infrastructure/         fetch-request-gateway
       presentation/           request-panel, response-panel
       index.ts                feature'ning ochiq API'si + kompozitsiya
+    workspaces/
+      domain/                 Workspace, Team, WorkspaceGateway, UserLookup
+      application/            workspace-service, team-service, schemas
+      infrastructure/         firestore-workspace-gateway, firestore-team-gateway
+      presentation/           home-page, workspace-page, workspaces-store
+    collections/
+      domain/                 ApiCollection, Folder, CollectionGateway
+      application/            collection-service, tree (buildTree, kaskad)
+      infrastructure/         firestore-collection-gateway
+      presentation/           collection-page, collection-tree, modallar
+    users/                    email → uid katalogi
     profile/                  presentation (profile-page)
     tabs/                     domain, presentation (tabs-store, tab-bar)
-    collections/              domain, presentation (sidebar)
     environments/             domain
 ```
 
@@ -82,7 +92,7 @@ src/
 |---|---|---|
 | `/` | Ish maydonlari ro'yxati va yaratish | Auth talab qilinadi |
 | `/workspace/$id` | Jamoalar, a'zolar, API to'plamlari | Auth talab qilinadi |
-| `/workspace/$id/collection/$cid` | Endpointlar, sozlamalar, so'rov yuborish | Auth talab qilinadi |
+| `/workspace/$id/collection/$cid` | Papkalar daraxti, endpointlar, sozlamalar | Auth talab qilinadi |
 | `/login` | Kirish + parolni tiklash | Ochiq |
 | `/register` | Ro'yxatdan o'tish | Ochiq |
 | `/profile` | Profil, parol almashtirish | Auth talab qilinadi |
