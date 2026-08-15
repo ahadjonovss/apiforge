@@ -13,8 +13,12 @@ interface CollectionsState {
   folders: Folder[]
   loading: boolean
   pending: boolean
+  saving: boolean
+  savedAt: number | null
+  saveError: DataErrorDetail | null
   error: DataErrorDetail | null
 
+  autoSave: (workspaceId: string, endpoint: RequestDef) => Promise<boolean>
   clearError: () => void
   loadCollections: (workspaceId: string) => Promise<void>
   createCollection: (
@@ -78,7 +82,31 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => {
     folders: [],
     loading: false,
     pending: false,
+    saving: false,
+    savedAt: null,
+    saveError: null,
     error: null,
+
+    autoSave: async (workspaceId, endpoint) => {
+      const collection = get().current
+      if (!collection) return false
+
+      set({ saving: true, saveError: null })
+      try {
+        await collectionService.saveEndpoint(workspaceId, collection.id, endpoint)
+        set((state) => ({
+          saving: false,
+          savedAt: Date.now(),
+          endpoints: state.endpoints.map((item) =>
+            item.id === endpoint.id ? endpoint : item,
+          ),
+        }))
+        return true
+      } catch (error) {
+        set({ saving: false, saveError: toDetail(error) })
+        return false
+      }
+    },
 
     clearError: () => set({ error: null }),
 

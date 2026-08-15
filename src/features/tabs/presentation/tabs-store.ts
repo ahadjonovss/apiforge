@@ -16,6 +16,7 @@ interface TabsState {
   closeTab: (tabId: string) => void
   setActiveTab: (tabId: string) => void
   patchRequest: (tabId: string, patch: Partial<RequestDef>) => void
+  markSaved: (tabId: string, revision: number) => void
   syncInherited: (collectionId: string, inherited: InheritedConfig) => void
   send: (tabId: string) => Promise<void>
 }
@@ -29,6 +30,7 @@ function makeTab(request: RequestDef, inherited: InheritedConfig | null): Tab {
     error: null,
     isSending: false,
     dirty: false,
+    revision: 0,
   }
 }
 
@@ -60,8 +62,20 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     set((state) => ({
       tabs: state.tabs.map((tab) =>
         tab.id === tabId
-          ? { ...tab, request: { ...tab.request, ...patch, updatedAt: Date.now() }, dirty: true }
+          ? {
+              ...tab,
+              request: { ...tab.request, ...patch, updatedAt: Date.now() },
+              dirty: true,
+              revision: tab.revision + 1,
+            }
           : tab,
+      ),
+    })),
+
+  markSaved: (tabId, revision) =>
+    set((state) => ({
+      tabs: state.tabs.map((tab) =>
+        tab.id === tabId && tab.revision === revision ? { ...tab, dirty: false } : tab,
       ),
     })),
 

@@ -9,4 +9,5 @@ export interface Tab {
   error: RequestError | null
   isSending: boolean
   dirty: boolean
+  revision: number
 }

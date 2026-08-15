@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Group, Panel, Separator } from 'react-resizable-panels'
-import { ArrowLeft, FilePlus2, FolderPlus, Home, Save, Settings } from 'lucide-react'
+import { ArrowLeft, FilePlus2, FolderPlus, Home, Settings } from 'lucide-react'
 import { cn } from '@/core/lib/cn'
 import { Button } from '@/shared/ui/button'
 import { DataErrorNote } from '@/shared/ui/data-error-note'
@@ -13,6 +13,8 @@ import { buildTree } from '../application/tree'
 import type { Folder } from '../domain/folder'
 import { useCollectionsStore } from './collections-store'
 import { CollectionHome } from './collection-home'
+import { SaveStatus } from './save-status'
+import { useAutoSave } from './use-auto-save'
 import { CollectionSettingsModal } from './collection-settings-modal'
 import { CollectionTree, type TreeHandlers } from './collection-tree'
 import { EndpointModal } from './endpoint-modal'
@@ -29,12 +31,10 @@ export function CollectionPage({
   const endpoints = useCollectionsStore((state) => state.endpoints)
   const folders = useCollectionsStore((state) => state.folders)
   const loading = useCollectionsStore((state) => state.loading)
-  const pending = useCollectionsStore((state) => state.pending)
   const error = useCollectionsStore((state) => state.error)
   const openCollection = useCollectionsStore((state) => state.openCollection)
   const removeEndpoint = useCollectionsStore((state) => state.removeEndpoint)
   const removeFolder = useCollectionsStore((state) => state.removeFolder)
-  const saveEndpoint = useCollectionsStore((state) => state.saveEndpoint)
 
   const tabs = useTabsStore((state) => state.tabs)
   const activeTabId = useTabsStore((state) => state.activeTabId)
@@ -55,6 +55,8 @@ export function CollectionPage({
 
   const tree = useMemo(() => buildTree(folders, endpoints), [folders, endpoints])
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null
+
+  useAutoSave(workspaceId, activeTab)
 
   const inherited = useMemo(
     () =>
@@ -225,15 +227,7 @@ export function CollectionPage({
               <span className="truncate text-xs text-muted-foreground">
                 {activeTab.request.name}
               </span>
-              <Button
-                size="sm"
-                variant="outline"
-                loading={pending}
-                onClick={() => void saveEndpoint(workspaceId, activeTab.request)}
-              >
-                <Save className="size-3.5" />
-                Saqlash
-              </Button>
+              <SaveStatus tab={activeTab} />
             </div>
 
             <Group orientation="vertical" className="min-h-0 flex-1">

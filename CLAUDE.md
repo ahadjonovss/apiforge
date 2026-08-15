@@ -175,6 +175,28 @@ murojaat qilardi. Ya'ni proxy har qanday build'da o'chiq, faqat dev server'da yo
 Proxy xatolari `x-apiforge-proxy-error` header'i bilan belgilanadi va `HttpRequestFailure`
 ga aylantiriladi — ular target'ning javobi emas, shuning uchun response sifatida ko'rsatilmaydi.
 
+## Avtomatik saqlash
+
+Endpoint tahrirlanganda 800ms tinchlikdan keyin o'zi saqlanadi. Qo'lda "Saqlash"
+tugmasi yo'q, o'rniga holat ko'rsatiladi: Saqlanmagan → Saqlanmoqda → Saqlandi.
+
+**`Tab.revision` nima uchun kerak.** Saqlash tugagach `dirty` ni tozalash uchun
+"o'shandan beri yana yozildimi?" degan savolga javob kerak. Buni `updatedAt`
+bilan solishtirish **noto'g'ri**: u `Date.now()` dan olinadi, ikki tez tahrir
+bir xil millisekundga tushadi va eski saqlash yangi o'zgarishni "saqlangan"
+deb belgilab yuboradi — matn jimgina yo'qoladi. Shuning uchun har `patchRequest`
+da monoton `revision` oshiriladi va `markSaved(tabId, revision)` faqat raqam
+mos kelgandagina tozalaydi.
+
+`autoSave` umumiy `pending` bayrog'iga tegmaydi — aks holda fon saqlashi
+boshqa tugmalarni "yuklanmoqda" holatiga tushirardi va `run()` ichidagi
+`pending` tekshiruvi saqlashni bloklardi.
+
+`beforeunload` saqlanmagan tab bo'lsa sahifani yopishdan ogohlantiradi.
+
+Collection bosh sahifasi bundan mustasno — u ochiq tahrir rejimiga
+(Saqlash/Bekor) ega, ya'ni foydalanuvchi ataylab kiradi va chiqadi.
+
 ## Hujjatlar
 
 Uch daraja, hammasi markdown:
