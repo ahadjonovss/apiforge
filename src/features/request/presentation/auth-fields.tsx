@@ -37,6 +37,7 @@ export function AuthFields({ value, onChange, modes }: Props) {
         <TextField
           label="Token"
           placeholder="{{authorizationToken}}"
+          hint="«Bearer» so'zini yozmang — u avtomatik qo'shiladi"
           value={value.bearer?.token ?? ''}
           onChange={(event) => onChange({ ...value, bearer: { token: event.target.value } })}
         />

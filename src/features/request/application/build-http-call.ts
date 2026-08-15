@@ -29,7 +29,9 @@ export function authHeaderEntries(
   scope: VariableScope,
 ): [string, string][] {
   if (auth.mode === 'bearer' && auth.bearer?.token) {
-    return [['Authorization', `Bearer ${interpolate(auth.bearer.token, scope)}`]]
+    const token = interpolate(auth.bearer.token, scope).trim().replace(/^bearer(\s+|$)/i, '')
+    if (!token) return []
+    return [['Authorization', `Bearer ${token}`]]
   }
 
   if (auth.mode === 'basic' && auth.basic) {
