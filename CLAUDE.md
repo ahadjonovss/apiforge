@@ -41,11 +41,11 @@ src/
   shared/       qayta ishlatiladigan "soqov" UI
   features/
     auth/         domain → application → infrastructure → presentation
-    request/      domain → application → infrastructure → presentation
-    profile/
-    tabs/
-    collections/
-    environments/
+    workspaces/   ish maydonlari, a'zolar, jamoalar
+    collections/  API to'plamlari va endpointlar
+    users/        email → uid katalogi (a'zo qo'shish uchun)
+    request/      so'rov yuborish
+    profile/ tabs/ environments/
 ```
 
 **Bog'liqlik qoidasi — ichkariga qarab:**
@@ -99,6 +99,31 @@ Firebase 5s ichida javob bermasa status `anonymous` ga o'tadi. Sababi: Firebase 
 IndexedDB'ga tayanadi va u bloklangan muhitlarda (private rejim, ba'zi ichki brauzerlar,
 headless Chrome) na xato, na javob qaytaradi — bunda ilova abadiy spinnerda qolardi.
 Kechikkan javob kelsa status o'zi to'g'rilanadi.
+
+## Ma'lumot modeli
+
+```
+users/{uid}                                              email → uid katalogi
+workspaces/{wid}                                         name, ownerId, memberIds[]
+workspaces/{wid}/members/{uid}                           email, displayName, role
+workspaces/{wid}/teams/{tid}                             name, memberIds[]
+workspaces/{wid}/collections/{cid}                       name, baseUrl, headers, auth, variables
+workspaces/{wid}/collections/{cid}/endpoints/{eid}       RequestDef
+```
+
+`memberIds` massivi workspace hujjatining o'zida turadi, chunki `firestore.rules`
+a'zolikni aynan shundan tekshiradi (`request.auth.uid in workspace.data.memberIds`).
+Subkolleksiyalarga ruxsat bitta `match /{document=**}` qoidasi orqali beriladi.
+
+**`users/` katalogi nega kerak.** Odamni jamoaga biriktirish uchun email'dan `uid`
+topish kerak, Firebase Auth esa buni klientdan bermaydi (faqat Admin SDK). Shuning
+uchun har kirishda `users/{uid}` yangilanadi va qoidalar uni har qanday tizimga
+kirgan foydalanuvchiga o'qishga ruxsat beradi. Bu ataylab qilingan yon berish:
+katalogda faqat email, ism va avatar bor.
+
+`workspaces` ro'yxati `memberIds array-contains` + `createdAt desc` bo'yicha
+so'raladi — bu kompozit indeks talab qiladi, u `firestore.indexes.json` da.
+Emulyator indekssiz ham ishlaydi, real Firestore esa yo'q.
 
 ## Proxy
 

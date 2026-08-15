@@ -80,7 +80,9 @@ src/
 
 | Yo'l | Sahifa | Himoya |
 |---|---|---|
-| `/` | Ish stoli (so'rov yuborish) | Auth talab qilinadi |
+| `/` | Ish maydonlari ro'yxati va yaratish | Auth talab qilinadi |
+| `/workspace/$id` | Jamoalar, a'zolar, API to'plamlari | Auth talab qilinadi |
+| `/workspace/$id/collection/$cid` | Endpointlar, sozlamalar, so'rov yuborish | Auth talab qilinadi |
 | `/login` | Kirish + parolni tiklash | Ochiq |
 | `/register` | Ro'yxatdan o'tish | Ochiq |
 | `/profile` | Profil, parol almashtirish | Auth talab qilinadi |

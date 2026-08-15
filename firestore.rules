@@ -12,7 +12,8 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == userId;
     }
 
     match /workspaces/{workspaceId} {
@@ -20,7 +21,9 @@ service cloud.firestore {
       allow create: if isSignedIn()
         && request.resource.data.ownerId == request.auth.uid
         && request.auth.uid in request.resource.data.memberIds;
-      allow update, delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow update: if isMember(resource)
+        && request.resource.data.ownerId == resource.data.ownerId;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
 
       match /{document=**} {
         allow read, write: if isMember(
