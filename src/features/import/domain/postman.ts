@@ -31,6 +31,7 @@ export interface PostmanBody {
 }
 
 export interface PostmanRequest {
+  description?: string | { content?: string }
   method?: string
   header?: PostmanKeyValue[] | string
   url?: PostmanUrl | string
@@ -38,10 +39,19 @@ export interface PostmanRequest {
   auth?: PostmanAuth
 }
 
+export interface PostmanResponse {
+  name?: string
+  code?: number
+  status?: string
+  body?: string
+}
+
 export interface PostmanItem {
   name?: string
+  description?: string | { content?: string }
   item?: PostmanItem[]
   request?: PostmanRequest | string
+  response?: PostmanResponse[]
   event?: unknown[]
 }
 

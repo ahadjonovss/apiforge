@@ -8,6 +8,7 @@ export interface ApiCollection {
   teamId: string | null
   name: string
   description: string
+  docs: string
   baseUrl: string
   headers: KeyValue[]
   auth: AuthConfig

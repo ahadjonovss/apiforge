@@ -11,11 +11,12 @@ import { useTabsStore, type Tab } from '@/features/tabs'
 import type { BodyMode } from '../domain/request'
 import { interpolate } from '../application/interpolate'
 import { AuthEditor } from './auth-editor'
+import { DocsEditor } from './docs-editor'
 import { InheritedHeaders } from './inherited-headers'
 
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i
 
-const SECTIONS = ['Params', 'Headers', 'Body', 'Auth'] as const
+const SECTIONS = ['Params', 'Headers', 'Body', 'Auth', 'Docs'] as const
 type Section = (typeof SECTIONS)[number]
 
 const BODY_MODES: BodyMode[] = ['none', 'json', 'raw', 'urlencoded', 'form-data']
@@ -179,6 +180,8 @@ export function RequestPanel({ tab }: { tab: Tab }) {
         )}
 
         {section === 'Auth' && <AuthEditor tab={tab} />}
+
+        {section === 'Docs' && <DocsEditor tab={tab} />}
       </div>
     </div>
   )

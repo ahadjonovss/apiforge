@@ -14,6 +14,8 @@ export function createRequest(partial: Partial<RequestDef> = {}): RequestDef {
   return {
     id: newId(),
     name: 'Untitled request',
+    docs: '',
+    responseDocs: [],
     method: 'GET',
     url: '',
     params: [],

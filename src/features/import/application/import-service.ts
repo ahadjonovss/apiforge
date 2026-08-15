@@ -29,6 +29,7 @@ export function createImportService(sink: ImportSink) {
       )
 
       await sink.applySettings(workspaceId, collection.id, {
+        docs: plan.collection.docs,
         baseUrl: plan.collection.baseUrl,
         headers: plan.collection.headers,
         auth: plan.collection.auth,
@@ -59,6 +60,8 @@ export function createImportService(sink: ImportSink) {
             createRequest({
               id: endpoint.id,
               name: endpoint.name,
+              docs: endpoint.docs,
+              responseDocs: endpoint.responseDocs,
               method: endpoint.method,
               url: endpoint.url,
               params: endpoint.params,

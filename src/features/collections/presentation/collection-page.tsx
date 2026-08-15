@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Group, Panel, Separator } from 'react-resizable-panels'
-import { ArrowLeft, FilePlus2, FolderPlus, Save, Settings } from 'lucide-react'
+import { ArrowLeft, FilePlus2, FolderPlus, Home, Save, Settings } from 'lucide-react'
+import { cn } from '@/core/lib/cn'
 import { Button } from '@/shared/ui/button'
 import { DataErrorNote } from '@/shared/ui/data-error-note'
 import type { RequestDef } from '@/features/request/domain/request'
@@ -11,6 +12,7 @@ import { ResponsePanel } from '@/features/request/presentation/response-panel'
 import { buildTree } from '../application/tree'
 import type { Folder } from '../domain/folder'
 import { useCollectionsStore } from './collections-store'
+import { CollectionHome } from './collection-home'
 import { CollectionSettingsModal } from './collection-settings-modal'
 import { CollectionTree, type TreeHandlers } from './collection-tree'
 import { EndpointModal } from './endpoint-modal'
@@ -40,6 +42,7 @@ export function CollectionPage({
   const setActiveTab = useTabsStore((state) => state.setActiveTab)
   const syncInherited = useTabsStore((state) => state.syncInherited)
 
+  const [view, setView] = useState<'home' | 'endpoint'>('home')
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [folderModal, setFolderModal] = useState<{ folder: Folder | null; parentId: string | null } | null>(null)
@@ -47,6 +50,7 @@ export function CollectionPage({
 
   useEffect(() => {
     void openCollection(workspaceId, collectionId)
+    setView('home')
   }, [workspaceId, collectionId, openCollection])
 
   const tree = useMemo(() => buildTree(folders, endpoints), [folders, endpoints])
@@ -77,6 +81,7 @@ export function CollectionPage({
     const existing = tabs.find((tab) => tab.id === endpoint.id)
     if (existing) setActiveTab(existing.id)
     else openTab(endpoint, inherited)
+    setView('endpoint')
   }
 
   const handlers: TreeHandlers = {
@@ -176,6 +181,18 @@ export function CollectionPage({
           </div>
 
           <div className="min-h-0 flex-1 overflow-auto p-1">
+            <button
+              type="button"
+              onClick={() => setView('home')}
+              className={cn(
+                'mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition',
+                view === 'home' ? 'bg-accent text-foreground' : 'text-muted-foreground hover:bg-accent/50',
+              )}
+            >
+              <Home className="size-3.5 shrink-0" />
+              <span className="truncate text-xs font-medium">Bosh sahifa</span>
+            </button>
+
             {tree.length === 0 ? (
               <p className="px-2 py-3 text-center text-[11px] text-muted-foreground">
                 Bo'sh — papka yoki endpoint qo'shing
@@ -196,7 +213,13 @@ export function CollectionPage({
       <Separator className="w-px shrink-0 bg-border transition-colors hover:bg-primary data-[state=dragging]:bg-primary" />
 
       <Panel defaultSize="74">
-        {activeTab ? (
+        {view === 'home' || !activeTab ? (
+          <CollectionHome
+            workspaceId={workspaceId}
+            collection={current}
+            onOpenSettings={() => setSettingsOpen(true)}
+          />
+        ) : (
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between border-b border-border px-3 py-1.5">
               <span className="truncate text-xs text-muted-foreground">
@@ -224,13 +247,6 @@ export function CollectionPage({
                 <ResponsePanel tab={activeTab} />
               </Panel>
             </Group>
-          </div>
-        ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-            <p className="text-sm font-medium">Endpoint tanlanmagan</p>
-            <p className="text-xs text-muted-foreground">
-              Chapdan birini oching yoki yangisini qo'shing
-            </p>
           </div>
         )}
       </Panel>

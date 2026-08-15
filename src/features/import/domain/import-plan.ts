@@ -1,10 +1,16 @@
 import type { KeyValue } from '@/core/domain/http'
 import type { EnvVariable } from '@/features/environments/domain/environment'
-import type { AuthConfig, RequestBody, RequestDef } from '@/features/request/domain/request'
+import type {
+  AuthConfig,
+  RequestBody,
+  RequestDef,
+  ResponseDoc,
+} from '@/features/request/domain/request'
 
 export interface PlannedCollection {
   name: string
   description: string
+  docs: string
   baseUrl: string
   headers: KeyValue[]
   auth: AuthConfig
@@ -23,6 +29,8 @@ export interface PlannedEndpoint {
   folderId: string | null
   order: number
   name: string
+  docs: string
+  responseDocs: ResponseDoc[]
   method: RequestDef['method']
   url: string
   params: KeyValue[]

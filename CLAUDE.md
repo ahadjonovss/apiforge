@@ -175,6 +175,27 @@ murojaat qilardi. Ya'ni proxy har qanday build'da o'chiq, faqat dev server'da yo
 Proxy xatolari `x-apiforge-proxy-error` header'i bilan belgilanadi va `HttpRequestFailure`
 ga aylantiriladi — ular target'ning javobi emas, shuning uchun response sifatida ko'rsatilmaydi.
 
+## Hujjatlar
+
+Uch daraja, hammasi markdown:
+
+| Qayerda | Maydon | Ko'rinishi |
+|---|---|---|
+| To'plam | `ApiCollection.docs` | Collection bosh sahifasi — to'plam ochilganda birinchi shu chiqadi |
+| Endpoint | `RequestDef.docs` | So'rov panelidagi **Docs** bo'limi |
+| Status kod | `RequestDef.responseDocs[]` | Javob panelining tepasidagi kod tugmalari |
+
+`responseDocs` da `status` **matn**, chunki `4xx` kabi guruhlar ham yoziladi.
+Javob kelganda mos keladigan kod tugmasi ajratib ko'rsatiladi.
+
+Markdown `react-markdown` bilan render qilinadi — u React element yasaydi,
+`dangerouslySetInnerHTML` ishlatmaydi, ya'ni foydalanuvchi yozgan matn XSS
+manbasi bo'lolmaydi. Sanitizatsiya kutubxonasi shu sababli kerak emas.
+
+Postman import'da `item.description` → endpoint docs, `response[]` misollari →
+`responseDocs` (body ```json blokka o'raladi). Bular ilgari tashlab
+yuborilardi.
+
 ## Postman import
 
 `features/import` — Postman Collection v2.x JSON'ini o'qiydi.

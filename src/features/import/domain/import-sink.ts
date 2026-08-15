@@ -3,7 +3,7 @@ import type { Folder } from '@/features/collections/domain/folder'
 import type { RequestDef } from '@/features/request/domain/request'
 
 export type CollectionSettings = Partial<
-  Pick<ApiCollection, 'headers' | 'auth' | 'variables' | 'baseUrl'>
+  Pick<ApiCollection, 'headers' | 'auth' | 'variables' | 'baseUrl' | 'docs'>
 >
 
 export interface ImportSink {

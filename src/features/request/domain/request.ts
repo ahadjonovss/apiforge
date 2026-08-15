@@ -32,9 +32,18 @@ export interface InheritedConfig {
   variables: VariableScope
 }
 
+export interface ResponseDoc {
+  id: string
+  status: string
+  title: string
+  body: string
+}
+
 export interface RequestDef {
   id: string
   name: string
+  docs: string
+  responseDocs: ResponseDoc[]
   method: HttpMethod
   url: string
   params: KeyValue[]

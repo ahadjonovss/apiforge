@@ -12,7 +12,7 @@ export interface CreateCollectionInput {
 export type CollectionPatch = Partial<
   Pick<
     ApiCollection,
-    'name' | 'description' | 'baseUrl' | 'headers' | 'auth' | 'variables' | 'teamId'
+    'name' | 'description' | 'docs' | 'baseUrl' | 'headers' | 'auth' | 'variables' | 'teamId'
   >
 >
 

@@ -1,7 +1,7 @@
 import { HTTP_METHODS, type HttpMethod, type KeyValue } from '@/core/domain/http'
 import { newId } from '@/core/lib/id'
 import type { EnvVariable } from '@/features/environments/domain/environment'
-import type { AuthConfig, RequestBody } from '@/features/request/domain/request'
+import type { AuthConfig, RequestBody, ResponseDoc } from '@/features/request/domain/request'
 import {
   ImportFailure,
   type ImportPlan,
@@ -10,6 +10,7 @@ import {
 } from '../domain/import-plan'
 import type {
   PostmanAuth,
+  PostmanResponse,
   PostmanBody,
   PostmanCollection,
   PostmanItem,
@@ -182,6 +183,19 @@ function toBody(body: PostmanBody | undefined, name: string, warnings: string[])
   }
 }
 
+function toResponseDocs(responses: PostmanResponse[] | undefined): ResponseDoc[] {
+  return (responses ?? [])
+    .filter((response) => response.code || response.name)
+    .map((response) => ({
+      id: newId(),
+      status: response.code ? String(response.code) : '200',
+      title: (response.name ?? '').trim(),
+      body: response.body?.trim()
+        ? ['```json', response.body.trim(), '```'].join('\n')
+        : '',
+    }))
+}
+
 function isFolder(item: PostmanItem): boolean {
   return Array.isArray(item.item)
 }
@@ -293,6 +307,8 @@ export function parsePostmanCollection(source: string): ImportPlan {
         folderId: parentId,
         order: index,
         name,
+        docs: text(item.description) || text(request.description),
+        responseDocs: toResponseDocs(item.response),
         method: toMethod(request.method, name, warnings),
         url: raw,
         params,
@@ -326,7 +342,8 @@ export function parsePostmanCollection(source: string): ImportPlan {
   return {
     collection: {
       name: (parsed.info.name ?? '').trim() || 'Import qilingan collection',
-      description: text(parsed.info.description),
+      description: text(parsed.info.description).split('\n')[0].slice(0, 200),
+      docs: text(parsed.info.description),
       baseUrl,
       headers: [],
       auth: collectionAuth,
