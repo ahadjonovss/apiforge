@@ -121,6 +121,28 @@ bo'lmagan `parentId`). Ikkalasida ham tegishli tugun ildizga chiqariladi, ya'ni
 ma'lumot ko'rinmay qolmaydi va rekursiya cheksizlikka ketmaydi. Papkani o'z avlodiga
 ko'chirish `moveFolder` da rad etiladi.
 
+## To'plam konfiguratsiyasining merosi
+
+To'plamning `baseUrl`, `headers` va `auth` sozlamalari endpointga **nusxalanmaydi** —
+so'rov yuborilayotganda qo'llanadi. Shuning uchun `baseUrl` o'zgarsa, barcha endpointlar
+darhol yangi manzilga qaraydi.
+
+`InheritedConfig` tab ichida saqlanadi (`Tab.inherited`) va `sendRequest` ga
+`options.inherited` bo'lib uzatiladi. `collection-page` to'plam o'zgarganda
+`syncInherited` orqali ochiq tablarni yangilaydi.
+
+`build-http-call` da qoidalar:
+
+- **URL** — `joinUrl(baseUrl, request.url)`. Absolyut URL (`https://…`) base'ni
+  butunlay e'tiborsiz qoldiradi, nisbiy yo'l esa unga ulanadi. Slashlar ikkilanmaydi.
+- **Headerlar** — avval to'plamniki, keyin endpointniki. Bir xil nom bo'lsa
+  endpoint g'olib.
+- **Auth** — faqat `mode === 'inherit'` bo'lganda meros olinadi. `none` aynan
+  "auth yo'q" degani, meros emas.
+
+Yangi endpointlar `auth: { mode: 'inherit' }` va bo'sh `url` bilan yaratiladi.
+URL maydonida base prefiks sifatida ko'rinadi, lekin tahrirlanmaydi.
+
 Papkani o'chirish kaskadli: `descendantFolderIds` butun ostki daraxtni yig'adi,
 undagi endpointlar ham o'chadi. Bu mantiq application qatlamida, gateway esa faqat
 berilgan id'lar ro'yxatini o'chiradi.

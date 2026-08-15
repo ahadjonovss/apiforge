@@ -1,9 +1,28 @@
 import type { KeyValue } from '@/core/domain/http'
 import type { VariableScope } from '@/core/domain/variables'
-import type { RequestDef } from '../domain/request'
+import type { AuthConfig, InheritedConfig, RequestDef } from '../domain/request'
 import type { HttpCall } from '../domain/request-gateway'
 import { HttpRequestFailure } from '../domain/response'
 import { interpolate } from './interpolate'
+
+const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i
+
+export function joinUrl(baseUrl: string, path: string): string {
+  const base = baseUrl.trim()
+  const raw = path.trim()
+
+  if (!base) return raw
+  if (ABSOLUTE_URL.test(raw)) return raw
+
+  const head = base.replace(/\/+$/, '')
+  const tail = raw.replace(/^\/+/, '')
+  return tail ? `${head}/${tail}` : head
+}
+
+function effectiveAuth(request: RequestDef, inherited?: InheritedConfig): AuthConfig {
+  if (request.auth.mode !== 'inherit') return request.auth
+  return inherited?.auth ?? { mode: 'none' }
+}
 
 function activePairs(pairs: KeyValue[], scope: VariableScope) {
   return pairs
@@ -11,13 +30,19 @@ function activePairs(pairs: KeyValue[], scope: VariableScope) {
     .map((pair) => [interpolate(pair.key, scope), interpolate(pair.value, scope)] as const)
 }
 
-function buildUrl(request: RequestDef, scope: VariableScope): URL {
-  const raw = interpolate(request.url, scope).trim()
+function buildUrl(
+  request: RequestDef,
+  scope: VariableScope,
+  inherited?: InheritedConfig,
+): URL {
+  const baseUrl = interpolate(inherited?.baseUrl ?? '', scope)
+  const raw = joinUrl(baseUrl, interpolate(request.url, scope))
+
   if (!raw) {
     throw new HttpRequestFailure({ kind: 'invalid', message: 'URL kiritilmagan' })
   }
 
-  const withScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`
+  const withScheme = ABSOLUTE_URL.test(raw) ? raw : `https://${raw}`
 
   let url: URL
   try {
@@ -33,14 +58,22 @@ function buildUrl(request: RequestDef, scope: VariableScope): URL {
   return url
 }
 
-function buildHeaders(request: RequestDef, scope: VariableScope): Headers {
+function buildHeaders(
+  request: RequestDef,
+  scope: VariableScope,
+  inherited?: InheritedConfig,
+): Headers {
   const headers = new Headers()
 
-  for (const [key, value] of activePairs(request.headers, scope)) {
-    headers.append(key, value)
+  for (const [key, value] of activePairs(inherited?.headers ?? [], scope)) {
+    headers.set(key, value)
   }
 
-  const auth = request.auth
+  for (const [key, value] of activePairs(request.headers, scope)) {
+    headers.set(key, value)
+  }
+
+  const auth = effectiveAuth(request, inherited)
   if (auth.mode === 'bearer' && auth.bearer?.token) {
     headers.set('Authorization', `Bearer ${interpolate(auth.bearer.token, scope)}`)
   } else if (auth.mode === 'basic' && auth.basic) {
@@ -96,13 +129,18 @@ function buildBody(request: RequestDef, headers: Headers, scope: VariableScope):
   }
 }
 
-export function buildHttpCall(request: RequestDef, scope: VariableScope): HttpCall {
-  const url = buildUrl(request, scope)
-  const headers = buildHeaders(request, scope)
+export function buildHttpCall(
+  request: RequestDef,
+  scope: VariableScope,
+  inherited?: InheritedConfig,
+): HttpCall {
+  const url = buildUrl(request, scope, inherited)
+  const headers = buildHeaders(request, scope, inherited)
   const body = buildBody(request, headers, scope)
 
-  if (request.auth.mode === 'apiKey' && request.auth.apiKey?.addTo === 'query') {
-    const { key, value } = request.auth.apiKey
+  const auth = effectiveAuth(request, inherited)
+  if (auth.mode === 'apiKey' && auth.apiKey?.addTo === 'query') {
+    const { key, value } = auth.apiKey
     if (key) url.searchParams.set(interpolate(key, scope), interpolate(value, scope))
   }
 

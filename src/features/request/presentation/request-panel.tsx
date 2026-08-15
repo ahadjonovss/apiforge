@@ -9,6 +9,9 @@ import { KeyValueEditor } from '@/shared/ui/key-value-editor'
 import { useTheme } from '@/app/providers/theme-provider'
 import { useTabsStore, type Tab } from '@/features/tabs'
 import type { BodyMode } from '../domain/request'
+import { AuthEditor } from './auth-editor'
+
+const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i
 
 const SECTIONS = ['Params', 'Headers', 'Body', 'Auth'] as const
 type Section = (typeof SECTIONS)[number]
@@ -22,6 +25,8 @@ export function RequestPanel({ tab }: { tab: Tab }) {
   const { resolved } = useTheme()
 
   const { request } = tab
+  const baseUrl = tab.inherited?.baseUrl?.trim() ?? ''
+  const prefix = baseUrl && !ABSOLUTE_URL.test(request.url.trim()) ? baseUrl : ''
 
   return (
     <div className="flex h-full flex-col">
@@ -40,16 +45,26 @@ export function RequestPanel({ tab }: { tab: Tab }) {
           ))}
         </select>
 
-        <input
-          value={request.url}
-          onChange={(event) => patchRequest(tab.id, { url: event.target.value })}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') void send(tab.id)
-          }}
-          placeholder="https://api.example.com/users"
-          spellCheck={false}
-          className="flex-1 rounded-md border border-border bg-card px-3 py-1.5 font-mono text-xs outline-none focus:ring-1 focus:ring-ring"
-        />
+        <div className="flex flex-1 items-stretch overflow-hidden rounded-md border border-border bg-card focus-within:ring-1 focus-within:ring-ring">
+          {prefix && (
+            <span
+              title={`To'plamning base URL'i: ${prefix}`}
+              className="flex max-w-[45%] items-center border-r border-border bg-muted px-2 font-mono text-xs text-muted-foreground"
+            >
+              <span className="truncate">{prefix}</span>
+            </span>
+          )}
+          <input
+            value={request.url}
+            onChange={(event) => patchRequest(tab.id, { url: event.target.value })}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') void send(tab.id)
+            }}
+            placeholder={prefix ? '/users' : 'https://api.example.com/users'}
+            spellCheck={false}
+            className="min-w-0 flex-1 bg-transparent px-3 py-1.5 font-mono text-xs outline-none"
+          />
+        </div>
 
         <button
           type="button"
@@ -156,11 +171,7 @@ export function RequestPanel({ tab }: { tab: Tab }) {
           </div>
         )}
 
-        {section === 'Auth' && (
-          <div className="p-4 text-xs text-muted-foreground">
-            Auth muharriri hali qo'shilmagan. Hozircha Headers orqali qo'shing.
-          </div>
-        )}
+        {section === 'Auth' && <AuthEditor tab={tab} />}
       </div>
     </div>
   )

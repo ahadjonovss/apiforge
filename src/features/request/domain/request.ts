@@ -24,6 +24,12 @@ export interface AuthConfig {
   apiKey?: { key: string; value: string; addTo: 'header' | 'query' }
 }
 
+export interface InheritedConfig {
+  baseUrl: string
+  headers: KeyValue[]
+  auth: AuthConfig
+}
+
 export interface RequestDef {
   id: string
   name: string

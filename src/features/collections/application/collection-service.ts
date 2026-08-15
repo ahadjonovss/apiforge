@@ -78,7 +78,8 @@ export function createCollectionService(gateway: CollectionGateway) {
 
       const endpoint = createRequest({
         name: name.trim(),
-        url: collection.baseUrl,
+        url: '',
+        auth: { mode: 'inherit' },
         collectionId: collection.id,
         folderId,
         order,

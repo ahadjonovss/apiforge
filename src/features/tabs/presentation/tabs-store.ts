@@ -1,28 +1,38 @@
 import { create } from 'zustand'
 import { createRequest, sendRequest, HttpRequestFailure } from '@/features/request'
 import type { RequestDef, RequestError } from '@/features/request'
+import type { InheritedConfig } from '@/features/request/domain/request'
 import type { Tab } from '../domain/tab'
 
 interface TabsState {
   tabs: Tab[]
   activeTabId: string | null
-  openTab: (request?: RequestDef) => string
+  openTab: (request?: RequestDef, inherited?: InheritedConfig | null) => string
   closeTab: (tabId: string) => void
   setActiveTab: (tabId: string) => void
   patchRequest: (tabId: string, patch: Partial<RequestDef>) => void
+  syncInherited: (collectionId: string, inherited: InheritedConfig) => void
   send: (tabId: string) => Promise<void>
 }
 
-function makeTab(request: RequestDef): Tab {
-  return { id: request.id, request, response: null, error: null, isSending: false, dirty: false }
+function makeTab(request: RequestDef, inherited: InheritedConfig | null): Tab {
+  return {
+    id: request.id,
+    request,
+    inherited,
+    response: null,
+    error: null,
+    isSending: false,
+    dirty: false,
+  }
 }
 
 export const useTabsStore = create<TabsState>((set, get) => ({
   tabs: [],
   activeTabId: null,
 
-  openTab: (request) => {
-    const tab = makeTab(request ?? createRequest())
+  openTab: (request, inherited = null) => {
+    const tab = makeTab(request ?? createRequest(), inherited)
     set((state) => ({ tabs: [...state.tabs, tab], activeTabId: tab.id }))
     return tab.id
   },
@@ -50,6 +60,13 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       ),
     })),
 
+  syncInherited: (collectionId, inherited) =>
+    set((state) => ({
+      tabs: state.tabs.map((tab) =>
+        tab.request.collectionId === collectionId ? { ...tab, inherited } : tab,
+      ),
+    })),
+
   send: async (tabId) => {
     const tab = get().tabs.find((item) => item.id === tabId)
     if (!tab || tab.isSending) return
@@ -62,7 +79,9 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     patchTab({ isSending: true, error: null })
 
     try {
-      const response = await sendRequest(tab.request)
+      const response = await sendRequest(tab.request, {
+        inherited: tab.inherited ?? undefined,
+      })
       patchTab({ response, isSending: false })
     } catch (error) {
       const detail: RequestError =

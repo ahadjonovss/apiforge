@@ -38,6 +38,7 @@ export function CollectionPage({
   const activeTabId = useTabsStore((state) => state.activeTabId)
   const openTab = useTabsStore((state) => state.openTab)
   const setActiveTab = useTabsStore((state) => state.setActiveTab)
+  const syncInherited = useTabsStore((state) => state.syncInherited)
 
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -51,10 +52,22 @@ export function CollectionPage({
   const tree = useMemo(() => buildTree(folders, endpoints), [folders, endpoints])
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null
 
+  const inherited = useMemo(
+    () =>
+      current
+        ? { baseUrl: current.baseUrl, headers: current.headers, auth: current.auth }
+        : null,
+    [current],
+  )
+
+  useEffect(() => {
+    if (current && inherited) syncInherited(current.id, inherited)
+  }, [current, inherited, syncInherited])
+
   const openEndpoint = (endpoint: RequestDef) => {
     const existing = tabs.find((tab) => tab.id === endpoint.id)
     if (existing) setActiveTab(existing.id)
-    else openTab(endpoint)
+    else openTab(endpoint, inherited)
   }
 
   const handlers: TreeHandlers = {
