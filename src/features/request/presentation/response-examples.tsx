@@ -1,31 +1,24 @@
 import { useState } from 'react'
-import { BookOpen, Check, Pencil, Plus, Save, X } from 'lucide-react'
+import { AlertTriangle, BookOpen, Check, Pencil, Plus, Save, Wand2, X } from 'lucide-react'
 import { cn } from '@/core/lib/cn'
 import { newId } from '@/core/lib/id'
-import { Markdown } from '@/shared/ui/markdown'
-import { MarkdownEditor } from '@/shared/ui/markdown-editor'
+import { JsonEditor } from '@/shared/ui/json-editor'
 import { useTabsStore, type Tab } from '@/features/tabs'
 import type { ResponseDoc } from '../domain/request'
 import type { ResponseResult } from '../domain/response'
 import {
+  formatJson,
   hasExampleData,
+  isJson,
   pruneEmptyExample,
+  stripFence,
   visibleExamples,
 } from '../application/response-examples'
 import { statusTone } from './status-tone'
 
-function fence(response: ResponseResult): string {
+function toExample(response: ResponseResult): string {
   const body = response.body.trim()
-  if (!body) return '_Bo‘sh javob_'
-
-  const isJson = response.contentType?.includes('json') ?? false
-  if (!isJson) return ['```', body, '```'].join('\n')
-
-  try {
-    return ['```json', JSON.stringify(JSON.parse(body), null, 2), '```'].join('\n')
-  } catch {
-    return ['```', body, '```'].join('\n')
-  }
+  return body ? formatJson(body) : ''
 }
 
 export function ResponseExamples({ tab }: { tab: Tab }) {
@@ -38,40 +31,33 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
   const current = response ? String(response.status) : null
 
   const setDocs = (next: ResponseDoc[]) => patchRequest(tab.id, { responseDocs: next })
+  const patchDoc = (id: string, patch: Partial<ResponseDoc>) =>
+    setDocs(docs.map((doc) => (doc.id === id ? { ...doc, ...patch } : doc)))
 
   const shown = visibleExamples(docs, openId)
   const discardIfEmpty = (id: string) => setDocs(pruneEmptyExample(docs, id))
-
-  const byStatus = (status: string) => docs.find((doc) => doc.status === status)
   const open = openId ? (docs.find((doc) => doc.id === openId) ?? null) : null
+  const openBody = open ? stripFence(open.body) : ''
 
-  const ensure = (status: string): ResponseDoc => {
-    const found = byStatus(status)
-    if (found) return found
-    const created: ResponseDoc = { id: newId(), status, title: '', body: '' }
-    setDocs([...docs, created])
-    return created
+  const close = () => {
+    if (openId) discardIfEmpty(openId)
+    setOpenId(null)
+    setEditing(false)
   }
 
-  const saveCurrent = () => {
-    if (!response || !current) return
-    const existing = byStatus(current)
-    const body = fence(response)
-
+  const add = (status: string, body = '', title = '') => {
+    const existing = docs.find((doc) => doc.status === status)
     if (existing) {
-      setDocs(docs.map((doc) => (doc.id === existing.id ? { ...doc, body } : doc)))
+      if (body) patchDoc(existing.id, { body })
       setOpenId(existing.id)
-    } else {
-      const created: ResponseDoc = {
-        id: newId(),
-        status: current,
-        title: response.statusText || '',
-        body,
-      }
-      setDocs([...docs, created])
-      setOpenId(created.id)
+      setEditing(!body && !hasExampleData(existing))
+      return
     }
-    setEditing(false)
+
+    const created: ResponseDoc = { id: newId(), status, title, body }
+    setDocs([...docs, created])
+    setOpenId(created.id)
+    setEditing(!body)
   }
 
   return (
@@ -95,9 +81,7 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
               title={doc.title || `${doc.status} misoli`}
               onClick={() => {
                 if (isOpen) {
-                  setOpenId(null)
-                  setEditing(false)
-                  discardIfEmpty(doc.id)
+                  close()
                   return
                 }
                 if (openId) discardIfEmpty(openId)
@@ -121,22 +105,20 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
 
         <button
           type="button"
+          aria-label="Misol qo'shish"
           onClick={() => {
             const status = window.prompt('Status kod (masalan 409 yoki 4xx)')?.trim()
-            if (!status) return
-            const target = ensure(status)
-            setOpenId(target.id)
-            setEditing(true)
+            if (status) add(status)
           }}
           className="rounded border border-dashed border-border px-1.5 py-0.5 text-[11px] text-muted-foreground transition hover:border-primary/60 hover:text-foreground"
         >
           <Plus className="size-3" />
         </button>
 
-        {response && (
+        {response && current && (
           <button
             type="button"
-            onClick={saveCurrent}
+            onClick={() => add(current, toExample(response), response.statusText || '')}
             title={`Hozirgi javobni ${current} misoli sifatida saqlash`}
             className="ml-auto flex items-center gap-1 rounded border border-border px-1.5 py-0.5 text-[11px] text-muted-foreground transition hover:border-primary hover:text-foreground"
           >
@@ -147,23 +129,17 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
       </div>
 
       {open && (
-        <div className="border-t border-border bg-muted/30 p-4">
+        <div className="border-t border-border bg-muted/30 p-3">
           <div className="mb-2 flex items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
               <span className={cn('font-mono text-xs font-bold', statusTone(open.status))}>
                 {open.status}
               </span>
               {editing ? (
                 <input
                   value={open.title}
-                  onChange={(event) =>
-                    setDocs(
-                      docs.map((doc) =>
-                        doc.id === open.id ? { ...doc, title: event.target.value } : doc,
-                      ),
-                    )
-                  }
-                  placeholder="Sarlavha"
+                  onChange={(event) => patchDoc(open.id, { title: event.target.value })}
+                  placeholder="Sarlavha, masalan: Muvaffaqiyatli"
                   className="min-w-0 flex-1 rounded border border-border bg-card px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
                 />
               ) : (
@@ -172,6 +148,16 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
             </div>
 
             <div className="flex shrink-0 items-center gap-1">
+              {editing && openBody.trim() !== '' && (
+                <button
+                  type="button"
+                  onClick={() => patchDoc(open.id, { body: formatJson(openBody) })}
+                  title="JSON'ni tartiblash"
+                  className="rounded p-1 text-muted-foreground transition hover:bg-accent hover:text-foreground"
+                >
+                  <Wand2 className="size-3.5" />
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setEditing(!editing)}
@@ -182,11 +168,7 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setOpenId(null)
-                  setEditing(false)
-                  discardIfEmpty(open.id)
-                }}
+                onClick={close}
                 aria-label="Yopish"
                 className="rounded p-1 text-muted-foreground transition hover:bg-accent hover:text-foreground"
               >
@@ -196,16 +178,21 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
           </div>
 
           {editing ? (
-            <MarkdownEditor
-              value={open.body}
-              minHeight="160px"
-              onChange={(value) =>
-                setDocs(docs.map((doc) => (doc.id === open.id ? { ...doc, body: value } : doc)))
-              }
-              placeholder="Qachon qaytadi, javob tuzilishi, xato sabablari…"
-            />
-          ) : open.body.trim() ? (
-            <Markdown source={open.body} />
+            <>
+              <JsonEditor
+                value={openBody}
+                onChange={(value) => patchDoc(open.id, { body: value })}
+                placeholder={'{\n  "access_token": "…"\n}'}
+              />
+              {openBody.trim() !== '' && !isJson(openBody) && (
+                <p className="mt-1 flex items-center gap-1 text-[11px] text-status-redirect">
+                  <AlertTriangle className="size-3" />
+                  JSON sintaksisi buzuq — baribir saqlanadi
+                </p>
+              )}
+            </>
+          ) : openBody.trim() ? (
+            <JsonEditor value={openBody} readOnly />
           ) : (
             <p className="text-xs text-muted-foreground">
               Hali yozilmagan — qalam belgisini bosing yoki javob kelganda «Javobni saqlash»

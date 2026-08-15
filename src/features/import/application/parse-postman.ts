@@ -190,9 +190,7 @@ function toResponseDocs(responses: PostmanResponse[] | undefined): ResponseDoc[]
       id: newId(),
       status: response.code ? String(response.code) : '200',
       title: (response.name ?? '').trim(),
-      body: response.body?.trim()
-        ? ['```json', response.body.trim(), '```'].join('\n')
-        : '',
+      body: response.body?.trim() ?? '',
     }))
 }
 

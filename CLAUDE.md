@@ -226,6 +226,14 @@ Uch daraja, hammasi markdown:
 
 `responseDocs` da `status` **matn**, chunki `4xx` kabi guruhlar ham yoziladi.
 
+Misol tanasi **xom JSON** sifatida saqlanadi va CodeMirror JSON muharririda
+tahrirlanadi — sintaksis bo'yash, tartiblash tugmasi va buzuq JSON haqida
+ogohlantirish bilan (ogohlantirish saqlashga to'sqinlik qilmaydi, chunki javob
+har doim ham to'g'ri JSON bo'lavermaydi).
+
+Eski yozuvlar markdown ``` bloklari ichida edi; `stripFence` ularni o'qishda
+ochib beradi, ya'ni migratsiya kerak emas.
+
 Javob paneli **faqat tanasi yozilgan** misollarni ko'rsatadi (`hasExampleData`),
 oxirida `+` tugmasi bilan. Yangi kod qo'shilayotganda yozuv hali bo'sh bo'ladi —
 shuning uchun ochiq turgani istisno qilinadi, aks holda yozayotganingizda

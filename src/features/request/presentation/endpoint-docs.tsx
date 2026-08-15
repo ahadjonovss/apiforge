@@ -4,8 +4,10 @@ import { Button } from '@/shared/ui/button'
 import { Markdown } from '@/shared/ui/markdown'
 import { MarkdownEditor } from '@/shared/ui/markdown-editor'
 import { MethodBadge } from '@/shared/ui/method-badge'
+import { JsonEditor } from '@/shared/ui/json-editor'
 import { useTabsStore, type Tab } from '@/features/tabs'
 import { interpolate } from '../application/interpolate'
+import { stripFence } from '../application/response-examples'
 import { statusTone } from './status-tone'
 
 const TEMPLATE = `## Nima qiladi
@@ -112,10 +114,10 @@ export function EndpointDocs({ tab }: { tab: Tab }) {
                     <span className={`font-mono ${statusTone(doc.status)}`}>{doc.status}</span>
                     {doc.title && <span>{doc.title}</span>}
                   </p>
-                  {doc.body.trim() ? (
-                    <Markdown source={doc.body} />
+                  {stripFence(doc.body).trim() ? (
+                    <JsonEditor value={stripFence(doc.body)} readOnly minHeight="80px" />
                   ) : (
-                    <p className="text-xs text-muted-foreground">Matn yozilmagan</p>
+                    <p className="text-xs text-muted-foreground">Misol yozilmagan</p>
                   )}
                 </div>
               ))}
