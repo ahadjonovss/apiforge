@@ -7,6 +7,7 @@ import {
 } from '@/features/request'
 import type { RequestDef, RequestError } from '@/features/request'
 import type { InheritedConfig } from '@/features/request/domain/request'
+import { applyCaptures } from '@/features/request/application/apply-captures'
 import type { Tab } from '../domain/tab'
 
 interface TabsState {
@@ -17,6 +18,7 @@ interface TabsState {
   setActiveTab: (tabId: string) => void
   patchRequest: (tabId: string, patch: Partial<RequestDef>) => void
   markSaved: (tabId: string, revision: number) => void
+  clearCaptures: (tabId: string) => void
   syncInherited: (collectionId: string, inherited: InheritedConfig) => void
   send: (tabId: string) => Promise<void>
 }
@@ -31,6 +33,8 @@ function makeTab(request: RequestDef, inherited: InheritedConfig | null): Tab {
     isSending: false,
     dirty: false,
     revision: 0,
+    captures: null,
+    captureMisses: [],
   }
 }
 
@@ -79,6 +83,11 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       ),
     })),
 
+  clearCaptures: (tabId) =>
+    set((state) => ({
+      tabs: state.tabs.map((tab) => (tab.id === tabId ? { ...tab, captures: null } : tab)),
+    })),
+
   syncInherited: (collectionId, inherited) =>
     set((state) => ({
       tabs: state.tabs.map((tab) =>
@@ -101,13 +110,25 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       const response = await sendRequest(tab.request, {
         inherited: tab.inherited ?? undefined,
       })
-      patchTab({ response, isSending: false })
+      const outcome = applyCaptures(tab.request.captures ?? [], response)
+      patchTab({
+        response,
+        isSending: false,
+        captures: outcome.captured.length > 0 ? outcome.captured : null,
+        captureMisses: outcome.missed,
+      })
     } catch (error) {
       const detail: RequestError =
         error instanceof HttpRequestFailure
           ? error.detail
           : describeRawError(String(error), 0)
-      patchTab({ error: detail, response: null, isSending: false })
+      patchTab({
+        error: detail,
+        response: null,
+        isSending: false,
+        captures: null,
+        captureMisses: [],
+      })
     }
   },
 }))

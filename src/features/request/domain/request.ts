@@ -39,11 +39,20 @@ export interface ResponseDoc {
   body: string
 }
 
+export interface CaptureRule {
+  id: string
+  source: 'body' | 'header'
+  path: string
+  target: string
+  enabled: boolean
+}
+
 export interface RequestDef {
   id: string
   name: string
   docs: string
   responseDocs: ResponseDoc[]
+  captures: CaptureRule[]
   method: HttpMethod
   url: string
   params: KeyValue[]

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { DataFailure, type DataErrorDetail } from '@/core/domain/data-error'
+import { newId } from '@/core/lib/id'
 import type { RequestDef } from '@/features/request/domain/request'
 import { collectionService } from '../composition'
 import type { ApiCollection } from '../domain/collection'
@@ -19,6 +20,10 @@ interface CollectionsState {
   error: DataErrorDetail | null
 
   autoSave: (workspaceId: string, endpoint: RequestDef) => Promise<boolean>
+  captureVariables: (
+    workspaceId: string,
+    entries: { key: string; value: string }[],
+  ) => Promise<boolean>
   clearError: () => void
   loadCollections: (workspaceId: string) => Promise<void>
   createCollection: (
@@ -104,6 +109,36 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => {
         return true
       } catch (error) {
         set({ saving: false, saveError: toDetail(error) })
+        return false
+      }
+    },
+
+    captureVariables: async (workspaceId, entries) => {
+      const collection = get().current
+      if (!collection || entries.length === 0) return false
+
+      const variables = collection.variables.slice()
+      for (const entry of entries) {
+        const index = variables.findIndex((variable) => variable.key === entry.key)
+        if (index === -1) {
+          variables.push({
+            id: newId(),
+            key: entry.key,
+            value: entry.value,
+            enabled: true,
+            secret: false,
+          })
+        } else {
+          variables[index] = { ...variables[index], value: entry.value, enabled: true }
+        }
+      }
+
+      try {
+        await collectionService.updateSettings(workspaceId, collection.id, { variables })
+        set({ current: { ...collection, variables } })
+        return true
+      } catch (error) {
+        set({ saveError: toDetail(error) })
         return false
       }
     },

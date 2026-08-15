@@ -175,6 +175,23 @@ murojaat qilardi. Ya'ni proxy har qanday build'da o'chiq, faqat dev server'da yo
 Proxy xatolari `x-apiforge-proxy-error` header'i bilan belgilanadi va `HttpRequestFailure`
 ga aylantiriladi — ular target'ning javobi emas, shuning uchun response sifatida ko'rsatilmaydi.
 
+## Javobdan o'zgaruvchiga olish (capture)
+
+Postman'ning test skriptlari o'rnini bosadi. `RequestDef.captures` — qoidalar
+ro'yxati: javob body'sining JSON yo'li yoki header nomi → to'plam o'zgaruvchisi.
+
+`application/apply-captures.ts` sof funksiya: qoidalar + javob → olingan
+qiymatlar va **sabablari bilan** o'tkazib yuborilganlar. Jimgina muvaffaqiyatsizlik
+yo'q — javob JSON bo'lmasa yoki yo'l topilmasa, javob panelida ko'rinadi.
+
+Oqim: `tabs-store.send` javobdan qiymatlarni ajratadi va tabga yozadi →
+`collection-page` ularni `captureVariables` orqali to'plam o'zgaruvchilariga
+saqlaydi → `clearCaptures` bilan tozalaydi. Shu sababli tabs feature'i
+collections'ga bog'lanmaydi, aksincha collections tabs'dan o'qiydi.
+
+Yo'l sintaksisi: `access_token`, `data.tokens.0.access`, `data.tokens[1].access`,
+`$.` prefiksi ham qabul qilinadi.
+
 ## Avtomatik saqlash
 
 Endpoint tahrirlanganda 800ms tinchlikdan keyin o'zi saqlanadi. Qo'lda "Saqlash"

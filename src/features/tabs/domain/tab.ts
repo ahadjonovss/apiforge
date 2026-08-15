@@ -1,3 +1,4 @@
+import type { CapturedValue } from '@/features/request/application/apply-captures'
 import type { InheritedConfig, RequestDef } from '@/features/request/domain/request'
 import type { RequestError, ResponseResult } from '@/features/request/domain/response'
 
@@ -10,4 +11,6 @@ export interface Tab {
   isSending: boolean
   dirty: boolean
   revision: number
+  captures: CapturedValue[] | null
+  captureMisses: { target: string; reason: string }[]
 }

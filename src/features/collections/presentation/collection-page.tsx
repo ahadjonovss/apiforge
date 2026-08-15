@@ -58,6 +58,16 @@ export function CollectionPage({
 
   useAutoSave(workspaceId, activeTab)
 
+  const captureVariables = useCollectionsStore((state) => state.captureVariables)
+  const clearCaptures = useTabsStore((state) => state.clearCaptures)
+  const pendingCaptures = activeTab?.captures ?? null
+
+  useEffect(() => {
+    if (!pendingCaptures || !activeTab) return
+    const tabId = activeTab.id
+    void captureVariables(workspaceId, pendingCaptures).finally(() => clearCaptures(tabId))
+  }, [pendingCaptures, activeTab, workspaceId, captureVariables, clearCaptures])
+
   const inherited = useMemo(
     () =>
       current

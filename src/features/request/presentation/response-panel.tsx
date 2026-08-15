@@ -5,6 +5,7 @@ import { oneDark } from '@codemirror/theme-one-dark'
 import { AlertCircle, BookOpen, Clock, HardDrive, Lightbulb, X } from 'lucide-react'
 import { Markdown } from '@/shared/ui/markdown'
 import { statusTone } from './status-tone'
+import { CaptureNote } from './capture-note'
 import { cn } from '@/core/lib/cn'
 import { useTheme } from '@/app/providers/theme-provider'
 import type { Tab } from '@/features/tabs'
@@ -30,6 +31,7 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
   const { resolved } = useTheme()
   const { response, error } = tab
 
+  const captureMisses = tab.captureMisses ?? []
   const responseDocs = tab.request.responseDocs ?? []
   const activeDoc = responseDocs.find((doc) => doc.id === openDoc) ?? null
 
@@ -151,6 +153,7 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
     <div className="flex h-full flex-col">
       {docsBar}
       {docPanel}
+      <CaptureNote tab={tab} misses={captureMisses} />
       <div className="flex items-center gap-4 border-b border-border px-3 py-2">
         <span className={cn('font-mono text-xs font-bold', statusClass(response.status))}>
           {response.status} {response.statusText}
