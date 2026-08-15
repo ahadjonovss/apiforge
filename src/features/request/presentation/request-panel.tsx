@@ -9,6 +9,7 @@ import { KeyValueEditor } from '@/shared/ui/key-value-editor'
 import { useTheme } from '@/app/providers/theme-provider'
 import { useTabsStore, type Tab } from '@/features/tabs'
 import type { BodyMode } from '../domain/request'
+import { interpolate } from '../application/interpolate'
 import { AuthEditor } from './auth-editor'
 
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i
@@ -25,8 +26,10 @@ export function RequestPanel({ tab }: { tab: Tab }) {
   const { resolved } = useTheme()
 
   const { request } = tab
-  const baseUrl = tab.inherited?.baseUrl?.trim() ?? ''
-  const prefix = baseUrl && !ABSOLUTE_URL.test(request.url.trim()) ? baseUrl : ''
+  const scope = tab.inherited?.variables ?? {}
+  const resolvedUrl = interpolate(request.url, scope).trim()
+  const resolvedBase = interpolate(tab.inherited?.baseUrl ?? '', scope).trim()
+  const prefix = resolvedBase && !ABSOLUTE_URL.test(resolvedUrl) ? resolvedBase : ''
 
   return (
     <div className="flex h-full flex-col">
