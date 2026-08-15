@@ -1,0 +1,45 @@
+import type { KeyValue } from '@/core/domain/http'
+import type { EnvVariable } from '@/features/environments/domain/environment'
+import type { AuthConfig, RequestBody, RequestDef } from '@/features/request/domain/request'
+
+export interface PlannedCollection {
+  name: string
+  description: string
+  headers: KeyValue[]
+  auth: AuthConfig
+  variables: EnvVariable[]
+}
+
+export interface PlannedFolder {
+  id: string
+  parentId: string | null
+  name: string
+  order: number
+}
+
+export interface PlannedEndpoint {
+  id: string
+  folderId: string | null
+  order: number
+  name: string
+  method: RequestDef['method']
+  url: string
+  params: KeyValue[]
+  headers: KeyValue[]
+  body: RequestBody
+  auth: AuthConfig
+}
+
+export interface ImportPlan {
+  collection: PlannedCollection
+  folders: PlannedFolder[]
+  endpoints: PlannedEndpoint[]
+  warnings: string[]
+}
+
+export class ImportFailure extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'ImportFailure'
+  }
+}

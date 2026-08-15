@@ -55,7 +55,16 @@ export function CollectionPage({
   const inherited = useMemo(
     () =>
       current
-        ? { baseUrl: current.baseUrl, headers: current.headers, auth: current.auth }
+        ? {
+            baseUrl: current.baseUrl,
+            headers: current.headers,
+            auth: current.auth,
+            variables: Object.fromEntries(
+              current.variables
+                .filter((variable) => variable.enabled && variable.key.trim() !== '')
+                .map((variable) => [variable.key, variable.value]),
+            ),
+          }
         : null,
     [current],
   )

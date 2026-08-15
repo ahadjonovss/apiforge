@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
-import { ArrowLeft, FolderOpen, Plus, Trash2, UserPlus, Users } from 'lucide-react'
+import { ArrowLeft, FolderOpen, Plus, Trash2, Upload, UserPlus, Users } from 'lucide-react'
 import { cn } from '@/core/lib/cn'
 import { Button } from '@/shared/ui/button'
 import { Modal } from '@/shared/ui/modal'
@@ -11,6 +11,7 @@ import { DataErrorNote } from '@/shared/ui/data-error-note'
 import { useAuthStore } from '@/features/auth'
 import { useCollectionsStore } from '@/features/collections/presentation/collections-store'
 import { collectionSchema, type CollectionValues } from '@/features/collections/application/schemas'
+import { ImportDialog } from '@/features/import/presentation/import-dialog'
 import { memberSchema, teamSchema, type MemberValues, type TeamValues } from '../application/schemas'
 import { canManage } from '../domain/workspace'
 import { useWorkspacesStore } from './workspaces-store'
@@ -273,6 +274,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
   const [addingMember, setAddingMember] = useState(false)
   const [addingTeam, setAddingTeam] = useState(false)
   const [addingCollection, setAddingCollection] = useState(false)
+  const [importing, setImporting] = useState(false)
 
   useEffect(() => {
     void openWorkspace(workspaceId)
@@ -325,10 +327,16 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
           title="API to'plamlari"
           count={collections.length}
           action={
-            <Button size="sm" variant="outline" onClick={() => setAddingCollection(true)}>
-              <Plus className="size-3.5" />
-              To'plam
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button size="sm" variant="ghost" onClick={() => setImporting(true)}>
+                <Upload className="size-3.5" />
+                Postman'dan
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setAddingCollection(true)}>
+                <Plus className="size-3.5" />
+                To'plam
+              </Button>
+            </div>
           }
         >
           {collections.length === 0 ? (
@@ -485,6 +493,13 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
         workspaceId={workspaceId}
         open={addingCollection}
         onClose={() => setAddingCollection(false)}
+      />
+      <ImportDialog
+        workspaceId={workspaceId}
+        teams={teams}
+        open={importing}
+        onClose={() => setImporting(false)}
+        onImported={() => void loadCollections(workspaceId)}
       />
     </div>
   )

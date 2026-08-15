@@ -175,6 +175,26 @@ murojaat qilardi. Ya'ni proxy har qanday build'da o'chiq, faqat dev server'da yo
 Proxy xatolari `x-apiforge-proxy-error` header'i bilan belgilanadi va `HttpRequestFailure`
 ga aylantiriladi — ular target'ning javobi emas, shuning uchun response sifatida ko'rsatilmaydi.
 
+## Postman import
+
+`features/import` — Postman Collection v2.x JSON'ini o'qiydi.
+`application/parse-postman.ts` sof funksiya: JSON matnini `ImportPlan` ga aylantiradi,
+hech narsani saqlamaydi. `application/import-service.ts` esa rejani `ImportSink`
+porti orqali yozadi; portni `composition.ts` da collections gateway'i qondiradi.
+
+Format juda mos tushadi: Postman'ning ichma-ich `item` daraxti bizning
+`parentId` papkalarimizga, `{{variable}}` sintaksisi esa `interpolate.ts` ga
+**aynan** to'g'ri keladi. Collection darajasidagi auth/header/variable — bizning
+`InheritedConfig` merosimizga.
+
+Mos kelmaydigan joylar ogohlantirish sifatida qaytariladi, jimgina tashlab
+ketilmaydi: pre-request/test skriptlari (bizda JS ijro etuvchi yo'q), OAuth2/AWS/
+NTLM/Digest auth, fayl body'lari va form-data ichidagi fayl maydonlari. GraphQL
+body JSON'ga o'giriladi (bu ham ogohlantiriladi).
+
+Parser buzuq ma'lumotda yiqilmaydi: notanish metod GET ga, notanish auth `none` ga
+tushadi, `info` yo'q fayl esa aniq xato bilan rad etiladi.
+
 ## Xatolarni tasniflash
 
 `RequestError` da `kind`, `title`, `message` va ixtiyoriy `hint` bor. Foydalanuvchi
