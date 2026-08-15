@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "apiforge-dev",
+    "dev": "apiforge-dev",
+    "prod": "apiforge-prod"
+  }
+}

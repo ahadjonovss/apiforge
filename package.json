@@ -6,8 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:dev": "tsc -b && vite build --mode development",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "emulators": "firebase emulators:start --only auth,firestore",
+    "deploy:dev": "npm run build:dev && firebase deploy -P dev --only hosting,firestore:rules",
+    "deploy:prod": "npm run build && firebase deploy -P prod --only hosting,firestore:rules"
   },
   "dependencies": {
     "@codemirror/lang-html": "^6.4.12",
