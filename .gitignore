@@ -34,3 +34,6 @@ firebase-debug.log
 
 # generated routes
 src/app/route-tree.gen.ts
+
+# emulyator ma'lumoti
+.firebase-data/

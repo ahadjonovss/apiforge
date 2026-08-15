@@ -19,9 +19,32 @@ export function joinUrl(baseUrl: string, path: string): string {
   return tail ? `${head}/${tail}` : head
 }
 
-function effectiveAuth(request: RequestDef, inherited?: InheritedConfig): AuthConfig {
+export function effectiveAuth(request: RequestDef, inherited?: InheritedConfig): AuthConfig {
   if (request.auth.mode !== 'inherit') return request.auth
   return inherited?.auth ?? { mode: 'none' }
+}
+
+export function authHeaderEntries(
+  auth: AuthConfig,
+  scope: VariableScope,
+): [string, string][] {
+  if (auth.mode === 'bearer' && auth.bearer?.token) {
+    return [['Authorization', `Bearer ${interpolate(auth.bearer.token, scope)}`]]
+  }
+
+  if (auth.mode === 'basic' && auth.basic) {
+    const user = interpolate(auth.basic.username, scope)
+    const pass = interpolate(auth.basic.password, scope)
+    return [['Authorization', `Basic ${btoa(`${user}:${pass}`)}`]]
+  }
+
+  if (auth.mode === 'apiKey' && auth.apiKey?.addTo === 'header' && auth.apiKey.key) {
+    return [
+      [interpolate(auth.apiKey.key, scope), interpolate(auth.apiKey.value, scope)],
+    ]
+  }
+
+  return []
 }
 
 function activePairs(pairs: KeyValue[], scope: VariableScope) {
@@ -83,15 +106,8 @@ function buildHeaders(
     headers.set(key, value)
   }
 
-  const auth = effectiveAuth(request, inherited)
-  if (auth.mode === 'bearer' && auth.bearer?.token) {
-    headers.set('Authorization', `Bearer ${interpolate(auth.bearer.token, scope)}`)
-  } else if (auth.mode === 'basic' && auth.basic) {
-    const user = interpolate(auth.basic.username, scope)
-    const pass = interpolate(auth.basic.password, scope)
-    headers.set('Authorization', `Basic ${btoa(`${user}:${pass}`)}`)
-  } else if (auth.mode === 'apiKey' && auth.apiKey?.addTo === 'header' && auth.apiKey.key) {
-    headers.set(interpolate(auth.apiKey.key, scope), interpolate(auth.apiKey.value, scope))
+  for (const [key, value] of authHeaderEntries(effectiveAuth(request, inherited), scope)) {
+    headers.set(key, value)
   }
 
   return headers

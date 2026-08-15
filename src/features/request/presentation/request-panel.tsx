@@ -11,6 +11,7 @@ import { useTabsStore, type Tab } from '@/features/tabs'
 import type { BodyMode } from '../domain/request'
 import { interpolate } from '../application/interpolate'
 import { AuthEditor } from './auth-editor'
+import { InheritedHeaders } from './inherited-headers'
 
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i
 
@@ -111,10 +112,13 @@ export function RequestPanel({ tab }: { tab: Tab }) {
         )}
 
         {section === 'Headers' && (
-          <KeyValueEditor
-            rows={request.headers}
-            onChange={(headers) => patchRequest(tab.id, { headers })}
-          />
+          <>
+            <InheritedHeaders tab={tab} />
+            <KeyValueEditor
+              rows={request.headers}
+              onChange={(headers) => patchRequest(tab.id, { headers })}
+            />
+          </>
         )}
 
         {section === 'Body' && (

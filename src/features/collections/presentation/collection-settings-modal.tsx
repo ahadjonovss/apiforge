@@ -7,7 +7,8 @@ import { Modal } from '@/shared/ui/modal'
 import { TextField } from '@/shared/ui/text-field'
 import { KeyValueEditor } from '@/shared/ui/key-value-editor'
 import { DataErrorNote } from '@/shared/ui/data-error-note'
-import type { AuthMode } from '@/features/request/domain/request'
+import type { AuthConfig, AuthMode } from '@/features/request/domain/request'
+import { AuthFields } from '@/features/request/presentation/auth-fields'
 import {
   collectionSettingsSchema,
   type CollectionSettingsValues,
@@ -33,8 +34,7 @@ export function CollectionSettingsModal({
   const updateSettings = useCollectionsStore((state) => state.updateSettings)
 
   const [headers, setHeaders] = useState<KeyValue[]>(collection.headers)
-  const [authMode, setAuthMode] = useState<AuthMode>(collection.auth.mode)
-  const [token, setToken] = useState(collection.auth.bearer?.token ?? '')
+  const [auth, setAuth] = useState<AuthConfig>(collection.auth)
   const [variables, setVariables] = useState<KeyValue[]>(() =>
     collection.variables.map((variable) => ({
       id: variable.id,
@@ -63,7 +63,7 @@ export function CollectionSettingsModal({
       description: values.description,
       baseUrl: values.baseUrl,
       headers: headers.filter((row) => row.key.trim() !== ''),
-      auth: authMode === 'bearer' ? { mode: 'bearer', bearer: { token } } : { mode: authMode },
+      auth,
       variables: variables
         .filter((row) => row.key.trim() !== '')
         .map((row) => ({
@@ -99,29 +99,7 @@ export function CollectionSettingsModal({
           {...register('baseUrl')}
         />
 
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium">Auth</label>
-          <select
-            value={authMode}
-            onChange={(event) => setAuthMode(event.target.value as AuthMode)}
-            className="rounded-md border border-border bg-card px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-ring"
-          >
-            {AUTH_MODES.map((mode) => (
-              <option key={mode} value={mode}>
-                {mode}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {authMode === 'bearer' && (
-          <TextField
-            label="Bearer token"
-            placeholder="{{token}}"
-            value={token}
-            onChange={(event) => setToken(event.target.value)}
-          />
-        )}
+        <AuthFields value={auth} modes={AUTH_MODES} onChange={setAuth} />
 
         <div>
           <p className="mb-1 text-xs font-medium">O'zgaruvchilar</p>
