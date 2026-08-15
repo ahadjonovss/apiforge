@@ -7,6 +7,11 @@ import { MarkdownEditor } from '@/shared/ui/markdown-editor'
 import { useTabsStore, type Tab } from '@/features/tabs'
 import type { ResponseDoc } from '../domain/request'
 import type { ResponseResult } from '../domain/response'
+import {
+  hasExampleData,
+  pruneEmptyExample,
+  visibleExamples,
+} from '../application/response-examples'
 import { statusTone } from './status-tone'
 
 function fence(response: ResponseResult): string {
@@ -34,9 +39,8 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
 
   const setDocs = (next: ResponseDoc[]) => patchRequest(tab.id, { responseDocs: next })
 
-  const shown = docs
-    .map((doc) => doc.status)
-    .sort((a, b) => a.localeCompare(b))
+  const shown = visibleExamples(docs, openId)
+  const discardIfEmpty = (id: string) => setDocs(pruneEmptyExample(docs, id))
 
   const byStatus = (status: string) => docs.find((doc) => doc.status === status)
   const open = openId ? (docs.find((doc) => doc.id === openId) ?? null) : null
@@ -82,36 +86,35 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
           <span className="mr-1 text-[11px] text-muted-foreground/70">hali yo'q</span>
         )}
 
-        {shown.map((status) => {
-          const doc = byStatus(status)
-          const isOpen = doc ? doc.id === openId : false
+        {shown.map((doc) => {
+          const isOpen = doc.id === openId
           return (
             <button
-              key={status}
+              key={doc.id}
               type="button"
-              title={
-                doc
-                  ? doc.title || `${status} misoli`
-                  : `${status} uchun misol qo'shish`
-              }
+              title={doc.title || `${doc.status} misoli`}
               onClick={() => {
-                const target = doc ?? ensure(status)
-                setOpenId(openId === target.id ? null : target.id)
-                setEditing(!doc)
+                if (isOpen) {
+                  setOpenId(null)
+                  setEditing(false)
+                  discardIfEmpty(doc.id)
+                  return
+                }
+                if (openId) discardIfEmpty(openId)
+                setOpenId(doc.id)
+                setEditing(!hasExampleData(doc))
               }}
               className={cn(
                 'rounded border px-1.5 py-0.5 font-mono text-[11px] font-bold transition',
-                doc ? statusTone(status) : 'text-muted-foreground/50',
+                statusTone(doc.status),
                 isOpen
                   ? 'border-primary bg-accent'
-                  : current === status
+                  : current === doc.status
                     ? 'border-primary/60'
-                    : doc
-                      ? 'border-border hover:border-primary/60'
-                      : 'border-dashed border-border hover:border-primary/60',
+                    : 'border-border hover:border-primary/60',
               )}
             >
-              {status}
+              {doc.status}
             </button>
           )
         })}
@@ -182,6 +185,7 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
                 onClick={() => {
                   setOpenId(null)
                   setEditing(false)
+                  discardIfEmpty(open.id)
                 }}
                 aria-label="Yopish"
                 className="rounded p-1 text-muted-foreground transition hover:bg-accent hover:text-foreground"

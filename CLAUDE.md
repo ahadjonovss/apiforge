@@ -226,7 +226,11 @@ Uch daraja, hammasi markdown:
 
 `responseDocs` da `status` **matn**, chunki `4xx` kabi guruhlar ham yoziladi.
 
-Javob paneli **faqat misoli mavjud** kodlarni ko'rsatadi, oxirida `+` tugmasi bilan.
+Javob paneli **faqat tanasi yozilgan** misollarni ko'rsatadi (`hasExampleData`),
+oxirida `+` tugmasi bilan. Yangi kod qo'shilayotganda yozuv hali bo'sh bo'ladi —
+shuning uchun ochiq turgani istisno qilinadi, aks holda yozayotganingizda
+qatordan yo'qolib ketardi. Yopilganda bo'sh yozuv `pruneEmptyExample` bilan
+o'chiriladi, ya'ni tasodifiy bosishlardan bo'sh yozuvlar to'planib qolmaydi.
 Javob kelganda mos kod ajratiladi, «Javobni saqlash» tugmasi esa haqiqiy javobni
 o'sha kod misoliga aylantiradi (JSON bo'lsa chiroyli formatlab, ```json blokka o'rab).
 Tahrirlash ham shu yerda — hujjat tasvirlayotgan javobning yonida.
