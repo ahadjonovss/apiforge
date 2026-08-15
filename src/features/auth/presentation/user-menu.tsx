@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { LogOut, User as UserIcon } from 'lucide-react'
+import { Boxes, LogOut, User as UserIcon } from 'lucide-react'
 import { cn } from '@/core/lib/cn'
 import { useAuthStore } from './auth-store'
 import { useT } from '@/app/providers/i18n-provider'
@@ -66,6 +66,18 @@ export function UserMenu() {
               <p className="mt-1 text-[10px] text-status-redirect">{t('profile.emailNotVerified')}</p>
             )}
           </div>
+
+          <Link
+            to="/workspaces"
+            onClick={() => setOpen(false)}
+            className={cn(
+              'flex items-center gap-2 px-3 py-2 text-xs transition',
+              'text-muted-foreground hover:bg-accent hover:text-foreground',
+            )}
+          >
+            <Boxes className="size-3.5" />
+            {t('workspaces.title')}
+          </Link>
 
           <Link
             to="/profile"

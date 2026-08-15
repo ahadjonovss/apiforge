@@ -248,7 +248,7 @@ export function ProfilePage() {
       <div className="mx-auto flex max-w-2xl flex-col gap-4 p-6">
         <div className="flex items-center justify-between">
           <Link
-            to="/"
+            to="/workspaces"
             className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition hover:text-foreground"
           >
             <ArrowLeft className="size-3.5" />

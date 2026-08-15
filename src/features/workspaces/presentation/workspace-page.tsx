@@ -301,7 +301,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
       <div className="flex h-full flex-col items-center justify-center gap-3">
         <p className="text-sm">{t('workspaces.notFound')}</p>
         <DataErrorNote error={error} />
-        <Link to="/" className="text-xs text-primary hover:underline">
+        <Link to="/workspaces" className="text-xs text-primary hover:underline">
           {t('workspaces.backHome')}
         </Link>
       </div>
@@ -312,7 +312,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
     <div className="h-full overflow-auto">
       <div className="mx-auto flex max-w-4xl flex-col gap-4 p-6">
         <Link
-          to="/"
+          to="/workspaces"
           className="inline-flex w-fit items-center gap-1.5 text-xs text-muted-foreground transition hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" />

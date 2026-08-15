@@ -80,6 +80,7 @@ src/
       application/            collection-service, tree (buildTree, kaskad)
       infrastructure/         firestore-collection-gateway
       presentation/           collection-page, collection-tree, modallar
+    landing/                  landing sahifa
     users/                    email → uid katalogi
     profile/                  presentation (profile-page)
     tabs/                     domain, presentation (tabs-store, tab-bar)
@@ -90,7 +91,8 @@ src/
 
 | Yo'l | Sahifa | Himoya |
 |---|---|---|
-| `/` | Ish maydonlari ro'yxati va yaratish | Auth talab qilinadi |
+| `/` | Landing sahifa — platforma haqida | Ochiq |
+| `/workspaces` | Ish maydonlari ro'yxati va yaratish | Auth talab qilinadi |
 | `/workspace/$id` | Jamoalar, a'zolar, API to'plamlari | Auth talab qilinadi |
 | `/workspace/$id/collection/$cid` | Papkalar daraxti, endpointlar, sozlamalar | Auth talab qilinadi |
 | `/login` | Kirish + parolni tiklash | Ochiq |

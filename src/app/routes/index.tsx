@@ -1,11 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { RequireAuth } from '@/features/auth'
-import { HomePage } from '@/features/workspaces/presentation/home-page'
+import { LandingPage } from '@/features/landing/presentation/landing-page'
 
 export const Route = createFileRoute('/')({
-  component: () => (
-    <RequireAuth>
-      <HomePage />
-    </RequireAuth>
-  ),
+  component: LandingPage,
 })

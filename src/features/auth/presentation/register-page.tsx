@@ -34,7 +34,7 @@ export function RegisterPage() {
   }, [clearError])
 
   useEffect(() => {
-    if (status === 'authenticated') void navigate({ to: '/' })
+    if (status === 'authenticated') void navigate({ to: '/workspaces' })
   }, [status, navigate])
 
   const onSubmit = handleSubmit(async (values) => {

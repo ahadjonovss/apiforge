@@ -214,6 +214,25 @@ boshqa tugmalarni "yuklanmoqda" holatiga tushirardi va `run()` ichidagi
 Collection bosh sahifasi bundan mustasno — u ochiq tahrir rejimiga
 (Saqlash/Bekor) ega, ya'ni foydalanuvchi ataylab kiradi va chiqadi.
 
+## Tillar
+
+`core/i18n` — uch til: `uz` (asos), `ru`, `en`. Kutubxona ishlatilmagan:
+lug'atlar oddiy obyekt, `translate` sof funksiya, React qatlami esa kichik
+provider. Tanlov `localStorage` da, boshlang'ich qiymat `navigator.languages`
+dan aniqlanadi.
+
+**To'liqlikni kompilyator tekshiradi:** `ru` va `en` `typeof uz` deb
+tiplangan, ya'ni yetishmagan yoki xato yozilgan kalit runtime'da emas,
+build'da yiqiladi.
+
+React'dan tashqarida hosil bo'ladigan xabarlar (Firebase auth kodlari,
+Firestore xatolari, zod sxemalari, tarmoq xatolari) **kalit** saqlaydi va
+ko'rsatilayotgan joyda tarjima qilinadi. `RequestError` va `DataErrorDetail`
+da `params` bor — host, email yoki davomiylik istalgan tilda o'rniga qo'yiladi.
+
+Noma'lum kalit o'zini qaytaradi, shuning uchun oddiy jumla ham `t()` dan
+o'tkazilsa buzilmaydi.
+
 ## Hujjatlar
 
 Uch daraja, hammasi markdown:
