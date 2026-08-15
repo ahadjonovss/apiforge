@@ -37,3 +37,6 @@ src/app/route-tree.gen.ts
 
 # emulyator ma'lumoti
 .firebase-data/
+
+# tanstack router keshi
+.tanstack/
