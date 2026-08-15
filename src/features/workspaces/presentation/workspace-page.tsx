@@ -13,8 +13,9 @@ import { useCollectionsStore } from '@/features/collections/presentation/collect
 import { collectionSchema, type CollectionValues } from '@/features/collections/application/schemas'
 import { ImportDialog } from '@/features/import/presentation/import-dialog'
 import { memberSchema, teamSchema, type MemberValues, type TeamValues } from '../application/schemas'
-import { canManage } from '../domain/workspace'
+import { canManage, canManageCollections } from '../domain/workspace'
 import { useWorkspacesStore } from './workspaces-store'
+import { WorkspaceHome } from './workspace-home'
 import { useT } from '@/app/providers/i18n-provider'
 
 function Panel({
@@ -287,6 +288,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
   }, [workspaceId, openWorkspace, loadCollections])
 
   const owner = current ? canManage(current, user?.id ?? null) : false
+  const manages = canManageCollections(members, user?.id ?? null)
 
   if (loading && !current) {
     return (
@@ -316,7 +318,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
           className="inline-flex w-fit items-center gap-1.5 text-xs text-muted-foreground transition hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" />
-          Ish maydonlari
+          {t('workspaces.title')}
         </Link>
 
         <div>
@@ -327,6 +329,14 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
         </div>
 
         <DataErrorNote error={error ?? collectionsError} />
+
+        <WorkspaceHome
+          workspace={current}
+          members={members}
+          teamCount={teams.length}
+          collectionCount={collections.length}
+          canEdit={manages}
+        />
 
         <Panel
           title={t('workspace.collections')}
@@ -365,14 +375,16 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
                         ` · ${teams.find((team) => team.id === item.teamId)?.name ?? 'jamoa'}`}
                     </p>
                   </Link>
-                  <button
-                    type="button"
-                    onClick={() => void removeCollection(workspaceId, item.id)}
-                    aria-label={t('common.delete')}
-                    className="rounded p-1 text-muted-foreground opacity-0 transition hover:bg-accent hover:text-destructive group-hover:opacity-100"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
+                  {manages && (
+                    <button
+                      type="button"
+                      onClick={() => void removeCollection(workspaceId, item.id)}
+                      aria-label={t('common.delete')}
+                      className="rounded p-1 text-muted-foreground opacity-0 transition hover:bg-accent hover:text-destructive group-hover:opacity-100"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>

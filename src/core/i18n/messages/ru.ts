@@ -127,6 +127,18 @@ export const ru: typeof uz = {
   'workspace.removeMember': 'Исключить',
   'workspace.fromPostman': 'Из Postman',
 
+  'workspace.docs': 'О рабочем пространстве',
+  'workspace.docsEmpty': 'Документация не написана',
+  'workspace.docsEmptyHint': 'Опишите, для чего это пространство и кто чем занимается',
+  'workspace.overview': 'Обзор',
+  'workspace.statCollections': 'Коллекция',
+  'workspace.statTeams': 'Команда',
+  'workspace.statMembers': 'Участник',
+  'workspace.statEndpoints': 'Эндпоинт',
+  'workspace.owner': 'Владелец',
+  'workspace.createdAt': 'Создано',
+  'workspace.template': '# {name}\n\nОпишите, зачем нужно это рабочее пространство.\n\n## Команды\n\n| Команда | Чем занимается |\n| --- | --- |\n|  |  |\n\n## Договорённости\n\n- Как называются эндпоинты\n- Кто что может менять\n',
+
   'data.error.not-found': 'Не найдено',
   'data.error.permission-denied': 'Нет прав на это действие',
   'data.error.already-exists': 'Пользователь уже является участником',

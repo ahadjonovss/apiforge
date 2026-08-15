@@ -127,6 +127,18 @@ export const en: typeof uz = {
   'workspace.removeMember': 'Remove',
   'workspace.fromPostman': 'From Postman',
 
+  'workspace.docs': 'About this workspace',
+  'workspace.docsEmpty': 'No documentation yet',
+  'workspace.docsEmptyHint': 'Describe what this workspace is for and who works on what',
+  'workspace.overview': 'Overview',
+  'workspace.statCollections': 'Collection',
+  'workspace.statTeams': 'Team',
+  'workspace.statMembers': 'Member',
+  'workspace.statEndpoints': 'Endpoint',
+  'workspace.owner': 'Owner',
+  'workspace.createdAt': 'Created',
+  'workspace.template': '# {name}\n\nDescribe what this workspace is for.\n\n## Teams\n\n| Team | Owns |\n| --- | --- |\n|  |  |\n\n## Conventions\n\n- How endpoints are named\n- Who can change what\n',
+
   'data.error.not-found': 'Not found',
   'data.error.permission-denied': 'You do not have permission for this',
   'data.error.already-exists': 'This user is already a member',

@@ -31,6 +31,7 @@ function toWorkspace(id: string, data: DocumentData): Workspace {
     id,
     name: data.name ?? '',
     description: data.description ?? '',
+    docs: data.docs ?? '',
     ownerId: data.ownerId ?? '',
     memberIds: data.memberIds ?? [],
     createdAt: data.createdAt ?? 0,
@@ -83,6 +84,7 @@ export const firestoreWorkspaceGateway: WorkspaceGateway = {
         id,
         name,
         description,
+        docs: '',
         ownerId: owner.id,
         memberIds: [owner.id],
         createdAt: now,
@@ -92,6 +94,7 @@ export const firestoreWorkspaceGateway: WorkspaceGateway = {
       await setDoc(doc(db, WORKSPACES, id), {
         name: workspace.name,
         description: workspace.description,
+        docs: workspace.docs,
         ownerId: workspace.ownerId,
         memberIds: workspace.memberIds,
         createdAt: now,
@@ -128,6 +131,14 @@ export const firestoreWorkspaceGateway: WorkspaceGateway = {
   async remove(workspaceId) {
     try {
       await deleteDoc(doc(db, WORKSPACES, workspaceId))
+    } catch (error) {
+      throw toDataFailure(error)
+    }
+  },
+
+  async saveDocs(workspaceId, docs) {
+    try {
+      await updateDoc(doc(db, WORKSPACES, workspaceId), { docs, updatedAt: Date.now() })
     } catch (error) {
       throw toDataFailure(error)
     }

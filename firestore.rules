@@ -7,8 +7,26 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isMember(workspace) {
-      return isSignedIn() && request.auth.uid in workspace.data.memberIds;
+    function workspaceOf(workspaceId) {
+      return get(/databases/$(database)/documents/workspaces/$(workspaceId));
+    }
+
+    function isMemberOf(workspaceId) {
+      return isSignedIn() && request.auth.uid in workspaceOf(workspaceId).data.memberIds;
+    }
+
+    function isOwnerOf(workspaceId) {
+      return isSignedIn() && workspaceOf(workspaceId).data.ownerId == request.auth.uid;
+    }
+
+    function roleIn(workspaceId) {
+      return get(
+        /databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid)
+      ).data.role;
+    }
+
+    function canManageCollections(workspaceId) {
+      return isOwnerOf(workspaceId) || roleIn(workspaceId) in ['owner', 'admin'];
     }
 
     match /users/{userId} {
@@ -17,18 +35,37 @@ service cloud.firestore {
     }
 
     match /workspaces/{workspaceId} {
-      allow read: if isMember(resource);
+      allow read: if isSignedIn() && request.auth.uid in resource.data.memberIds;
       allow create: if isSignedIn()
         && request.resource.data.ownerId == request.auth.uid
         && request.auth.uid in request.resource.data.memberIds;
-      allow update: if isMember(resource)
+      allow update: if isSignedIn()
+        && request.auth.uid in resource.data.memberIds
         && request.resource.data.ownerId == resource.data.ownerId;
       allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
 
-      match /{document=**} {
-        allow read, write: if isMember(
-          get(/databases/$(database)/documents/workspaces/$(workspaceId))
-        );
+      match /members/{memberId} {
+        allow read: if isMemberOf(workspaceId);
+        allow write: if isMemberOf(workspaceId);
+      }
+
+      match /teams/{teamId} {
+        allow read: if isMemberOf(workspaceId);
+        allow write: if isMemberOf(workspaceId);
+      }
+
+      match /collections/{collectionId} {
+        allow read: if isMemberOf(workspaceId);
+        allow create, update: if isMemberOf(workspaceId);
+        allow delete: if canManageCollections(workspaceId);
+
+        match /folders/{folderId} {
+          allow read, write: if isMemberOf(workspaceId);
+        }
+
+        match /endpoints/{endpointId} {
+          allow read, write: if isMemberOf(workspaceId);
+        }
       }
     }
   }

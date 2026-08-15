@@ -18,6 +18,7 @@ export interface WorkspaceGateway {
   get(workspaceId: string): Promise<Workspace | null>
   create(input: CreateWorkspaceInput): Promise<Workspace>
   rename(workspaceId: string, name: string, description: string): Promise<void>
+  saveDocs(workspaceId: string, docs: string): Promise<void>
   remove(workspaceId: string): Promise<void>
   listMembers(workspaceId: string): Promise<WorkspaceMember[]>
   addMember(input: AddMemberInput): Promise<WorkspaceMember>

@@ -24,6 +24,7 @@ interface WorkspacesState {
 
   openWorkspace: (workspaceId: string) => Promise<void>
   renameWorkspace: (workspaceId: string, name: string, description: string) => Promise<boolean>
+  saveDocs: (workspaceId: string, docs: string) => Promise<boolean>
 
   addMember: (workspaceId: string, email: string, role: WorkspaceRole) => Promise<boolean>
   removeMember: (workspaceId: string, userId: string) => Promise<boolean>
@@ -113,6 +114,14 @@ export const useWorkspacesStore = create<WorkspacesState>((set, get) => {
       run(async () => {
         await workspaceService.rename(workspaceId, name, description)
         await refreshWorkspace(workspaceId)
+      }),
+
+    saveDocs: (workspaceId, docs) =>
+      run(async () => {
+        await workspaceService.saveDocs(workspaceId, docs)
+        set((state) => ({
+          current: state.current ? { ...state.current, docs } : state.current,
+        }))
       }),
 
     addMember: (workspaceId, email, role) =>

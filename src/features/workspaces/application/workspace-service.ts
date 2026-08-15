@@ -40,6 +40,10 @@ export function createWorkspaceService(gateway: WorkspaceGateway, users: UserLoo
       return gateway.rename(workspaceId, name.trim(), description.trim())
     },
 
+    saveDocs(workspaceId: string, docs: string): Promise<void> {
+      return gateway.saveDocs(workspaceId, docs)
+    },
+
     remove(workspaceId: string): Promise<void> {
       return gateway.remove(workspaceId)
     },

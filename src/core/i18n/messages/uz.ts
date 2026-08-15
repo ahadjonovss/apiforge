@@ -125,6 +125,18 @@ export const uz = {
   'workspace.removeMember': 'Chiqarish',
   'workspace.fromPostman': "Postman'dan",
 
+  'workspace.docs': 'Ish maydoni haqida',
+  'workspace.docsEmpty': 'Hujjat yozilmagan',
+  'workspace.docsEmptyHint': "Bu ish maydoni nima uchun ekanini, kim nima bilan shug'ullanishini yozing",
+  'workspace.overview': 'Umumiy',
+  'workspace.statCollections': "To'plam",
+  'workspace.statTeams': 'Jamoa',
+  'workspace.statMembers': "A'zo",
+  'workspace.statEndpoints': 'Endpoint',
+  'workspace.owner': 'Egasi',
+  'workspace.createdAt': 'Yaratilgan',
+  'workspace.template': "# {name}\n\nBu ish maydoni nima uchun kerakligini yozing.\n\n## Jamoalar\n\n| Jamoa | Nima bilan shug'ullanadi |\n| --- | --- |\n|  |  |\n\n## Kelishuvlar\n\n- Endpoint nomlari qanday yoziladi\n- Kim nimani o'zgartira oladi\n",
+
   'data.error.not-found': 'Topilmadi',
   'data.error.permission-denied': "Bu amalga ruxsatingiz yo'q",
   'data.error.already-exists': "Bu foydalanuvchi allaqachon a'zo",
