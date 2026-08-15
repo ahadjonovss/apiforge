@@ -29,6 +29,7 @@ export function createImportService(sink: ImportSink) {
       )
 
       await sink.applySettings(workspaceId, collection.id, {
+        baseUrl: plan.collection.baseUrl,
         headers: plan.collection.headers,
         auth: plan.collection.auth,
         variables: plan.collection.variables,

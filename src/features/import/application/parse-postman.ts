@@ -186,6 +186,43 @@ function isFolder(item: PostmanItem): boolean {
   return Array.isArray(item.item)
 }
 
+const LEADING_VARIABLE = /^\{\{\s*([\w.-]+)\s*\}\}/
+
+function leadingVariable(url: string): string | null {
+  return LEADING_VARIABLE.exec(url.trim())?.[1] ?? null
+}
+
+function promoteBaseUrl(endpoints: PlannedEndpoint[], warnings: string[]): string {
+  if (endpoints.length === 0) return ''
+
+  const candidate = leadingVariable(endpoints[0].url)
+  if (!candidate) return ''
+  if (!endpoints.every((endpoint) => leadingVariable(endpoint.url) === candidate)) return ''
+
+  for (const endpoint of endpoints) {
+    endpoint.url = endpoint.url.trim().replace(LEADING_VARIABLE, '')
+  }
+
+  warnings.push(
+    `Barcha so'rovlar «{{${candidate}}}» bilan boshlangani uchun u base URL sifatida ajratildi — qiymatini sozlamalardagi o'zgaruvchilardan bering`,
+  )
+
+  return `{{${candidate}}}`
+}
+
+function hasScript(events: unknown[] | undefined): boolean {
+  if (!Array.isArray(events)) return false
+
+  return events.some((event) => {
+    const exec = (event as { script?: { exec?: unknown } })?.script?.exec
+    if (typeof exec === 'string') return exec.trim() !== ''
+    if (Array.isArray(exec)) {
+      return exec.some((line) => typeof line === 'string' && line.trim() !== '')
+    }
+    return false
+  })
+}
+
 export function parsePostmanCollection(source: string): ImportPlan {
   let parsed: PostmanCollection
   try {
@@ -203,7 +240,7 @@ export function parsePostmanCollection(source: string): ImportPlan {
   if (schema && !schema.includes('v2.1') && !schema.includes('v2.0')) {
     warnings.push('Collection formati v2.x emas — ba’zi maydonlar tushib qolishi mumkin')
   }
-  if (Array.isArray(parsed.event) && parsed.event.length > 0) {
+  if (hasScript(parsed.event)) {
     warnings.push("Collection darajasidagi skriptlar ko'chirilmadi")
   }
 
@@ -225,6 +262,8 @@ export function parsePostmanCollection(source: string): ImportPlan {
   const endpoints: PlannedEndpoint[] = []
   let scriptedRequests = 0
 
+  const scriptedFolders: string[] = []
+
   const walk = (items: PostmanItem[], parentId: string | null) => {
     items.forEach((item, index) => {
       const name = (item.name ?? '').trim() || 'Nomsiz'
@@ -232,6 +271,7 @@ export function parsePostmanCollection(source: string): ImportPlan {
       if (isFolder(item)) {
         const id = newId()
         folders.push({ id, parentId, name, order: index })
+        if (hasScript(item.event)) scriptedFolders.push(name)
         walk(item.item ?? [], id)
         return
       }
@@ -241,7 +281,7 @@ export function parsePostmanCollection(source: string): ImportPlan {
         return
       }
 
-      if (Array.isArray(item.event) && item.event.length > 0) scriptedRequests += 1
+      if (hasScript(item.event)) scriptedRequests += 1
 
       const request: PostmanRequest =
         typeof item.request === 'string' ? { url: item.request } : item.request
@@ -265,6 +305,12 @@ export function parsePostmanCollection(source: string): ImportPlan {
 
   walk(parsed.item ?? [], null)
 
+  if (scriptedFolders.length > 0) {
+    warnings.push(
+      `«${scriptedFolders.join('», «')}» papkasidagi skriptlar ko'chirilmadi — agar ular token yoki o'zgaruvchi o'rnatgan bo'lsa, qiymatni qo'lda kiritish kerak`,
+    )
+  }
+
   if (scriptedRequests > 0) {
     warnings.push(
       `${scriptedRequests} ta so'rovdagi pre-request/test skriptlari ko'chirilmadi`,
@@ -275,10 +321,13 @@ export function parsePostmanCollection(source: string): ImportPlan {
     throw new ImportFailure("Collection bo'sh — ko'chiradigan narsa topilmadi")
   }
 
+  const baseUrl = promoteBaseUrl(endpoints, warnings)
+
   return {
     collection: {
       name: (parsed.info.name ?? '').trim() || 'Import qilingan collection',
       description: text(parsed.info.description),
+      baseUrl,
       headers: [],
       auth: collectionAuth,
       variables,

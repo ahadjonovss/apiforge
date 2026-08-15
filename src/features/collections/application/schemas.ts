@@ -9,10 +9,18 @@ export const collectionSchema = z.object({
   description: z.string().trim().max(200, 'Tavsif 200 belgidan oshmasligi kerak'),
 })
 
+export const baseUrlSchema = z
+  .string()
+  .trim()
+  .refine(
+    (value) => value === '' || value.includes('{{') || /^[a-z][a-z0-9+.-]*:\/\/.+/i.test(value),
+    { message: 'Manzil https:// bilan boshlanishi yoki {{o‘zgaruvchi}} bo‘lishi kerak' },
+  )
+
 export const collectionSettingsSchema = z.object({
   name: collectionSchema.shape.name,
   description: collectionSchema.shape.description,
-  baseUrl: z.union([z.url('Havola noto‘g‘ri'), z.literal('')]),
+  baseUrl: baseUrlSchema,
 })
 
 export const endpointSchema = z.object({

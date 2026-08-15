@@ -5,6 +5,7 @@ import type { AuthConfig, RequestBody, RequestDef } from '@/features/request/dom
 export interface PlannedCollection {
   name: string
   description: string
+  baseUrl: string
   headers: KeyValue[]
   auth: AuthConfig
   variables: EnvVariable[]

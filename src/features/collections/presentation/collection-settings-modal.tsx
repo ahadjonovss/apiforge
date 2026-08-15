@@ -35,6 +35,14 @@ export function CollectionSettingsModal({
   const [headers, setHeaders] = useState<KeyValue[]>(collection.headers)
   const [authMode, setAuthMode] = useState<AuthMode>(collection.auth.mode)
   const [token, setToken] = useState(collection.auth.bearer?.token ?? '')
+  const [variables, setVariables] = useState<KeyValue[]>(() =>
+    collection.variables.map((variable) => ({
+      id: variable.id,
+      key: variable.key,
+      value: variable.value,
+      enabled: variable.enabled,
+    })),
+  )
 
   const {
     register,
@@ -56,6 +64,15 @@ export function CollectionSettingsModal({
       baseUrl: values.baseUrl,
       headers: headers.filter((row) => row.key.trim() !== ''),
       auth: authMode === 'bearer' ? { mode: 'bearer', bearer: { token } } : { mode: authMode },
+      variables: variables
+        .filter((row) => row.key.trim() !== '')
+        .map((row) => ({
+          id: row.id,
+          key: row.key,
+          value: row.value,
+          enabled: row.enabled,
+          secret: false,
+        })),
     })
     if (saved) onClose()
   })
@@ -76,8 +93,8 @@ export function CollectionSettingsModal({
         />
         <TextField
           label="Base URL"
-          placeholder="https://api.example.com"
-          hint="Yangi endpoint shu manzildan boshlanadi"
+          placeholder="https://api.example.com yoki {{gateway}}"
+          hint="Barcha endpointlar shu manzildan boshlanadi. O'zgaruvchi ham bo'lishi mumkin."
           error={errors.baseUrl?.message}
           {...register('baseUrl')}
         />
@@ -105,6 +122,21 @@ export function CollectionSettingsModal({
             onChange={(event) => setToken(event.target.value)}
           />
         )}
+
+        <div>
+          <p className="mb-1 text-xs font-medium">O'zgaruvchilar</p>
+          <p className="mb-1 text-[11px] text-muted-foreground">
+            URL, header va body ichida <code>{'{{nom}}'}</code> ko'rinishida ishlatiladi
+          </p>
+          <div className="rounded-md border border-border">
+            <KeyValueEditor
+              rows={variables}
+              onChange={setVariables}
+              keyPlaceholder="Nom"
+              valuePlaceholder="Qiymat"
+            />
+          </div>
+        </div>
 
         <div>
           <p className="mb-1 text-xs font-medium">Umumiy headerlar</p>
