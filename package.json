@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "build:dev": "tsc -b && vite build --mode development",
+    "build": "vite build && tsc -b",
+    "build:dev": "vite build --mode development && tsc -b",
     "lint": "oxlint",
     "preview": "vite preview",
     "emulators": "firebase emulators:start --only auth,firestore --import=./.firebase-data --export-on-exit",
