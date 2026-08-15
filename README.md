@@ -47,20 +47,34 @@ Ishlaydi:
 - `{{variable}}` interpolation — `src/lib/interpolate.ts` (environment UI hali yo'q)
 - Light/dark tema
 
+- CORS'siz so'rovlar — dev proxy orqali (pastga qarang)
+
 Hali yo'q:
 
-- **Cloud Function proxy** — eng muhim keyingi qadam, pastga qarang
+- **Cloud Function proxy** — production uchun, pastga qarang
 - Firestore persistence (collection'lar, environment'lar, history)
 - Auth ekranlari
 - cURL import/export
 
-## ⚠️ CORS cheklovi
+## CORS va dev proxy
 
-Hozirgi `src/lib/http-client.ts` brauzerdan **to'g'ridan-to'g'ri** `fetch` qiladi. Bu faqat
-`Access-Control-Allow-Origin` qaytaradigan API'lar bilan ishlaydi — real dunyodagi API'larning
-ozchiligi.
+Brauzerdan to'g'ridan-to'g'ri `fetch` faqat `Access-Control-Allow-Origin` qaytaradigan API'lar
+bilan ishlaydi — real dunyodagi API'larning ozchiligi.
 
-Yechim: Cloud Function relay.
+**Dev rejimida bu hal qilingan.** `vite.config.ts` ichidagi `apiforge-dev-proxy` plagini
+so'rovni Node tomondan uzatadi, shuning uchun CORS umuman qo'llanmaydi:
+
+```
+Browser → Vite dev server (/__apiforge_proxy?target=…) → Target API → qaytish
+```
+
+Beradigan qulayliklari: `localhost` va ichki tarmoq API'lari ishlaydi, response headerlarning
+**hammasi** ko'rinadi (real CORS'da faqat safelist'dagilar ko'rinardi), qo'shimcha kechikish ~0ms.
+
+O'chirish uchun `.env` da `VITE_DEV_PROXY=false`.
+
+Proxy faqat `npm run dev` da faol (`import.meta.env.DEV`). Production build'da so'rov yana
+to'g'ridan-to'g'ri ketadi — deploy qilingan APIForge uchun Cloud Function relay kerak:
 
 ```
 Browser → Cloud Function (proxy) → Target API → qaytish

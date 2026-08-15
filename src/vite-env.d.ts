@@ -9,6 +9,7 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_APP_ID: string
   readonly VITE_FUNCTIONS_REGION: string
   readonly VITE_USE_EMULATORS: string
+  readonly VITE_DEV_PROXY: string
 }
 
 interface ImportMeta {

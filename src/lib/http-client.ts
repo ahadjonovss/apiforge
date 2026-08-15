@@ -102,6 +102,13 @@ function buildBody(request: RequestDef, headers: Headers, scope: VariableScope):
   }
 }
 
+const DEV_PROXY_PATH = '/__apiforge_proxy'
+
+function resolveTarget(url: URL): string {
+  if (!import.meta.env.DEV || import.meta.env.VITE_DEV_PROXY === 'false') return url.toString()
+  return `${DEV_PROXY_PATH}?target=${encodeURIComponent(url.toString())}`
+}
+
 export interface SendOptions {
   scope?: VariableScope
   timeoutMs?: number
@@ -133,7 +140,7 @@ export async function sendRequest(
 
   let response: Response
   try {
-    response = await fetch(url, { method: request.method, headers, body, signal })
+    response = await fetch(resolveTarget(url), { method: request.method, headers, body, signal })
   } catch (error) {
     const durationMs = Math.round(performance.now() - startedAt)
     if (timeoutSignal.aborted) {
@@ -153,6 +160,13 @@ export async function sendRequest(
 
   const text = await response.text()
   const durationMs = Math.round(performance.now() - startedAt)
+
+  if (response.headers.has('x-apiforge-proxy-error')) {
+    throw new HttpRequestFailure({
+      kind: response.status === 400 ? 'invalid' : 'network',
+      message: `${text} (${durationMs}ms)`,
+    })
+  }
 
   const responseHeaders: Record<string, string> = {}
   response.headers.forEach((value, key) => {

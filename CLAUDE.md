@@ -7,7 +7,7 @@ Web-based API client (Postman analogi), Firebase backend.
 ```bash
 npm run dev              # vite dev server
 npm run build            # tsc -b && vite build
-npm run lint             # eslint
+npm run lint             # oxlint
 firebase emulators:start # auth 9099, firestore 8080, functions 5001
 ```
 
@@ -29,8 +29,15 @@ Build tekshiruvsiz o'zgarish qo'shilmasin — `npm run build` typecheck'ni ham b
 `src/lib/http-client.ts` — sof funksiya, React'ga bog'liq emas. `RequestDef` qabul qiladi,
 `ResponseResult` qaytaradi, xatolikda `HttpRequestFailure` tashlaydi.
 
-Hozir brauzerdan to'g'ridan-to'g'ri `fetch` qiladi. Cloud Function proxy qo'shilganda
-faqat shu fayl o'zgaradi — chaqiruvchi kod (`tabs-store.ts`) tegilmaydi.
+Dev rejimida so'rov `vite.config.ts` dagi `apiforge-dev-proxy` plagini orqali o'tadi
+(`/__apiforge_proxy?target=…`), shuning uchun CORS to'sqinlik qilmaydi. Production build'da
+to'g'ridan-to'g'ri `fetch`. Yo'nalishni `resolveTarget` tanlaydi; `VITE_DEV_PROXY=false` o'chiradi.
+
+Proxy xatolari `x-apiforge-proxy-error` header'i bilan belgilanadi va `HttpRequestFailure`
+ga aylantiriladi — ular target'ning javobi emas, shuning uchun response sifatida ko'rsatilmaydi.
+
+Cloud Function proxy qo'shilganda faqat shu fayl o'zgaradi — chaqiruvchi kod
+(`tabs-store.ts`) tegilmaydi.
 
 `src/lib/interpolate.ts` — `{{variable}}` almashtirish. URL, header, param, body — hammasida
 ishlatiladi, `sendRequest` ichida chaqiriladi.
