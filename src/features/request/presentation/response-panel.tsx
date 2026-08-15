@@ -2,10 +2,9 @@ import { useMemo, useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { AlertCircle, BookOpen, Clock, HardDrive, Lightbulb, X } from 'lucide-react'
-import { Markdown } from '@/shared/ui/markdown'
-import { statusTone } from './status-tone'
+import { AlertCircle, Clock, HardDrive, Lightbulb } from 'lucide-react'
 import { CaptureNote } from './capture-note'
+import { ResponseExamples } from './response-examples'
 import { cn } from '@/core/lib/cn'
 import { useTheme } from '@/app/providers/theme-provider'
 import type { Tab } from '@/features/tabs'
@@ -27,74 +26,10 @@ function formatSize(bytes: number) {
 
 export function ResponsePanel({ tab }: { tab: Tab }) {
   const [view, setView] = useState<View>('Body')
-  const [openDoc, setOpenDoc] = useState<string | null>(null)
   const { resolved } = useTheme()
   const { response, error } = tab
 
   const captureMisses = tab.captureMisses ?? []
-  const responseDocs = tab.request.responseDocs ?? []
-  const activeDoc = responseDocs.find((doc) => doc.id === openDoc) ?? null
-
-  const docsBar =
-    responseDocs.length > 0 ? (
-      <div className="flex items-center gap-1 border-b border-border px-3 py-1.5">
-        <BookOpen className="size-3 shrink-0 text-muted-foreground" />
-        <span className="mr-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-          Javob hujjatlari
-        </span>
-        {responseDocs
-          .slice()
-          .sort((a, b) => a.status.localeCompare(b.status))
-          .map((doc) => {
-            const matches = response ? String(response.status) === doc.status : false
-            return (
-              <button
-                key={doc.id}
-                type="button"
-                onClick={() => setOpenDoc(openDoc === doc.id ? null : doc.id)}
-                title={doc.title || `${doc.status} hujjati`}
-                className={cn(
-                  'rounded border px-1.5 py-0.5 font-mono text-[11px] font-bold transition',
-                  statusTone(doc.status),
-                  openDoc === doc.id
-                    ? 'border-primary bg-accent'
-                    : matches
-                      ? 'border-primary/60'
-                      : 'border-border hover:border-primary/60',
-                )}
-              >
-                {doc.status}
-              </button>
-            )
-          })}
-      </div>
-    ) : null
-
-  const docPanel = activeDoc ? (
-    <div className="border-b border-border bg-muted/30 p-4">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold">
-          <span className={cn('font-mono', statusTone(activeDoc.status))}>
-            {activeDoc.status}
-          </span>
-          {activeDoc.title && <span className="ml-2">{activeDoc.title}</span>}
-        </p>
-        <button
-          type="button"
-          onClick={() => setOpenDoc(null)}
-          className="rounded p-1 text-muted-foreground transition hover:bg-accent hover:text-foreground"
-          aria-label="Yopish"
-        >
-          <X className="size-3.5" />
-        </button>
-      </div>
-      {activeDoc.body.trim() ? (
-        <Markdown source={activeDoc.body} />
-      ) : (
-        <p className="text-xs text-muted-foreground">Hujjat matni yozilmagan</p>
-      )}
-    </div>
-  ) : null
 
   const isJson = response?.contentType?.includes('json') ?? false
 
@@ -110,7 +45,9 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
 
   if (error) {
     return (
-      <div className="flex h-full items-center justify-center p-6">
+      <div className="flex h-full flex-col">
+        <ResponseExamples tab={tab} />
+        <div className="flex flex-1 items-center justify-center p-6">
         <div className="w-full max-w-md rounded-lg border border-destructive/30 bg-destructive/5 p-5">
           <div className="flex items-start gap-3">
             <AlertCircle className="mt-0.5 size-5 shrink-0 text-destructive" />
@@ -131,6 +68,7 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
             </div>
           </div>
         </div>
+        </div>
       </div>
     )
   }
@@ -138,8 +76,7 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
   if (!response) {
     return (
       <div className="flex h-full flex-col">
-        {docsBar}
-        {docPanel}
+        <ResponseExamples tab={tab} />
         <div className="flex flex-1 items-center justify-center p-6">
           <p className="text-xs text-muted-foreground">
             So'rov yuboring — javob shu yerda ko'rinadi
@@ -151,8 +88,7 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
 
   return (
     <div className="flex h-full flex-col">
-      {docsBar}
-      {docPanel}
+      <ResponseExamples tab={tab} />
       <CaptureNote tab={tab} misses={captureMisses} />
       <div className="flex items-center gap-4 border-b border-border px-3 py-2">
         <span className={cn('font-mono text-xs font-bold', statusClass(response.status))}>

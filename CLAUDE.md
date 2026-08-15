@@ -222,10 +222,18 @@ Uch daraja, hammasi markdown:
 |---|---|---|
 | To'plam | `ApiCollection.docs` | Collection bosh sahifasi — to'plam ochilganda birinchi shu chiqadi |
 | Endpoint | `RequestDef.docs` | So'rov panelidagi **Docs** bo'limi |
-| Status kod | `RequestDef.responseDocs[]` | Javob panelining tepasidagi kod tugmalari |
+| Status kod | `RequestDef.responseDocs[]` | Javob panelining tepasida, **doim ko'rinadi** |
 
 `responseDocs` da `status` **matn**, chunki `4xx` kabi guruhlar ham yoziladi.
-Javob kelganda mos keladigan kod tugmasi ajratib ko'rsatiladi.
+
+Javob paneli keng tarqalgan kodlarni (200, 201, 400, 401, 403, 404, 422, 500) doim
+ko'rsatadi: yozilganlari rangli va to'liq chegarali, yozilmaganlari uzuq chegarali.
+Ya'ni misol qo'shish joyi ko'rinib turadi, izlash kerak emas. Javob kelganda mos
+kod ajratiladi, «Javobni saqlash» tugmasi esa haqiqiy javobni o'sha kod misoliga
+aylantiradi (JSON bo'lsa chiroyli formatlab, ```json blokka o'rab).
+
+Tahrirlash ham shu yerda — hujjat tasvirlayotgan javobning yonida. `Docs` bo'limi
+faqat endpointning umumiy hujjati uchun qoldi.
 
 Markdown `react-markdown` bilan render qilinadi — u React element yasaydi,
 `dangerouslySetInnerHTML` ishlatmaydi, ya'ni foydalanuvchi yozgan matn XSS
