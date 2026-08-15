@@ -6,19 +6,23 @@ const DEV_PROXY_PATH = '/__apiforge_proxy'
 const PROXY_ERROR_HEADER = 'x-apiforge-proxy-error'
 const PROXY_CODE_HEADER = 'x-apiforge-error-code'
 
-function proxyEnabled(): boolean {
-  return __DEV_PROXY__ && import.meta.env.VITE_DEV_PROXY !== 'false'
+function proxyPath(): string {
+  if (__DEV_PROXY__) {
+    return import.meta.env.VITE_DEV_PROXY === 'false' ? '' : DEV_PROXY_PATH
+  }
+  return import.meta.env.VITE_PROXY_PATH ?? ''
 }
 
 function resolveTarget(url: URL): string {
-  if (!proxyEnabled()) return url.toString()
-  return `${DEV_PROXY_PATH}?target=${encodeURIComponent(url.toString())}`
+  const path = proxyPath()
+  if (!path) return url.toString()
+  return `${path}?target=${encodeURIComponent(url.toString())}`
 }
 
 export const fetchRequestGateway: RequestGateway = {
   async send(call: HttpCall, signal: AbortSignal): Promise<ResponseResult> {
     const startedAt = performance.now()
-    const viaProxy = proxyEnabled()
+    const viaProxy = proxyPath() !== ''
 
     let response: Response
     try {

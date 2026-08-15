@@ -163,6 +163,24 @@ Emulyator indekssiz ham ishlaydi, real Firestore esa yo'q.
 
 ## Proxy
 
+Ikki implementatsiya, bitta shartnoma (`?target=…`, xato `x-apiforge-proxy-error`
+va `x-apiforge-error-code` bilan):
+
+| Muhit | Yo'l | Qayerda |
+|---|---|---|
+| dev server | `/__apiforge_proxy` | `vite.config.ts` plagini |
+| Vercel | `/api/proxy` | `api/proxy.ts` serverless funksiya |
+
+Tanlovni `VITE_PROXY_PATH` qiladi; bo'sh bo'lsa to'g'ridan-to'g'ri `fetch`.
+
+**Vercel proxy'sida SSRF himoyasi shart**, chunki u ochiq internetda turadi.
+`api/_guard.ts` sof funksiya — shuning uchun sinaladi. Ikki qatlam: URL tekshiruvi
+(protokol, `localhost`, private IP literal) va DNS'dan keyin **yechilgan IP**
+tekshiruvi — ommaviy domen private manzilga ishora qilishi mumkin. Redirect'lar
+qo'lda kuzatiladi va har bir hop qayta tekshiriladi; aks holda ochiq redirect
+butun himoyani bir qadamda chetlab o'tardi.
+
+
 Dev server'da so'rov `vite.config.ts` dagi `apiforge-dev-proxy` plagini orqali o'tadi
 (`/__apiforge_proxy?target=…`), shuning uchun CORS to'sqinlik qilmaydi. Yo'nalishni
 `resolveTarget` tanlaydi.

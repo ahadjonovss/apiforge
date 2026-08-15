@@ -144,6 +144,42 @@ Hali yo'q:
 - Hosting deploy (`npm run deploy:dev` tayyor, hali ishlatilmagan)
 - cURL import/export
 
+## Vercel'ga deploy
+
+```
+Vercel → GitHub repo'ni ulang → Framework: Vite (avtomatik aniqlanadi)
+```
+
+`vercel.json` build buyrug'i, chiqish papkasi va SPA rewrite'larini beradi.
+Rewrite `api/` dan tashqari hamma yo'lni `index.html` ga yo'naltiradi — TanStack
+Router klient tomonda ishlaganligi uchun kerak.
+
+**Muhit o'zgaruvchilari** `.env.production` da (Firebase web konfiguratsiyasi maxfiy
+emas). Boshqa Firebase project'ga o'tmoqchi bo'lsangiz, Vercel dashboard'ida
+`VITE_FIREBASE_*` ni qayta belgilang.
+
+**Deploydan keyin bitta qo'lda qadam:** Firebase Console → Authentication →
+Settings → Authorized domains ga Vercel domenini qo'shing (`*.vercel.app` yoki
+o'z domeningiz). Aks holda kirish "unauthorized domain" bilan rad etiladi.
+
+### Deploy qilingan proxy
+
+`api/proxy.ts` — Vercel serverless funksiyasi, dev proxy bilan bir xil vazifani
+bajaradi, lekin **ommaviy internetda turadi**. Shuning uchun himoya qo'shilgan:
+
+- private IP oralig'lari bloklanadi (10/8, 172.16/12, 192.168/16, 127/8,
+  169.254/16, 100.64/10, ::1, fc00::/7, fe80::/10 va IPv4-mapped shakllari)
+- `localhost`, `*.internal` va `http(s)` dan boshqa protokollar rad etiladi
+- host DNS orqali yechiladi va **yechilgan IP** ham tekshiriladi — ya'ni ommaviy
+  domen private manzilga ishora qilsa ham o'tmaydi
+- redirect'lar qo'lda kuzatiladi, **har bir hop qaytadan tekshiriladi** (aks holda
+  ochiq redirect himoyani chetlab o'tardi), 5 hopdan ko'p bo'lsa to'xtatiladi
+- so'rov va javob hajmi 8 MB bilan cheklangan, timeout 25s
+- `cookie` va `x-forwarded-*` headerlari uzatilmaydi
+
+Front-end qaysi yo'lni ishlatishini `VITE_PROXY_PATH` hal qiladi: dev server'da
+plagin yo'li, production'da `/api/proxy`, bo'sh bo'lsa to'g'ridan-to'g'ri `fetch`.
+
 ## CORS va dev proxy
 
 Brauzerdan to'g'ridan-to'g'ri `fetch` faqat `Access-Control-Allow-Origin` qaytaradigan API'lar
