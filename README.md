@@ -154,9 +154,14 @@ Vercel → GitHub repo'ni ulang → Framework: Vite (avtomatik aniqlanadi)
 Rewrite `api/` dan tashqari hamma yo'lni `index.html` ga yo'naltiradi — TanStack
 Router klient tomonda ishlaganligi uchun kerak.
 
-**Muhit o'zgaruvchilari** `.env.production` da (Firebase web konfiguratsiyasi maxfiy
-emas). Boshqa Firebase project'ga o'tmoqchi bo'lsangiz, Vercel dashboard'ida
-`VITE_FIREBASE_*` ni qayta belgilang.
+**Muhit o'zgaruvchilari.** Vercel repodagi `.env.*` fayllarini o'qimaydi — u faqat
+dashboard'dagi o'zgaruvchilarni beradi. Shu sababli Firebase konfiguratsiyasi
+`src/core/config/firebase-config.ts` da, kodda turadi (u baribir maxfiy emas va
+bundle'ga tushadi). Env berilsa — ustidan yozadi, berilmasa — koddagisi ishlaydi.
+Shuning uchun build har qanday hostingda ishlaydi.
+
+Boshqa Firebase project'ga o'tish uchun Vercel dashboard'ida `VITE_FIREBASE_*` ni
+belgilang yoki `firebase-config.ts` dagi qiymatlarni almashtiring.
 
 **Deploydan keyin bitta qo'lda qadam:** Firebase Console → Authentication →
 Settings → Authorized domains ga Vercel domenini qo'shing (`*.vercel.app` yoki

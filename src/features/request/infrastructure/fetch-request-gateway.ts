@@ -3,6 +3,7 @@ import type { HttpCall, RequestGateway } from '../domain/request-gateway'
 import { HttpRequestFailure, type ResponseResult } from '../domain/response'
 
 const DEV_PROXY_PATH = '/__apiforge_proxy'
+const DEPLOYED_PROXY_PATH = '/api/proxy'
 const PROXY_ERROR_HEADER = 'x-apiforge-proxy-error'
 const PROXY_CODE_HEADER = 'x-apiforge-error-code'
 
@@ -10,7 +11,8 @@ function proxyPath(): string {
   if (__DEV_PROXY__) {
     return import.meta.env.VITE_DEV_PROXY === 'false' ? '' : DEV_PROXY_PATH
   }
-  return import.meta.env.VITE_PROXY_PATH ?? ''
+  const configured = import.meta.env.VITE_PROXY_PATH?.trim()
+  return configured ? configured : DEPLOYED_PROXY_PATH
 }
 
 function resolveTarget(url: URL): string {

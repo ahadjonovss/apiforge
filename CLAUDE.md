@@ -161,6 +161,20 @@ katalogda faqat email, ism va avatar bor.
 so'raladi — bu kompozit indeks talab qiladi, u `firestore.indexes.json` da.
 Emulyator indekssiz ham ishlaydi, real Firestore esa yo'q.
 
+## Konfiguratsiya qayerda turadi
+
+Firebase web konfiguratsiyasi `core/config/firebase-config.ts` da, `.env` faqat
+ustidan yozadi. Sabab: Vercel repodagi `.env.*` fayllarini build'ga bermaydi,
+faqat dashboard'dagi o'zgaruvchilarni beradi — bo'sh `apiKey` esa
+`auth/invalid-api-key` bilan butun ilovani ishga tushirmay qo'yadi.
+
+Bu qiymatlar maxfiy emas: ular baribir klient bundle'iga tushadi, himoya esa
+`firestore.rules` va Auth orqali. Shu sababli ularni kodda saqlash xavf emas,
+lekin deploy'ni bitta tashqi sozlamaga bog'liqlikdan xalos qiladi.
+
+Xuddi shunday, `VITE_PROXY_PATH` berilmasa production build `/api/proxy` ni
+ishlatadi.
+
 ## Proxy
 
 Ikki implementatsiya, bitta shartnoma (`?target=…`, xato `x-apiforge-proxy-error`
