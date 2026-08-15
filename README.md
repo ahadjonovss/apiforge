@@ -108,31 +108,40 @@ Bog'liqlik yo'nalishi ichkariga: `presentation`/`infrastructure` → `applicatio
 
 Ishlaydi:
 
-- Tab'lar: ochish, yopish, almashish
-- Method + URL + query params + headers
-- Body: `none`, `json`, `raw`, `urlencoded` (form-data hali yo'q)
-- Auth: `bearer`, `basic`, `apiKey` — http-client'da bor, UI hali yo'q
-- Response: status, vaqt, hajm, JSON pretty-print, headerlar
-- `{{variable}}` interpolation — `src/lib/interpolate.ts` (environment UI hali yo'q)
+- Landing sahifa, uch til (uz / ru / en)
+- Auth: kirish, ro'yxatdan o'tish, parolni tiklash, profil
+- Ish maydonlari, jamoalar, a'zolar
+- API to'plamlari, ichma-ich papkalar, endpointlar
+- To'plamdan meros: base URL, headerlar, auth, o'zgaruvchilar
+- Markdown hujjatlar: to'plam bosh sahifasi, endpoint docs, status kod misollari
+- Javobdan o'zgaruvchiga olish (capture)
+- Postman collection import
+- Method + URL + params + headers + body (`none`, `json`, `raw`, `urlencoded`)
+- Auth: `inherit`, `bearer`, `basic`, `apiKey`
+- Avtomatik saqlash, xatolarni tasniflash
 - Light/dark tema
 
 - CORS'siz so'rovlar — dev proxy orqali (pastga qarang)
 - Auth: kirish, ro'yxatdan o'tish, parolni tiklash, profil, parol almashtirish
 
-⚠️ `apiforge-dev` da Firebase Authentication xizmati hali yoqilmagan
-(`CONFIGURATION_NOT_FOUND`). Konsolda **Authentication → Get started → Email/Password**
-ni yoqmaguningizcha login/register faqat emulyatorda ishlaydi:
+`apiforge-dev` to'liq ulangan: Authentication (email/parol) yoqilgan, Firestore
+`europe-west3` da, qoidalar va indekslar deploy qilingan. Ilova standart holatda
+**real Firebase**'ga yozadi.
+
+Emulyatorga o'tish uchun:
 
 ```bash
 echo "VITE_USE_EMULATORS=true" > .env.development.local
 npm run emulators
 ```
 
+Emulyator ma'lumoti `.firebase-data` ga saqlanadi va real project bilan almashmaydi.
+
 Hali yo'q:
 
 - **Cloud Function proxy** — production uchun, pastga qarang
-- Firestore persistence (collection'lar, environment'lar, history)
-- Auth ekranlari
+- Environment'lar (dev/prod almashish), so'rovlar tarixi
+- Hosting deploy (`npm run deploy:dev` tayyor, hali ishlatilmagan)
 - cURL import/export
 
 ## CORS va dev proxy
