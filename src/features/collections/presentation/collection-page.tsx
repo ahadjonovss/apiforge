@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Group, Panel, Separator } from 'react-resizable-panels'
-import { ArrowLeft, FilePlus2, FolderPlus, Home, Settings } from 'lucide-react'
+import { ArrowLeft, BookText, FilePlus2, FolderPlus, Home, Settings } from 'lucide-react'
 import { cn } from '@/core/lib/cn'
 import { Button } from '@/shared/ui/button'
 import { DataErrorNote } from '@/shared/ui/data-error-note'
@@ -9,6 +9,7 @@ import type { RequestDef } from '@/features/request/domain/request'
 import { useTabsStore } from '@/features/tabs'
 import { RequestPanel } from '@/features/request/presentation/request-panel'
 import { ResponsePanel } from '@/features/request/presentation/response-panel'
+import { EndpointDocs } from '@/features/request/presentation/endpoint-docs'
 import { buildTree } from '../application/tree'
 import type { Folder } from '../domain/folder'
 import { useCollectionsStore } from './collections-store'
@@ -43,6 +44,7 @@ export function CollectionPage({
   const syncInherited = useTabsStore((state) => state.syncInherited)
 
   const [view, setView] = useState<'home' | 'endpoint'>('home')
+  const [docsOpen, setDocsOpen] = useState(false)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [folderModal, setFolderModal] = useState<{ folder: Folder | null; parentId: string | null } | null>(null)
@@ -51,6 +53,7 @@ export function CollectionPage({
   useEffect(() => {
     void openCollection(workspaceId, collectionId)
     setView('home')
+    setDocsOpen(false)
   }, [workspaceId, collectionId, openCollection])
 
   const tree = useMemo(() => buildTree(folders, endpoints), [folders, endpoints])
@@ -233,13 +236,33 @@ export function CollectionPage({
           />
         ) : (
           <div className="flex h-full flex-col">
-            <div className="flex items-center justify-between border-b border-border px-3 py-1.5">
+            <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-1.5">
               <span className="truncate text-xs text-muted-foreground">
                 {activeTab.request.name}
               </span>
-              <SaveStatus tab={activeTab} />
+              <div className="flex shrink-0 items-center gap-2">
+                <SaveStatus tab={activeTab} />
+                <button
+                  type="button"
+                  onClick={() => setDocsOpen((open) => !open)}
+                  className={cn(
+                    'flex items-center gap-1 rounded border px-2 py-1 text-[11px] transition',
+                    docsOpen
+                      ? 'border-primary bg-accent text-foreground'
+                      : 'border-border text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  <BookText className="size-3" />
+                  Docs
+                </button>
+              </div>
             </div>
 
+            {docsOpen ? (
+              <div className="min-h-0 flex-1">
+                <EndpointDocs tab={activeTab} />
+              </div>
+            ) : (
             <Group orientation="vertical" className="min-h-0 flex-1">
               <Panel defaultSize="45" minSize="20">
                 <RequestPanel tab={activeTab} />
@@ -251,6 +274,7 @@ export function CollectionPage({
                 <ResponsePanel tab={activeTab} />
               </Panel>
             </Group>
+            )}
           </div>
         )}
       </Panel>

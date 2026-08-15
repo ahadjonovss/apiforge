@@ -221,19 +221,18 @@ Uch daraja, hammasi markdown:
 | Qayerda | Maydon | Ko'rinishi |
 |---|---|---|
 | To'plam | `ApiCollection.docs` | Collection bosh sahifasi — to'plam ochilganda birinchi shu chiqadi |
-| Endpoint | `RequestDef.docs` | So'rov panelidagi **Docs** bo'limi |
+| Endpoint | `RequestDef.docs` | **Docs** tugmasi — alohida to'liq sahifa |
 | Status kod | `RequestDef.responseDocs[]` | Javob panelining tepasida, **doim ko'rinadi** |
 
 `responseDocs` da `status` **matn**, chunki `4xx` kabi guruhlar ham yoziladi.
 
-Javob paneli keng tarqalgan kodlarni (200, 201, 400, 401, 403, 404, 422, 500) doim
-ko'rsatadi: yozilganlari rangli va to'liq chegarali, yozilmaganlari uzuq chegarali.
-Ya'ni misol qo'shish joyi ko'rinib turadi, izlash kerak emas. Javob kelganda mos
-kod ajratiladi, «Javobni saqlash» tugmasi esa haqiqiy javobni o'sha kod misoliga
-aylantiradi (JSON bo'lsa chiroyli formatlab, ```json blokka o'rab).
+Javob paneli **faqat misoli mavjud** kodlarni ko'rsatadi, oxirida `+` tugmasi bilan.
+Javob kelganda mos kod ajratiladi, «Javobni saqlash» tugmasi esa haqiqiy javobni
+o'sha kod misoliga aylantiradi (JSON bo'lsa chiroyli formatlab, ```json blokka o'rab).
+Tahrirlash ham shu yerda — hujjat tasvirlayotgan javobning yonida.
 
-Tahrirlash ham shu yerda — hujjat tasvirlayotgan javobning yonida. `Docs` bo'limi
-faqat endpointning umumiy hujjati uchun qoldi.
+Endpoint hujjati esa **Docs** tugmasi ostida alohida to'liq sahifada: nomi, metodi,
+hal qilingan manzili, markdown matn va pastda barcha javob misollari birga.
 
 Markdown `react-markdown` bilan render qilinadi — u React element yasaydi,
 `dangerouslySetInnerHTML` ishlatmaydi, ya'ni foydalanuvchi yozgan matn XSS

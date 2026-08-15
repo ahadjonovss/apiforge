@@ -12,12 +12,11 @@ import type { BodyMode } from '../domain/request'
 import { interpolate } from '../application/interpolate'
 import { AuthEditor } from './auth-editor'
 import { CaptureEditor } from './capture-editor'
-import { DocsEditor } from './docs-editor'
 import { InheritedHeaders } from './inherited-headers'
 
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i
 
-const SECTIONS = ['Params', 'Headers', 'Body', 'Auth', 'Capture', 'Docs'] as const
+const SECTIONS = ['Params', 'Headers', 'Body', 'Auth', 'Capture'] as const
 type Section = (typeof SECTIONS)[number]
 
 const BODY_MODES: BodyMode[] = ['none', 'json', 'raw', 'urlencoded', 'form-data']
@@ -183,8 +182,6 @@ export function RequestPanel({ tab }: { tab: Tab }) {
         {section === 'Auth' && <AuthEditor tab={tab} />}
 
         {section === 'Capture' && <CaptureEditor tab={tab} />}
-
-        {section === 'Docs' && <DocsEditor tab={tab} />}
       </div>
     </div>
   )

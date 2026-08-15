@@ -9,8 +9,6 @@ import type { ResponseDoc } from '../domain/request'
 import type { ResponseResult } from '../domain/response'
 import { statusTone } from './status-tone'
 
-const COMMON = ['200', '201', '400', '401', '403', '404', '422', '500']
-
 function fence(response: ResponseResult): string {
   const body = response.body.trim()
   if (!body) return '_Bo‘sh javob_'
@@ -36,9 +34,9 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
 
   const setDocs = (next: ResponseDoc[]) => patchRequest(tab.id, { responseDocs: next })
 
-  const shown = [...new Set([...docs.map((doc) => doc.status), ...COMMON])].sort((a, b) =>
-    a.localeCompare(b),
-  )
+  const shown = docs
+    .map((doc) => doc.status)
+    .sort((a, b) => a.localeCompare(b))
 
   const byStatus = (status: string) => docs.find((doc) => doc.status === status)
   const open = openId ? (docs.find((doc) => doc.id === openId) ?? null) : null
@@ -79,6 +77,10 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
         <span className="mr-1 text-[10px] uppercase tracking-wide text-muted-foreground">
           Javob misollari
         </span>
+
+        {shown.length === 0 && (
+          <span className="mr-1 text-[11px] text-muted-foreground/70">hali yo'q</span>
+        )}
 
         {shown.map((status) => {
           const doc = byStatus(status)
