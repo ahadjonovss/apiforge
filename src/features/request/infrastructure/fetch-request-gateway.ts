@@ -34,9 +34,10 @@ export const fetchRequestGateway: RequestGateway = {
       if (viaProxy) {
         throw new HttpRequestFailure({
           kind: 'network',
-          title: 'Dev server javob bermadi',
-          message: `So'rov proxy'ga ham yetib bormadi (${durationMs}ms)`,
-          hint: '`npm run dev` ishlab turibdimi tekshiring.',
+          title: 'error.title.proxyDown',
+          message: 'error.msg.proxyDown',
+          hint: 'error.hint.proxyDown',
+          params: { ms: durationMs },
         })
       }
 
@@ -58,8 +59,9 @@ export const fetchRequestGateway: RequestGateway = {
       if (response.status === 400) {
         throw new HttpRequestFailure({
           kind: 'invalid',
-          title: "So'rov noto'g'ri",
-          message: `${text} (${durationMs}ms)`,
+          title: 'error.title.invalid',
+          message: text,
+          params: { ms: durationMs },
         })
       }
 

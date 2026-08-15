@@ -4,6 +4,7 @@ import { MethodBadge } from '@/shared/ui/method-badge'
 import type { RequestDef } from '@/features/request/domain/request'
 import type { TreeNode } from '../application/tree'
 import type { Folder as FolderModel } from '../domain/folder'
+import { useT } from '@/app/providers/i18n-provider'
 
 export interface TreeHandlers {
   activeId: string | null
@@ -57,6 +58,7 @@ function FolderRow({
   depth: number
   handlers: TreeHandlers
 }) {
+  const t = useT()
   const open = handlers.expanded.has(node.folder.id)
 
   return (
@@ -85,22 +87,22 @@ function FolderRow({
 
         <div className="flex shrink-0 items-center opacity-0 transition group-hover:opacity-100">
           <IconButton
-            label="Ichiga papka"
+            label={t('folder.addInside')}
             onClick={() => handlers.onCreateFolder(node.folder.id)}
           >
             <FolderPlus className="size-3" />
           </IconButton>
           <IconButton
-            label="Ichiga endpoint"
+            label={t('endpoint.addInside')}
             onClick={() => handlers.onCreateEndpoint(node.folder.id)}
           >
             <FilePlus2 className="size-3" />
           </IconButton>
-          <IconButton label="Tahrirlash" onClick={() => handlers.onEditFolder(node.folder)}>
+          <IconButton label={t('common.edit')} onClick={() => handlers.onEditFolder(node.folder)}>
             <Pencil className="size-3" />
           </IconButton>
           <IconButton
-            label="O'chirish"
+            label={t('common.delete')}
             danger
             onClick={() => handlers.onDeleteFolder(node.folder.id)}
           >
@@ -117,7 +119,7 @@ function FolderRow({
             className="py-1 text-[11px] text-muted-foreground"
             style={{ paddingLeft: `${(depth + 1) * 12 + 22}px` }}
           >
-            Bo'sh
+            {t('common.empty')}
           </p>
         ))}
     </>
@@ -133,6 +135,7 @@ function EndpointRow({
   depth: number
   handlers: TreeHandlers
 }) {
+  const t = useT()
   return (
     <div
       className={cn(
@@ -151,11 +154,11 @@ function EndpointRow({
       </button>
 
       <div className="flex shrink-0 items-center opacity-0 transition group-hover:opacity-100">
-        <IconButton label="Tahrirlash" onClick={() => handlers.onEditEndpoint(endpoint)}>
+        <IconButton label={t('common.edit')} onClick={() => handlers.onEditEndpoint(endpoint)}>
           <Pencil className="size-3" />
         </IconButton>
         <IconButton
-          label="O'chirish"
+          label={t('common.delete')}
           danger
           onClick={() => handlers.onDeleteEndpoint(endpoint.id)}
         >

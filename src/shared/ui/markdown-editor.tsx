@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Eye, Pencil } from 'lucide-react'
 import { cn } from '@/core/lib/cn'
 import { Markdown } from './markdown'
+import { useT } from '@/app/providers/i18n-provider'
 
 interface Props {
   value: string
@@ -13,9 +14,10 @@ interface Props {
 export function MarkdownEditor({
   value,
   onChange,
-  placeholder = 'Markdown yozing…',
+  placeholder,
   minHeight = '220px',
 }: Props) {
+  const t = useT()
   const [preview, setPreview] = useState(false)
 
   return (
@@ -30,7 +32,7 @@ export function MarkdownEditor({
           )}
         >
           <Pencil className="size-3" />
-          Tahrirlash
+          {t('docs.edit')}
         </button>
         <button
           type="button"
@@ -41,7 +43,7 @@ export function MarkdownEditor({
           )}
         >
           <Eye className="size-3" />
-          Ko'rinishi
+          {t('docs.preview')}
         </button>
       </div>
 
@@ -53,14 +55,14 @@ export function MarkdownEditor({
           {value.trim() ? (
             <Markdown source={value} />
           ) : (
-            <p className="text-xs text-muted-foreground">Hozircha bo'sh</p>
+            <p className="text-xs text-muted-foreground">{t('docs.stillEmpty')}</p>
           )}
         </div>
       ) : (
         <textarea
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t('docs.placeholder')}
           spellCheck={false}
           style={{ minHeight }}
           className="w-full resize-y rounded-md border border-border bg-card p-3 font-mono text-xs outline-none focus:ring-1 focus:ring-ring"

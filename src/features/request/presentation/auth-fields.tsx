@@ -1,13 +1,6 @@
 import { TextField } from '@/shared/ui/text-field'
 import type { AuthConfig, AuthMode } from '../domain/request'
-
-const LABELS: Record<AuthMode, string> = {
-  inherit: "To'plamdan meros",
-  none: 'Yo‘q',
-  bearer: 'Bearer token',
-  basic: 'Basic',
-  apiKey: 'API key',
-}
+import { useT } from '@/app/providers/i18n-provider'
 
 interface Props {
   value: AuthConfig
@@ -16,10 +9,11 @@ interface Props {
 }
 
 export function AuthFields({ value, onChange, modes }: Props) {
+  const t = useT()
   return (
     <>
       <div className="flex flex-col gap-1">
-        <label className="text-xs font-medium">Usul</label>
+        <label className="text-xs font-medium">{t('auth.field.method')}</label>
         <select
           value={value.mode}
           onChange={(event) => onChange({ ...value, mode: event.target.value as AuthMode })}
@@ -27,7 +21,7 @@ export function AuthFields({ value, onChange, modes }: Props) {
         >
           {modes.map((mode) => (
             <option key={mode} value={mode}>
-              {LABELS[mode]}
+              {t(`auth.mode.${mode}` as never)}
             </option>
           ))}
         </select>
@@ -35,9 +29,9 @@ export function AuthFields({ value, onChange, modes }: Props) {
 
       {value.mode === 'bearer' && (
         <TextField
-          label="Token"
+          label={t('auth.field.token')}
           placeholder="{{authorizationToken}}"
-          hint="«Bearer» so'zini yozmang — u avtomatik qo'shiladi"
+          hint={t('auth.field.tokenHint')}
           value={value.bearer?.token ?? ''}
           onChange={(event) => onChange({ ...value, bearer: { token: event.target.value } })}
         />
@@ -46,7 +40,7 @@ export function AuthFields({ value, onChange, modes }: Props) {
       {value.mode === 'basic' && (
         <>
           <TextField
-            label="Foydalanuvchi"
+            label={t('auth.field.username')}
             value={value.basic?.username ?? ''}
             onChange={(event) =>
               onChange({
@@ -56,7 +50,7 @@ export function AuthFields({ value, onChange, modes }: Props) {
             }
           />
           <TextField
-            label="Parol"
+            label={t('common.password')}
             type="password"
             value={value.basic?.password ?? ''}
             onChange={(event) =>
@@ -72,7 +66,7 @@ export function AuthFields({ value, onChange, modes }: Props) {
       {value.mode === 'apiKey' && (
         <>
           <TextField
-            label="Kalit nomi"
+            label={t('auth.field.keyName')}
             placeholder="X-API-Key"
             value={value.apiKey?.key ?? ''}
             onChange={(event) =>
@@ -87,7 +81,7 @@ export function AuthFields({ value, onChange, modes }: Props) {
             }
           />
           <TextField
-            label="Qiymat"
+            label={t('auth.field.value')}
             placeholder="{{apiKey}}"
             value={value.apiKey?.value ?? ''}
             onChange={(event) =>
@@ -102,7 +96,7 @@ export function AuthFields({ value, onChange, modes }: Props) {
             }
           />
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium">Qayerga</label>
+            <label className="text-xs font-medium">{t('auth.field.addTo')}</label>
             <select
               value={value.apiKey?.addTo ?? 'header'}
               onChange={(event) =>
@@ -117,8 +111,8 @@ export function AuthFields({ value, onChange, modes }: Props) {
               }
               className="w-56 rounded-md border border-border bg-card px-2 py-1.5 text-xs outline-none focus:ring-1 focus:ring-ring"
             >
-              <option value="header">Header</option>
-              <option value="query">Query parametr</option>
+              <option value="header">{t('auth.field.header')}</option>
+              <option value="query">{t('auth.field.query')}</option>
             </select>
           </div>
         </>

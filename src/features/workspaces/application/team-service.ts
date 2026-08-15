@@ -7,7 +7,7 @@ function assertValid(result: { success: boolean; error?: { issues: { message: st
   if (!result.success) {
     throw new DataFailure({
       kind: 'validation',
-      message: result.error?.issues[0]?.message ?? "Ma'lumot noto'g'ri",
+      message: result.error?.issues[0]?.message ?? 'data.error.validation',
     })
   }
 }

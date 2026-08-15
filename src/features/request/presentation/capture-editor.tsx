@@ -3,8 +3,10 @@ import { newId } from '@/core/lib/id'
 import { Button } from '@/shared/ui/button'
 import { useTabsStore, type Tab } from '@/features/tabs'
 import type { CaptureRule } from '../domain/request'
+import { useT } from '@/app/providers/i18n-provider'
 
 export function CaptureEditor({ tab }: { tab: Tab }) {
+  const t = useT()
   const patchRequest = useTabsStore((state) => state.patchRequest)
   const rules = tab.request.captures ?? []
 
@@ -16,19 +18,15 @@ export function CaptureEditor({ tab }: { tab: Tab }) {
   return (
     <div className="flex flex-col gap-3 p-4">
       <div>
-        <h3 className="text-xs font-semibold">Javobdan o'zgaruvchiga olish</h3>
+        <h3 className="text-xs font-semibold">{t('capture.title')}</h3>
         <p className="mt-0.5 text-[11px] text-muted-foreground">
-          So'rov muvaffaqiyatli o'tgach, javobdan qiymat olinib to'plam o'zgaruvchisiga
-          yoziladi. Postman'dagi test skriptining o'rnini bosadi.
+          {t('capture.hint')}
         </p>
       </div>
 
       {rules.length === 0 ? (
         <div className="rounded-md border border-dashed border-border p-4 text-center">
-          <p className="text-[11px] text-muted-foreground">
-            Masalan: login javobidagi <code className="font-mono">access_token</code> ni{' '}
-            <code className="font-mono">authorizationToken</code> ga yozish
-          </p>
+          <p className="text-[11px] text-muted-foreground">{t('capture.example')}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
@@ -42,7 +40,7 @@ export function CaptureEditor({ tab }: { tab: Tab }) {
                 checked={rule.enabled}
                 onChange={(event) => update(rule.id, { enabled: event.target.checked })}
                 className="size-3.5 accent-primary"
-                aria-label="Yoqish"
+                aria-label={t('common.add')}
               />
 
               <select
@@ -77,7 +75,7 @@ export function CaptureEditor({ tab }: { tab: Tab }) {
               <button
                 type="button"
                 onClick={() => setRules(rules.filter((item) => item.id !== rule.id))}
-                aria-label="O'chirish"
+                aria-label={t('common.delete')}
                 className="rounded p-1 text-muted-foreground transition hover:bg-accent hover:text-destructive"
               >
                 <Trash2 className="size-3.5" />
@@ -99,14 +97,11 @@ export function CaptureEditor({ tab }: { tab: Tab }) {
           }
         >
           <Plus className="size-3.5" />
-          Qoida qo'shish
+          {t('capture.addRule')}
         </Button>
       </div>
 
-      <p className="text-[11px] text-muted-foreground">
-        Ichma-ich maydon uchun nuqta ishlating:{' '}
-        <code className="font-mono">data.tokens.0.access</code>
-      </p>
+      <p className="text-[11px] text-muted-foreground">{t('capture.pathHint')}</p>
     </div>
   )
 }

@@ -15,6 +15,7 @@ import {
   visibleExamples,
 } from '../application/response-examples'
 import { statusTone } from './status-tone'
+import { useT } from '@/app/providers/i18n-provider'
 
 function toExample(response: ResponseResult): string {
   const body = response.body.trim()
@@ -22,6 +23,7 @@ function toExample(response: ResponseResult): string {
 }
 
 export function ResponseExamples({ tab }: { tab: Tab }) {
+  const t = useT()
   const patchRequest = useTabsStore((state) => state.patchRequest)
   const [openId, setOpenId] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
@@ -65,11 +67,11 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
       <div className="flex flex-wrap items-center gap-1 px-3 py-1.5">
         <BookOpen className="size-3 shrink-0 text-muted-foreground" />
         <span className="mr-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-          Javob misollari
+          {t('response.examples')}
         </span>
 
         {shown.length === 0 && (
-          <span className="mr-1 text-[11px] text-muted-foreground/70">hali yo'q</span>
+          <span className="mr-1 text-[11px] text-muted-foreground/70">{t('response.examplesEmpty')}</span>
         )}
 
         {shown.map((doc) => {
@@ -105,9 +107,9 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
 
         <button
           type="button"
-          aria-label="Misol qo'shish"
+          aria-label={t('response.addExample')}
           onClick={() => {
-            const status = window.prompt('Status kod (masalan 409 yoki 4xx)')?.trim()
+            const status = window.prompt(t('response.statusPrompt'))?.trim()
             if (status) add(status)
           }}
           className="rounded border border-dashed border-border px-1.5 py-0.5 text-[11px] text-muted-foreground transition hover:border-primary/60 hover:text-foreground"
@@ -119,11 +121,11 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
           <button
             type="button"
             onClick={() => add(current, toExample(response), response.statusText || '')}
-            title={`Hozirgi javobni ${current} misoli sifatida saqlash`}
+            title={t('response.saveAsTitle', { status: current })}
             className="ml-auto flex items-center gap-1 rounded border border-border px-1.5 py-0.5 text-[11px] text-muted-foreground transition hover:border-primary hover:text-foreground"
           >
             <Save className="size-3" />
-            Javobni {current} ga saqlash
+            {t('response.saveAs', { status: current })}
           </button>
         )}
       </div>
@@ -139,7 +141,7 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
                 <input
                   value={open.title}
                   onChange={(event) => patchDoc(open.id, { title: event.target.value })}
-                  placeholder="Sarlavha, masalan: Muvaffaqiyatli"
+                  placeholder={t('response.exampleTitle')}
                   className="min-w-0 flex-1 rounded border border-border bg-card px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
                 />
               ) : (
@@ -152,7 +154,7 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
                 <button
                   type="button"
                   onClick={() => patchDoc(open.id, { body: formatJson(openBody) })}
-                  title="JSON'ni tartiblash"
+                  title={t('response.formatJson')}
                   className="rounded p-1 text-muted-foreground transition hover:bg-accent hover:text-foreground"
                 >
                   <Wand2 className="size-3.5" />
@@ -161,7 +163,7 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
               <button
                 type="button"
                 onClick={() => setEditing(!editing)}
-                aria-label={editing ? 'Tayyor' : 'Tahrirlash'}
+                aria-label={editing ? t('common.done') : t('common.edit')}
                 className="rounded p-1 text-muted-foreground transition hover:bg-accent hover:text-foreground"
               >
                 {editing ? <Check className="size-3.5" /> : <Pencil className="size-3.5" />}
@@ -169,7 +171,7 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
               <button
                 type="button"
                 onClick={close}
-                aria-label="Yopish"
+                aria-label={t('common.close')}
                 className="rounded p-1 text-muted-foreground transition hover:bg-accent hover:text-foreground"
               >
                 <X className="size-3.5" />
@@ -187,7 +189,7 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
               {openBody.trim() !== '' && !isJson(openBody) && (
                 <p className="mt-1 flex items-center gap-1 text-[11px] text-status-redirect">
                   <AlertTriangle className="size-3" />
-                  JSON sintaksisi buzuq — baribir saqlanadi
+                  {t('response.brokenJson')}
                 </p>
               )}
             </>
@@ -195,8 +197,7 @@ export function ResponseExamples({ tab }: { tab: Tab }) {
             <JsonEditor value={openBody} readOnly />
           ) : (
             <p className="text-xs text-muted-foreground">
-              Hali yozilmagan — qalam belgisini bosing yoki javob kelganda «Javobni saqlash»
-              tugmasidan foydalaning
+              {t('response.exampleEmpty')}
             </p>
           )}
         </div>

@@ -20,6 +20,7 @@ import { CollectionSettingsModal } from './collection-settings-modal'
 import { CollectionTree, type TreeHandlers } from './collection-tree'
 import { EndpointModal } from './endpoint-modal'
 import { FolderModal } from './folder-modal'
+import { useT } from '@/app/providers/i18n-provider'
 
 export function CollectionPage({
   workspaceId,
@@ -28,6 +29,7 @@ export function CollectionPage({
   workspaceId: string
   collectionId: string
 }) {
+  const t = useT()
   const current = useCollectionsStore((state) => state.current)
   const endpoints = useCollectionsStore((state) => state.endpoints)
   const folders = useCollectionsStore((state) => state.folders)
@@ -127,7 +129,7 @@ export function CollectionPage({
   if (loading && !current) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-xs text-muted-foreground">Yuklanmoqda…</p>
+        <p className="text-xs text-muted-foreground">{t('common.loading')}</p>
       </div>
     )
   }
@@ -135,14 +137,14 @@ export function CollectionPage({
   if (!current) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3">
-        <p className="text-sm">To'plam topilmadi</p>
+        <p className="text-sm">{t('collection.notFound')}</p>
         <DataErrorNote error={error} />
         <Link
           to="/workspace/$workspaceId"
           params={{ workspaceId }}
           className="text-xs text-primary hover:underline"
         >
-          Ish maydoniga qaytish
+          {t('collection.backToWorkspace')}
         </Link>
       </div>
     )
@@ -159,11 +161,11 @@ export function CollectionPage({
               className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground transition hover:text-foreground"
             >
               <ArrowLeft className="size-3" />
-              Ish maydoni
+              {t('collection.workspace')}
             </Link>
             <p className="mt-1 truncate text-sm font-semibold">{current.name}</p>
             <p className="truncate text-[11px] text-muted-foreground">
-              {current.baseUrl || 'Base URL belgilanmagan'}
+              {current.baseUrl || `${t('collection.baseUrl')} — ${t('collection.baseUrlUnset')}`}
             </p>
           </div>
 
@@ -174,7 +176,7 @@ export function CollectionPage({
               onClick={() => setFolderModal({ folder: null, parentId: null })}
             >
               <FolderPlus className="size-3.5" />
-              Papka
+              {t('collection.statFolders')}
             </Button>
             <Button
               size="sm"
@@ -182,12 +184,12 @@ export function CollectionPage({
               onClick={() => setEndpointModal({ endpoint: null, parentId: null })}
             >
               <FilePlus2 className="size-3.5" />
-              Endpoint
+              {t('collection.statEndpoints')}
             </Button>
             <Button
               size="sm"
               variant="ghost"
-              aria-label="Sozlamalar"
+              aria-label={t('collection.settings')}
               className="ml-auto"
               onClick={() => setSettingsOpen(true)}
             >
@@ -205,12 +207,12 @@ export function CollectionPage({
               )}
             >
               <Home className="size-3.5 shrink-0" />
-              <span className="truncate text-xs font-medium">Bosh sahifa</span>
+              <span className="truncate text-xs font-medium">{t('collection.home')}</span>
             </button>
 
             {tree.length === 0 ? (
               <p className="px-2 py-3 text-center text-[11px] text-muted-foreground">
-                Bo'sh — papka yoki endpoint qo'shing
+                {t('endpoint.treeEmpty')}
               </p>
             ) : (
               <CollectionTree nodes={tree} handlers={handlers} />

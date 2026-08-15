@@ -1,6 +1,7 @@
 import { AlertCircle, Check, Loader2 } from 'lucide-react'
 import type { Tab } from '@/features/tabs'
 import { useCollectionsStore } from './collections-store'
+import { useT } from '@/app/providers/i18n-provider'
 
 function clock(value: number): string {
   return new Date(value).toLocaleTimeString('uz-UZ', {
@@ -10,6 +11,7 @@ function clock(value: number): string {
 }
 
 export function SaveStatus({ tab }: { tab: Tab }) {
+  const t = useT()
   const saving = useCollectionsStore((state) => state.saving)
   const savedAt = useCollectionsStore((state) => state.savedAt)
   const saveError = useCollectionsStore((state) => state.saveError)
@@ -21,7 +23,7 @@ export function SaveStatus({ tab }: { tab: Tab }) {
         className="flex items-center gap-1 text-[11px] text-destructive"
       >
         <AlertCircle className="size-3" />
-        Saqlanmadi
+        {t('save.failed')}
       </span>
     )
   }
@@ -30,7 +32,7 @@ export function SaveStatus({ tab }: { tab: Tab }) {
     return (
       <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
         <Loader2 className="size-3 animate-spin" />
-        Saqlanmoqda…
+        {t('save.saving')}
       </span>
     )
   }
@@ -39,7 +41,7 @@ export function SaveStatus({ tab }: { tab: Tab }) {
     return (
       <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
         <span className="size-1.5 rounded-full bg-primary" />
-        Saqlanmagan
+        {t('save.unsaved')}
       </span>
     )
   }
@@ -47,7 +49,7 @@ export function SaveStatus({ tab }: { tab: Tab }) {
   return (
     <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
       <Check className="size-3 text-status-success" />
-      {savedAt ? `Saqlandi ${clock(savedAt)}` : 'Saqlangan'}
+      {savedAt ? t('save.saved', { time: clock(savedAt) }) : t('save.savedPlain')}
     </span>
   )
 }

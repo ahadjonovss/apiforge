@@ -14,6 +14,7 @@ import {
   type ProfileValues,
 } from '@/features/auth/application/schemas'
 import { AuthErrorNote, AuthSuccessNote } from '@/features/auth/presentation/auth-error-note'
+import { useT } from '@/app/providers/i18n-provider'
 
 function Section({
   title,
@@ -34,6 +35,7 @@ function Section({
 }
 
 function IdentityCard() {
+  const t = useT()
   const user = useAuthStore((state) => state.user)
   const pending = useAuthStore((state) => state.pending)
   const sendEmailVerification = useAuthStore((state) => state.sendEmailVerification)
@@ -53,18 +55,18 @@ function IdentityCard() {
         )}
 
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">{user.displayName || 'Ismsiz'}</p>
+          <p className="truncate text-sm font-semibold">{user.displayName || t('profile.noName')}</p>
           <p className="truncate text-xs text-muted-foreground">{user.email}</p>
           <span className="mt-1 inline-flex items-center gap-1 text-[11px]">
             {user.emailVerified ? (
               <>
                 <BadgeCheck className="size-3 text-status-success" />
-                <span className="text-status-success">Email tasdiqlangan</span>
+                <span className="text-status-success">{t('profile.emailVerified')}</span>
               </>
             ) : (
               <>
                 <MailWarning className="size-3 text-status-redirect" />
-                <span className="text-status-redirect">Email tasdiqlanmagan</span>
+                <span className="text-status-redirect">{t('profile.emailNotVerified')}</span>
               </>
             )}
           </span>
@@ -73,15 +75,15 @@ function IdentityCard() {
 
       <dl className="mt-5 grid gap-2 border-t border-border pt-4 text-xs">
         <div className="grid grid-cols-[120px_1fr] gap-2">
-          <dt className="text-muted-foreground">Foydalanuvchi ID</dt>
+          <dt className="text-muted-foreground">{t('profile.userId')}</dt>
           <dd className="truncate font-mono text-[11px]">{user.id}</dd>
         </div>
         <div className="grid grid-cols-[120px_1fr] gap-2">
-          <dt className="text-muted-foreground">Ro'yxatdan o'tgan</dt>
+          <dt className="text-muted-foreground">{t('profile.createdAt')}</dt>
           <dd>{formatDateTime(user.createdAt)}</dd>
         </div>
         <div className="grid grid-cols-[120px_1fr] gap-2">
-          <dt className="text-muted-foreground">Oxirgi kirish</dt>
+          <dt className="text-muted-foreground">{t('profile.lastSignIn')}</dt>
           <dd>{formatDateTime(user.lastSignInAt)}</dd>
         </div>
       </dl>
@@ -95,11 +97,11 @@ function IdentityCard() {
             loading={pending}
             onClick={async () => {
               if (await sendEmailVerification()) {
-                setNotice('Tasdiqlash havolasi yuborildi')
+                setNotice(t('profile.verificationSent'))
               }
             }}
           >
-            Tasdiqlash havolasini yuborish
+            {t('profile.sendVerification')}
           </Button>
         </div>
       )}
@@ -108,6 +110,7 @@ function IdentityCard() {
 }
 
 function ProfileForm() {
+  const t = useT()
   const user = useAuthStore((state) => state.user)
   const pending = useAuthStore((state) => state.pending)
   const error = useAuthStore((state) => state.error)
@@ -130,25 +133,25 @@ function ProfileForm() {
   const onSubmit = handleSubmit(async (values) => {
     setNotice(null)
     if (await updateProfile({ displayName: values.displayName, photoUrl: values.photoUrl })) {
-      setNotice('Profil yangilandi')
+      setNotice(t('profile.updated'))
       reset(values)
     }
   })
 
   return (
-    <Section title="Profil ma'lumotlari" description="Ism va avatar havolasini o'zgartiring">
+    <Section title={t('profile.info')} description={t('profile.infoHint')}>
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <TextField
-          label="Ism"
+          label={t('auth.fullName')}
           autoComplete="name"
-          error={errors.displayName?.message}
+          error={t(errors.displayName?.message as never)}
           {...register('displayName')}
         />
         <TextField
-          label="Avatar havolasi"
+          label={t('profile.avatarUrl')}
           placeholder="https://…"
-          hint="Bo'sh qoldirsangiz bosh harflar ko'rsatiladi"
-          error={errors.photoUrl?.message}
+          hint={t('profile.avatarHint')}
+          error={t(errors.photoUrl?.message as never)}
           {...register('photoUrl')}
         />
 
@@ -158,7 +161,7 @@ function ProfileForm() {
         <div>
           <Button type="submit" size="sm" loading={pending} disabled={!isDirty}>
             <Save className="size-3.5" />
-            Saqlash
+            {t('common.save')}
           </Button>
         </div>
       </form>
@@ -167,6 +170,7 @@ function ProfileForm() {
 }
 
 function PasswordForm() {
+  const t = useT()
   const pending = useAuthStore((state) => state.pending)
   const error = useAuthStore((state) => state.error)
   const changePassword = useAuthStore((state) => state.changePassword)
@@ -185,34 +189,34 @@ function PasswordForm() {
   const onSubmit = handleSubmit(async (values) => {
     setNotice(null)
     if (await changePassword(values.currentPassword, values.newPassword)) {
-      setNotice('Parol almashtirildi')
+      setNotice(t('profile.passwordChanged'))
       reset()
     }
   })
 
   return (
-    <Section title="Parol" description="Xavfsizlik uchun joriy parolni tasdiqlash talab qilinadi">
+    <Section title={t('profile.password')} description={t('profile.passwordHint')}>
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <TextField
-          label="Joriy parol"
+          label={t('profile.currentPassword')}
           type="password"
           autoComplete="current-password"
-          error={errors.currentPassword?.message}
+          error={t(errors.currentPassword?.message as never)}
           {...register('currentPassword')}
         />
         <TextField
-          label="Yangi parol"
+          label={t('profile.newPassword')}
           type="password"
           autoComplete="new-password"
-          hint="Kamida 8 belgi, harf va raqam"
-          error={errors.newPassword?.message}
+          hint={t('auth.passwordHint')}
+          error={t(errors.newPassword?.message as never)}
           {...register('newPassword')}
         />
         <TextField
-          label="Yangi parolni tasdiqlang"
+          label={t('profile.confirmNewPassword')}
           type="password"
           autoComplete="new-password"
-          error={errors.confirmPassword?.message}
+          error={t(errors.confirmPassword?.message as never)}
           {...register('confirmPassword')}
         />
 
@@ -222,7 +226,7 @@ function PasswordForm() {
         <div>
           <Button type="submit" size="sm" loading={pending}>
             <KeyRound className="size-3.5" />
-            Parolni almashtirish
+            {t('profile.changePassword')}
           </Button>
         </div>
       </form>
@@ -231,6 +235,7 @@ function PasswordForm() {
 }
 
 export function ProfilePage() {
+  const t = useT()
   const signOut = useAuthStore((state) => state.signOut)
   const clearError = useAuthStore((state) => state.clearError)
 
@@ -247,12 +252,12 @@ export function ProfilePage() {
             className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition hover:text-foreground"
           >
             <ArrowLeft className="size-3.5" />
-            Ish stoliga qaytish
+            {t('profile.backToWorkbench')}
           </Link>
 
           <Button variant="ghost" size="sm" onClick={() => void signOut()}>
             <LogOut className="size-3.5" />
-            Chiqish
+            {t('auth.signOut')}
           </Button>
         </div>
 

@@ -4,22 +4,22 @@ export const workspaceSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, 'Nom kamida 2 belgidan iborat bo‘lishi kerak')
-    .max(60, 'Nom 60 belgidan oshmasligi kerak'),
-  description: z.string().trim().max(200, 'Tavsif 200 belgidan oshmasligi kerak'),
+    .min(2, 'validation.titleMin')
+    .max(60, 'validation.titleMax'),
+  description: z.string().trim().max(200, 'validation.descMax'),
 })
 
 export const teamSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, 'Nom kamida 2 belgidan iborat bo‘lishi kerak')
-    .max(60, 'Nom 60 belgidan oshmasligi kerak'),
-  description: z.string().trim().max(200, 'Tavsif 200 belgidan oshmasligi kerak'),
+    .min(2, 'validation.titleMin')
+    .max(60, 'validation.titleMax'),
+  description: z.string().trim().max(200, 'validation.descMax'),
 })
 
 export const memberSchema = z.object({
-  email: z.email("Email manzil noto'g'ri"),
+  email: z.email('validation.emailInvalid'),
   role: z.enum(['admin', 'member']),
 })
 

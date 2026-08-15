@@ -66,9 +66,9 @@ function buildUrl(
   if (!raw) {
     throw new HttpRequestFailure({
       kind: 'invalid',
-      title: 'URL kiritilmagan',
-      message: "So'rov manzili bo'sh",
-      hint: "Manzil yozing yoki to'plam sozlamalarida base URL belgilang.",
+      title: 'error.title.urlEmpty',
+      message: 'error.msg.urlEmpty',
+      hint: 'error.hint.urlEmpty',
     })
   }
 
@@ -80,9 +80,10 @@ function buildUrl(
   } catch {
     throw new HttpRequestFailure({
       kind: 'invalid',
-      title: "URL noto'g'ri",
-      message: `«${raw}» manzil sifatida o'qilmadi`,
-      hint: 'Manzilda ortiqcha bo‘sh joy yoki belgi bormi tekshiring.',
+      title: 'error.title.urlInvalid',
+      message: 'error.msg.urlInvalid',
+      hint: 'error.hint.urlInvalid',
+      params: { url: raw },
     })
   }
 

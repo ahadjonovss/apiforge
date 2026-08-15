@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import { X } from 'lucide-react'
+import { useT } from '@/app/providers/i18n-provider'
 
 interface Props {
   open: boolean
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function Modal({ open, title, description, onClose, children }: Props) {
+  const t = useT()
   useEffect(() => {
     if (!open) return
     const onKey = (event: KeyboardEvent) => {
@@ -25,7 +27,7 @@ export function Modal({ open, title, description, onClose, children }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
         type="button"
-        aria-label="Yopish"
+        aria-label={t('common.close')}
         onClick={onClose}
         className="absolute inset-0 bg-black/50"
       />
@@ -46,7 +48,7 @@ export function Modal({ open, title, description, onClose, children }: Props) {
           <button
             type="button"
             onClick={onClose}
-            aria-label="Yopish"
+            aria-label={t('common.close')}
             className="rounded p-1 text-muted-foreground transition hover:bg-accent hover:text-foreground"
           >
             <X className="size-3.5" />

@@ -12,7 +12,7 @@ function assertValid(result: { success: boolean; error?: { issues: { message: st
   if (!result.success) {
     throw new DataFailure({
       kind: 'validation',
-      message: result.error?.issues[0]?.message ?? "Ma'lumot noto'g'ri",
+      message: result.error?.issues[0]?.message ?? 'data.error.validation',
     })
   }
 }
@@ -137,13 +137,13 @@ export function createCollectionService(gateway: CollectionGateway) {
       if (parentId === folder.id) {
         throw new DataFailure({
           kind: 'validation',
-          message: 'Papkani o‘z ichiga ko‘chirib bo‘lmaydi',
+          message: 'folder.error.self',
         })
       }
       if (parentId && isDescendant(folders, folder.id, parentId)) {
         throw new DataFailure({
           kind: 'validation',
-          message: 'Papkani o‘z ichki papkasiga ko‘chirib bo‘lmaydi',
+          message: 'folder.error.descendant',
         })
       }
 

@@ -2,8 +2,10 @@ import { Lock } from 'lucide-react'
 import type { Tab } from '@/features/tabs'
 import { authHeaderEntries, effectiveAuth } from '../application/build-http-call'
 import { interpolate } from '../application/interpolate'
+import { useT } from '@/app/providers/i18n-provider'
 
 export function InheritedHeaders({ tab }: { tab: Tab }) {
+  const t = useT()
   const inherited = tab.inherited
   if (!inherited) return null
 
@@ -31,7 +33,7 @@ export function InheritedHeaders({ tab }: { tab: Tab }) {
       <div className="flex items-center gap-1.5 px-3 py-1.5">
         <Lock className="size-3 text-muted-foreground" />
         <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          To'plamdan meros
+          {t('request.inherited')}
         </span>
       </div>
 
@@ -39,7 +41,7 @@ export function InheritedHeaders({ tab }: { tab: Tab }) {
         <div
           key={key}
           className="grid grid-cols-[32px_1fr_1fr_32px] items-center gap-2 px-3 py-1"
-          title="To'plam sozlamalaridan keladi — bu yerda tahrirlanmaydi"
+          title={t('request.inheritedTitle')}
         >
           <span />
           <span className="truncate font-mono text-xs text-muted-foreground">{key}</span>

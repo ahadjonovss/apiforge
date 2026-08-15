@@ -17,7 +17,7 @@ function assert<T>(result: { success: boolean; data?: T; error?: { issues: { mes
   if (!result.success) {
     throw new AuthFailure({
       kind: 'validation',
-      message: result.error?.issues[0]?.message ?? "Ma'lumot noto'g'ri",
+      message: result.error?.issues[0]?.message ?? 'auth.error.validation',
     })
   }
   return result.data as T
@@ -64,7 +64,7 @@ export function createAuthService(gateway: AuthGateway) {
       if (currentPassword === nextPassword) {
         throw new AuthFailure({
           kind: 'validation',
-          message: 'Yangi parol joriysidan farq qilishi kerak',
+          message: 'validation.samePassword',
         })
       }
       return gateway.changePassword(currentPassword, nextPassword)

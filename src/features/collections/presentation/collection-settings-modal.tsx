@@ -15,6 +15,7 @@ import {
 } from '../application/schemas'
 import type { ApiCollection } from '../domain/collection'
 import { useCollectionsStore } from './collections-store'
+import { useT } from '@/app/providers/i18n-provider'
 
 const AUTH_MODES: AuthMode[] = ['none', 'bearer', 'basic', 'apiKey']
 
@@ -29,6 +30,7 @@ export function CollectionSettingsModal({
   open: boolean
   onClose: () => void
 }) {
+  const t = useT()
   const pending = useCollectionsStore((state) => state.pending)
   const error = useCollectionsStore((state) => state.error)
   const updateSettings = useCollectionsStore((state) => state.updateSettings)
@@ -80,44 +82,44 @@ export function CollectionSettingsModal({
   return (
     <Modal
       open={open}
-      title="To'plam sozlamalari"
-      description="Bu qiymatlar to'plamdagi barcha endpointlarga tegishli"
+      title={t('collection.settingsTitle')}
+      description={t('collection.settingsHint')}
       onClose={onClose}
     >
       <form onSubmit={onSubmit} className="flex max-h-[70vh] flex-col gap-3 overflow-auto">
-        <TextField label="Nomi" error={errors.name?.message} {...register('name')} />
+        <TextField label={t('common.name')} error={t(errors.name?.message as never)} {...register('name')} />
         <TextField
-          label="Tavsif"
-          error={errors.description?.message}
+          label={t('common.description')}
+          error={t(errors.description?.message as never)}
           {...register('description')}
         />
         <TextField
-          label="Base URL"
-          placeholder="https://api.example.com yoki {{gateway}}"
-          hint="Barcha endpointlar shu manzildan boshlanadi. O'zgaruvchi ham bo'lishi mumkin."
-          error={errors.baseUrl?.message}
+          label={t('collection.baseUrl')}
+          placeholder="https://api.example.com · {{gateway}}"
+          hint={t('collection.baseUrlHint')}
+          error={t(errors.baseUrl?.message as never)}
           {...register('baseUrl')}
         />
 
         <AuthFields value={auth} modes={AUTH_MODES} onChange={setAuth} />
 
         <div>
-          <p className="mb-1 text-xs font-medium">O'zgaruvchilar</p>
+          <p className="mb-1 text-xs font-medium">{t('collection.variables')}</p>
           <p className="mb-1 text-[11px] text-muted-foreground">
-            URL, header va body ichida <code>{'{{nom}}'}</code> ko'rinishida ishlatiladi
+            {t('collection.variablesHint')}
           </p>
           <div className="rounded-md border border-border">
             <KeyValueEditor
               rows={variables}
               onChange={setVariables}
-              keyPlaceholder="Nom"
-              valuePlaceholder="Qiymat"
+              keyPlaceholder={t('kv.name')}
+              valuePlaceholder={t('kv.valueLabel')}
             />
           </div>
         </div>
 
         <div>
-          <p className="mb-1 text-xs font-medium">Umumiy headerlar</p>
+          <p className="mb-1 text-xs font-medium">{t('collection.commonHeaders')}</p>
           <div className="rounded-md border border-border">
             <KeyValueEditor rows={headers} onChange={setHeaders} />
           </div>
@@ -127,10 +129,10 @@ export function CollectionSettingsModal({
 
         <div className="flex justify-end gap-2 pt-1">
           <Button variant="ghost" size="sm" onClick={onClose}>
-            Bekor qilish
+            {t('common.cancel')}
           </Button>
           <Button type="submit" size="sm" loading={pending}>
-            Saqlash
+            {t('common.save')}
           </Button>
         </div>
       </form>

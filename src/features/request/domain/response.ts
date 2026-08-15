@@ -26,6 +26,7 @@ export interface RequestError {
   title: string
   message: string
   hint?: string
+  params?: Record<string, string | number>
 }
 
 export class HttpRequestFailure extends Error {

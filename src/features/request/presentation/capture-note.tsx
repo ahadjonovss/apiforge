@@ -1,13 +1,16 @@
 import { AlertTriangle, Variable } from 'lucide-react'
 import type { Tab } from '@/features/tabs'
+import type { CaptureMiss } from '../application/apply-captures'
+import { useT } from '@/app/providers/i18n-provider'
 
 export function CaptureNote({
   tab,
   misses,
 }: {
   tab: Tab
-  misses: { target: string; reason: string }[]
+  misses: CaptureMiss[]
 }) {
+  const t = useT()
   const rules = (tab.request.captures ?? []).filter((rule) => rule.enabled)
   if (rules.length === 0) return null
 
@@ -20,7 +23,7 @@ export function CaptureNote({
       {saved.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
           <Variable className="size-3 shrink-0 text-status-success" />
-          <span className="text-[11px] text-muted-foreground">O'zgaruvchiga yozildi:</span>
+          <span className="text-[11px] text-muted-foreground">{t('capture.saved')}</span>
           {saved.map((target) => (
             <code
               key={target}
@@ -36,7 +39,7 @@ export function CaptureNote({
         <div key={miss.target} className="flex items-start gap-1.5">
           <AlertTriangle className="mt-px size-3 shrink-0 text-status-redirect" />
           <span className="text-[11px] text-status-redirect">
-            <code className="font-mono">{miss.target}</code> olinmadi — {miss.reason}
+            <code className="font-mono">{miss.target}</code> — {t(miss.reason as never, { path: miss.path ?? '' })}
           </span>
         </div>
       ))}

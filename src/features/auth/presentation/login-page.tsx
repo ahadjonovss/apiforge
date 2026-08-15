@@ -9,9 +9,11 @@ import { signInSchema, type SignInValues } from '../application/schemas'
 import { useAuthStore } from './auth-store'
 import { AuthShell } from './auth-shell'
 import { AuthErrorNote, AuthSuccessNote } from './auth-error-note'
+import { useT } from '@/app/providers/i18n-provider'
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const t = useT()
   const status = useAuthStore((state) => state.status)
   const pending = useAuthStore((state) => state.pending)
   const error = useAuthStore((state) => state.error)
@@ -48,39 +50,39 @@ export function LoginPage() {
     const email = getValues('email')
     setNotice(null)
     if (await sendPasswordReset(email)) {
-      setNotice('Parolni tiklash havolasi emailingizga yuborildi')
+      setNotice(t('auth.resetSent'))
     }
   }
 
   return (
     <AuthShell
-      title="Xush kelibsiz"
-      subtitle="So'rovlaringizga kirish uchun tizimga kiring"
+      title={t('auth.welcome')}
+      subtitle={t('auth.welcomeHint')}
       footer={
         <>
-          Hisobingiz yo'qmi?{' '}
+          {t('auth.noAccount')}{' '}
           <Link to="/register" className="font-medium text-primary hover:underline">
-            Ro'yxatdan o'ting
+            {t('auth.register')}
           </Link>
         </>
       }
     >
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <TextField
-          label="Email"
+          label={t('common.email')}
           type="email"
           autoComplete="email"
-          placeholder="siz@example.com"
-          error={errors.email?.message}
+          placeholder={t('auth.emailPlaceholder')}
+          error={t(errors.email?.message as never)}
           {...register('email')}
         />
 
         <TextField
-          label="Parol"
+          label={t('common.password')}
           type="password"
           autoComplete="current-password"
           placeholder="••••••••"
-          error={errors.password?.message}
+          error={t(errors.password?.message as never)}
           {...register('password')}
         />
 
@@ -89,7 +91,7 @@ export function LoginPage() {
 
         <Button type="submit" size="lg" block loading={pending}>
           <LogIn className="size-3.5" />
-          Kirish
+          {t('auth.signIn')}
         </Button>
 
         <button
@@ -97,7 +99,7 @@ export function LoginPage() {
           onClick={() => void onReset()}
           className="text-[11px] text-muted-foreground transition hover:text-foreground"
         >
-          Parolni unutdingizmi?
+          {t('auth.forgotPassword')}
         </button>
       </form>
     </AuthShell>

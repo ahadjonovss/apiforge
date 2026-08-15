@@ -26,9 +26,10 @@ export function createSendRequest(gateway: RequestGateway) {
       if (timeoutSignal.aborted) {
         throw new HttpRequestFailure({
           kind: 'timeout',
-          title: 'Vaqt tugadi',
-          message: `Server ${timeoutMs}ms ichida javob bermadi`,
-          hint: 'Server sekin bo‘lishi mumkin. Qayta urinib ko‘ring.',
+          title: 'error.title.timeout',
+          message: 'error.msg.timeoutMs',
+          hint: 'error.hint.timeout',
+          params: { ms: timeoutMs },
         })
       }
       throw error

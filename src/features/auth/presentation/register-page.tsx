@@ -9,9 +9,11 @@ import { signUpSchema, type SignUpValues } from '../application/schemas'
 import { useAuthStore } from './auth-store'
 import { AuthShell } from './auth-shell'
 import { AuthErrorNote } from './auth-error-note'
+import { useT } from '@/app/providers/i18n-provider'
 
 export function RegisterPage() {
   const navigate = useNavigate()
+  const t = useT()
   const status = useAuthStore((state) => state.status)
   const pending = useAuthStore((state) => state.pending)
   const error = useAuthStore((state) => state.error)
@@ -45,51 +47,51 @@ export function RegisterPage() {
 
   return (
     <AuthShell
-      title="Hisob yaratish"
-      subtitle="So'rovlaringiz va to'plamlaringiz bulutda saqlanadi"
+      title={t('auth.registerTitle')}
+      subtitle={t('auth.registerHint')}
       footer={
         <>
-          Hisobingiz bormi?{' '}
+          {t('auth.hasAccount')}{' '}
           <Link to="/login" className="font-medium text-primary hover:underline">
-            Kirish
+            {t('auth.signIn')}
           </Link>
         </>
       }
     >
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <TextField
-          label="Ism"
+          label={t('auth.fullName')}
           autoComplete="name"
           placeholder="Samandar Ahadjonov"
-          error={errors.displayName?.message}
+          error={t(errors.displayName?.message as never)}
           {...register('displayName')}
         />
 
         <TextField
-          label="Email"
+          label={t('common.email')}
           type="email"
           autoComplete="email"
-          placeholder="siz@example.com"
-          error={errors.email?.message}
+          placeholder={t('auth.emailPlaceholder')}
+          error={t(errors.email?.message as never)}
           {...register('email')}
         />
 
         <TextField
-          label="Parol"
+          label={t('common.password')}
           type="password"
           autoComplete="new-password"
           placeholder="••••••••"
-          hint="Kamida 8 belgi, harf va raqam"
-          error={errors.password?.message}
+          hint={t('auth.passwordHint')}
+          error={t(errors.password?.message as never)}
           {...register('password')}
         />
 
         <TextField
-          label="Parolni tasdiqlang"
+          label={t('auth.confirmPassword')}
           type="password"
           autoComplete="new-password"
           placeholder="••••••••"
-          error={errors.confirmPassword?.message}
+          error={t(errors.confirmPassword?.message as never)}
           {...register('confirmPassword')}
         />
 
@@ -97,7 +99,7 @@ export function RegisterPage() {
 
         <Button type="submit" size="lg" block loading={pending}>
           <UserPlus className="size-3.5" />
-          Ro'yxatdan o'tish
+          {t('auth.register')}
         </Button>
       </form>
     </AuthShell>

@@ -1,10 +1,12 @@
 import { useTabsStore, type Tab } from '@/features/tabs'
 import type { AuthMode } from '../domain/request'
 import { AuthFields } from './auth-fields'
+import { useT } from '@/app/providers/i18n-provider'
 
 const MODES: AuthMode[] = ['inherit', 'none', 'bearer', 'basic', 'apiKey']
 
 export function AuthEditor({ tab }: { tab: Tab }) {
+  const t = useT()
   const patchRequest = useTabsStore((state) => state.patchRequest)
   const auth = tab.request.auth
   const inheritedMode = tab.inherited?.auth.mode ?? 'none'
@@ -20,8 +22,8 @@ export function AuthEditor({ tab }: { tab: Tab }) {
       {auth.mode === 'inherit' && (
         <p className="text-xs text-muted-foreground">
           {tab.inherited
-            ? `To'plam sozlamasi qo'llanadi: ${inheritedMode}`
-            : "Bu so'rov to'plamga bog'lanmagan, shuning uchun meros olinmaydi"}
+            ? t('auth.inheritedApplies', { mode: inheritedMode })
+            : t('auth.notInCollection')}
         </p>
       )}
     </div>

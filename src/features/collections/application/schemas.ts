@@ -4,9 +4,9 @@ export const collectionSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, 'Nom kamida 2 belgidan iborat bo‘lishi kerak')
-    .max(60, 'Nom 60 belgidan oshmasligi kerak'),
-  description: z.string().trim().max(200, 'Tavsif 200 belgidan oshmasligi kerak'),
+    .min(2, 'validation.titleMin')
+    .max(60, 'validation.titleMax'),
+  description: z.string().trim().max(200, 'validation.descMax'),
 })
 
 export const baseUrlSchema = z
@@ -14,7 +14,7 @@ export const baseUrlSchema = z
   .trim()
   .refine(
     (value) => value === '' || value.includes('{{') || /^[a-z][a-z0-9+.-]*:\/\/.+/i.test(value),
-    { message: 'Manzil https:// bilan boshlanishi yoki {{o‘zgaruvchi}} bo‘lishi kerak' },
+    { message: 'validation.baseUrlInvalid' },
   )
 
 export const collectionSettingsSchema = z.object({
@@ -27,16 +27,16 @@ export const endpointSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, 'Nom kiritilmagan')
-    .max(80, 'Nom 80 belgidan oshmasligi kerak'),
+    .min(1, 'validation.titleEmpty')
+    .max(80, 'validation.titleMax80'),
 })
 
 export const folderSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, 'Nom kiritilmagan')
-    .max(60, 'Nom 60 belgidan oshmasligi kerak'),
+    .min(1, 'validation.titleEmpty')
+    .max(60, 'validation.titleMax'),
 })
 
 export type FolderValues = z.infer<typeof folderSchema>

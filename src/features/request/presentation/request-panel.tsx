@@ -13,6 +13,7 @@ import { interpolate } from '../application/interpolate'
 import { AuthEditor } from './auth-editor'
 import { CaptureEditor } from './capture-editor'
 import { InheritedHeaders } from './inherited-headers'
+import { useT } from '@/app/providers/i18n-provider'
 
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i
 
@@ -22,6 +23,7 @@ type Section = (typeof SECTIONS)[number]
 const BODY_MODES: BodyMode[] = ['none', 'json', 'raw', 'urlencoded', 'form-data']
 
 export function RequestPanel({ tab }: { tab: Tab }) {
+  const t = useT()
   const [section, setSection] = useState<Section>('Params')
   const patchRequest = useTabsStore((state) => state.patchRequest)
   const send = useTabsStore((state) => state.send)
@@ -53,7 +55,7 @@ export function RequestPanel({ tab }: { tab: Tab }) {
         <div className="flex flex-1 items-stretch overflow-hidden rounded-md border border-border bg-card focus-within:ring-1 focus-within:ring-ring">
           {prefix && (
             <span
-              title={`To'plamning base URL'i: ${prefix}`}
+              title={t('request.baseUrlTitle', { url: prefix })}
               className="flex max-w-[45%] items-center border-r border-border bg-muted px-2 font-mono text-xs text-muted-foreground"
             >
               <span className="truncate">{prefix}</span>
@@ -65,7 +67,7 @@ export function RequestPanel({ tab }: { tab: Tab }) {
             onKeyDown={(event) => {
               if (event.key === 'Enter') void send(tab.id)
             }}
-            placeholder={prefix ? '/users' : 'https://api.example.com/users'}
+            placeholder={prefix ? t('request.pathPlaceholder') : t('request.urlPlaceholder')}
             spellCheck={false}
             className="min-w-0 flex-1 bg-transparent px-3 py-1.5 font-mono text-xs outline-none"
           />
@@ -82,7 +84,7 @@ export function RequestPanel({ tab }: { tab: Tab }) {
           ) : (
             <Send className="size-3.5" />
           )}
-          Send
+          {t('request.send')}
         </button>
       </div>
 
@@ -99,7 +101,7 @@ export function RequestPanel({ tab }: { tab: Tab }) {
                 : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >
-            {item}
+            {t(`request.${item.toLowerCase()}` as never)}
           </button>
         ))}
       </div>
@@ -167,13 +169,13 @@ export function RequestPanel({ tab }: { tab: Tab }) {
 
             {request.body.mode === 'form-data' && (
               <div className="p-4 text-xs text-muted-foreground">
-                Form-data muharriri hali qo'shilmagan.
+                {t('request.formDataMissing')}
               </div>
             )}
 
             {request.body.mode === 'none' && (
               <div className="p-4 text-xs text-muted-foreground">
-                Bu so'rovda body yo'q.
+                {t('request.noBody')}
               </div>
             )}
           </div>

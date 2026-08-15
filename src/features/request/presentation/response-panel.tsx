@@ -8,6 +8,7 @@ import { ResponseExamples } from './response-examples'
 import { cn } from '@/core/lib/cn'
 import { useTheme } from '@/app/providers/theme-provider'
 import type { Tab } from '@/features/tabs'
+import { useT } from '@/app/providers/i18n-provider'
 
 const VIEWS = ['Body', 'Headers'] as const
 type View = (typeof VIEWS)[number]
@@ -25,6 +26,7 @@ function formatSize(bytes: number) {
 }
 
 export function ResponsePanel({ tab }: { tab: Tab }) {
+  const t = useT()
   const [view, setView] = useState<View>('Body')
   const { resolved } = useTheme()
   const { response, error } = tab
@@ -52,13 +54,13 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
           <div className="flex items-start gap-3">
             <AlertCircle className="mt-0.5 size-5 shrink-0 text-destructive" />
             <div className="min-w-0">
-              <p className="text-sm font-medium text-destructive">{error.title}</p>
-              <p className="mt-1 break-words text-xs text-foreground">{error.message}</p>
+              <p className="text-sm font-medium text-destructive">{t(error.title as never, error.params)}</p>
+              <p className="mt-1 break-words text-xs text-foreground">{t(error.message as never, error.params)}</p>
 
               {error.hint && (
                 <div className="mt-3 flex items-start gap-2 border-t border-destructive/20 pt-3">
                   <Lightbulb className="mt-px size-3.5 shrink-0 text-muted-foreground" />
-                  <p className="text-[11px] text-muted-foreground">{error.hint}</p>
+                  <p className="text-[11px] text-muted-foreground">{t(error.hint as never, error.params)}</p>
                 </div>
               )}
 
@@ -79,7 +81,7 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
         <ResponseExamples tab={tab} />
         <div className="flex flex-1 items-center justify-center p-6">
           <p className="text-xs text-muted-foreground">
-            So'rov yuboring — javob shu yerda ko'rinadi
+            {t('response.empty')}
           </p>
         </div>
       </div>
@@ -117,7 +119,7 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
                 : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >
-            {item}
+            {t(`response.${item.toLowerCase()}` as never)}
             {item === 'Headers' && (
               <span className="ml-1 text-muted-foreground">
                 ({Object.keys(response.headers).length})

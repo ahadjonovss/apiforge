@@ -9,6 +9,7 @@ import { useTabsStore, type Tab } from '@/features/tabs'
 import { interpolate } from '../application/interpolate'
 import { stripFence } from '../application/response-examples'
 import { statusTone } from './status-tone'
+import { useT } from '@/app/providers/i18n-provider'
 
 const TEMPLATE = `## Nima qiladi
 
@@ -26,6 +27,7 @@ const TEMPLATE = `## Nima qiladi
 `
 
 export function EndpointDocs({ tab }: { tab: Tab }) {
+  const t = useT()
   const patchRequest = useTabsStore((state) => state.patchRequest)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(tab.request.docs)
@@ -54,19 +56,19 @@ export function EndpointDocs({ tab }: { tab: Tab }) {
             <h1 className="text-xl font-semibold">{tab.request.name}</h1>
             <p className="mt-1 flex items-center gap-2 font-mono text-xs text-muted-foreground">
               <MethodBadge method={tab.request.method} />
-              <span className="truncate">{`${base}${path}` || 'manzil yo‘q'}</span>
+              <span className="truncate">{`${base}${path}` || t('docs.noUrl')}</span>
             </p>
           </div>
 
           {editing ? (
             <Button size="sm" onClick={commit}>
               <Check className="size-3.5" />
-              Tayyor
+              {t('common.done')}
             </Button>
           ) : (
             <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
               <Pencil className="size-3.5" />
-              Tahrirlash
+              {t('common.edit')}
             </Button>
           )}
         </div>
@@ -80,7 +82,7 @@ export function EndpointDocs({ tab }: { tab: Tab }) {
                 onClick={() => setDraft(TEMPLATE)}
                 className="w-fit text-[11px] text-primary hover:underline"
               >
-                Namuna shablonni qo'yish
+                {t('collection.template')}
               </button>
             )}
           </div>
@@ -90,21 +92,21 @@ export function EndpointDocs({ tab }: { tab: Tab }) {
           <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-10 text-center">
             <FileText className="size-7 text-muted-foreground/40" />
             <div>
-              <p className="text-sm font-medium">Hujjat yozilmagan</p>
+              <p className="text-sm font-medium">{t('docs.endpointEmpty')}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Bu endpoint nima qilishini markdown formatida yozing
+                {t('docs.endpointEmptyHint')}
               </p>
             </div>
             <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
               <Pencil className="size-3.5" />
-              Yozishni boshlash
+              {t('collection.startWriting')}
             </Button>
           </div>
         )}
 
         {examples.length > 0 && (
           <section className="flex flex-col gap-3 border-t border-border pt-5">
-            <h2 className="text-sm font-semibold">Javob misollari</h2>
+            <h2 className="text-sm font-semibold">{t('docs.examplesSection')}</h2>
             {examples
               .slice()
               .sort((a, b) => a.status.localeCompare(b.status))
@@ -117,7 +119,7 @@ export function EndpointDocs({ tab }: { tab: Tab }) {
                   {stripFence(doc.body).trim() ? (
                     <JsonEditor value={stripFence(doc.body)} readOnly minHeight="80px" />
                   ) : (
-                    <p className="text-xs text-muted-foreground">Misol yozilmagan</p>
+                    <p className="text-xs text-muted-foreground">{t('docs.exampleEmpty')}</p>
                   )}
                 </div>
               ))}

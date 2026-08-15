@@ -15,6 +15,7 @@ import { ImportDialog } from '@/features/import/presentation/import-dialog'
 import { memberSchema, teamSchema, type MemberValues, type TeamValues } from '../application/schemas'
 import { canManage } from '../domain/workspace'
 import { useWorkspacesStore } from './workspaces-store'
+import { useT } from '@/app/providers/i18n-provider'
 
 function Panel({
   title,
@@ -49,6 +50,7 @@ function AddMemberModal({
   open: boolean
   onClose: () => void
 }) {
+  const t = useT()
   const pending = useWorkspacesStore((state) => state.pending)
   const error = useWorkspacesStore((state) => state.error)
   const addMember = useWorkspacesStore((state) => state.addMember)
@@ -73,21 +75,21 @@ function AddMemberModal({
   return (
     <Modal
       open={open}
-      title="A'zo qo'shish"
-      description="Foydalanuvchi avval APIForge'da ro'yxatdan o'tgan bo'lishi kerak"
+      title={t('workspace.addMember')}
+      description={t('workspace.addMemberHint')}
       onClose={onClose}
     >
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <TextField
-          label="Email"
+          label={t('common.email')}
           type="email"
           placeholder="hamkasb@example.com"
-          error={errors.email?.message}
+          error={t(errors.email?.message as never)}
           {...register('email')}
         />
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium">Rol</label>
+          <label className="text-xs font-medium">{t('common.role')}</label>
           <select
             className="rounded-md border border-border bg-card px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-ring"
             {...register('role')}
@@ -101,10 +103,10 @@ function AddMemberModal({
 
         <div className="flex justify-end gap-2">
           <Button variant="ghost" size="sm" onClick={onClose}>
-            Bekor qilish
+            {t('common.cancel')}
           </Button>
           <Button type="submit" size="sm" loading={pending}>
-            Qo'shish
+            {t('common.add')}
           </Button>
         </div>
       </form>
@@ -121,6 +123,7 @@ function CreateTeamModal({
   open: boolean
   onClose: () => void
 }) {
+  const t = useT()
   const pending = useWorkspacesStore((state) => state.pending)
   const error = useWorkspacesStore((state) => state.error)
   const createTeam = useWorkspacesStore((state) => state.createTeam)
@@ -143,13 +146,13 @@ function CreateTeamModal({
   })
 
   return (
-    <Modal open={open} title="Yangi jamoa" description="Jamoaga a'zolarni keyin biriktirasiz" onClose={onClose}>
+    <Modal open={open} title={t('workspace.newTeam')} description={t('workspace.newTeamHint')} onClose={onClose}>
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
-        <TextField label="Nomi" placeholder="Platform" error={errors.name?.message} {...register('name')} />
+        <TextField label={t('common.name')} placeholder="Platform" error={t(errors.name?.message as never)} {...register('name')} />
         <TextField
-          label="Tavsif"
-          placeholder="Ixtiyoriy"
-          error={errors.description?.message}
+          label={t('common.description')}
+          placeholder={t('common.optional')}
+          error={t(errors.description?.message as never)}
           {...register('description')}
         />
 
@@ -157,10 +160,10 @@ function CreateTeamModal({
 
         <div className="flex justify-end gap-2">
           <Button variant="ghost" size="sm" onClick={onClose}>
-            Bekor qilish
+            {t('common.cancel')}
           </Button>
           <Button type="submit" size="sm" loading={pending}>
-            Yaratish
+            {t('common.create')}
           </Button>
         </div>
       </form>
@@ -177,6 +180,7 @@ function CreateCollectionModal({
   open: boolean
   onClose: () => void
 }) {
+  const t = useT()
   const teams = useWorkspacesStore((state) => state.teams)
   const pending = useCollectionsStore((state) => state.pending)
   const error = useCollectionsStore((state) => state.error)
@@ -210,27 +214,27 @@ function CreateCollectionModal({
   return (
     <Modal
       open={open}
-      title="Yangi API to'plami"
-      description="Endpointlar shu to'plam ichida saqlanadi"
+      title={t('workspace.newCollection')}
+      description={t('workspace.newCollectionHint')}
       onClose={onClose}
     >
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
-        <TextField label="Nomi" placeholder="Billing API" error={errors.name?.message} {...register('name')} />
+        <TextField label={t('common.name')} placeholder="Billing API" error={t(errors.name?.message as never)} {...register('name')} />
         <TextField
-          label="Tavsif"
-          placeholder="Ixtiyoriy"
-          error={errors.description?.message}
+          label={t('common.description')}
+          placeholder={t('common.optional')}
+          error={t(errors.description?.message as never)}
           {...register('description')}
         />
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium">Jamoa</label>
+          <label className="text-xs font-medium">{t('common.team')}</label>
           <select
             value={teamId}
             onChange={(event) => setTeamId(event.target.value)}
             className="rounded-md border border-border bg-card px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-ring"
           >
-            <option value="">Biriktirilmagan</option>
+            <option value="">{t('workspace.unassigned')}</option>
             {teams.map((team) => (
               <option key={team.id} value={team.id}>
                 {team.name}
@@ -243,10 +247,10 @@ function CreateCollectionModal({
 
         <div className="flex justify-end gap-2">
           <Button variant="ghost" size="sm" onClick={onClose}>
-            Bekor qilish
+            {t('common.cancel')}
           </Button>
           <Button type="submit" size="sm" loading={pending}>
-            Yaratish
+            {t('common.create')}
           </Button>
         </div>
       </form>
@@ -255,6 +259,7 @@ function CreateCollectionModal({
 }
 
 export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
+  const t = useT()
   const user = useAuthStore((state) => state.user)
   const current = useWorkspacesStore((state) => state.current)
   const members = useWorkspacesStore((state) => state.members)
@@ -286,7 +291,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
   if (loading && !current) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-xs text-muted-foreground">Yuklanmoqda…</p>
+        <p className="text-xs text-muted-foreground">{t('common.loading')}</p>
       </div>
     )
   }
@@ -294,10 +299,10 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
   if (!current) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3">
-        <p className="text-sm">Ish maydoni topilmadi</p>
+        <p className="text-sm">{t('workspaces.notFound')}</p>
         <DataErrorNote error={error} />
         <Link to="/" className="text-xs text-primary hover:underline">
-          Bosh sahifaga qaytish
+          {t('workspaces.backHome')}
         </Link>
       </div>
     )
@@ -317,31 +322,31 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
         <div>
           <h1 className="text-lg font-semibold">{current.name}</h1>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {current.description || 'Tavsifsiz'}
+            {current.description || t('workspaces.noDescription')}
           </p>
         </div>
 
         <DataErrorNote error={error ?? collectionsError} />
 
         <Panel
-          title="API to'plamlari"
+          title={t('workspace.collections')}
           count={collections.length}
           action={
             <div className="flex items-center gap-1">
               <Button size="sm" variant="ghost" onClick={() => setImporting(true)}>
                 <Upload className="size-3.5" />
-                Postman'dan
+                {t('workspace.fromPostman')}
               </Button>
               <Button size="sm" variant="outline" onClick={() => setAddingCollection(true)}>
                 <Plus className="size-3.5" />
-                To'plam
+                {t('workspace.collection')}
               </Button>
             </div>
           }
         >
           {collections.length === 0 ? (
             <p className="px-4 py-6 text-center text-xs text-muted-foreground">
-              Hali to'plam yo'q
+              {t('workspace.noCollections')}
             </p>
           ) : (
             <ul className="divide-y divide-border">
@@ -355,7 +360,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
                   >
                     <p className="truncate text-xs font-medium">{item.name}</p>
                     <p className="truncate text-[11px] text-muted-foreground">
-                      {item.description || 'Tavsifsiz'}
+                      {item.description || t('workspaces.noDescription')}
                       {item.teamId &&
                         ` · ${teams.find((team) => team.id === item.teamId)?.name ?? 'jamoa'}`}
                     </p>
@@ -363,7 +368,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
                   <button
                     type="button"
                     onClick={() => void removeCollection(workspaceId, item.id)}
-                    aria-label="O'chirish"
+                    aria-label={t('common.delete')}
                     className="rounded p-1 text-muted-foreground opacity-0 transition hover:bg-accent hover:text-destructive group-hover:opacity-100"
                   >
                     <Trash2 className="size-3.5" />
@@ -375,18 +380,18 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
         </Panel>
 
         <Panel
-          title="Jamoalar"
+          title={t('workspace.teams')}
           count={teams.length}
           action={
             <Button size="sm" variant="outline" onClick={() => setAddingTeam(true)}>
               <Plus className="size-3.5" />
-              Jamoa
+              {t('common.team')}
             </Button>
           }
         >
           {teams.length === 0 ? (
             <p className="px-4 py-6 text-center text-xs text-muted-foreground">
-              Hali jamoa yo'q
+              {t('workspace.noTeams')}
             </p>
           ) : (
             <ul className="divide-y divide-border">
@@ -396,13 +401,13 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
                     <div className="min-w-0">
                       <p className="truncate text-xs font-medium">{team.name}</p>
                       <p className="truncate text-[11px] text-muted-foreground">
-                        {team.description || 'Tavsifsiz'}
+                        {team.description || t('workspaces.noDescription')}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => void removeTeam(workspaceId, team.id)}
-                      aria-label="O'chirish"
+                      aria-label={t('common.delete')}
                       className="rounded p-1 text-muted-foreground transition hover:bg-accent hover:text-destructive"
                     >
                       <Trash2 className="size-3.5" />
@@ -430,7 +435,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
                     })}
                     {members.length === 0 && (
                       <span className="text-[11px] text-muted-foreground">
-                        Avval ish maydoniga a'zo qo'shing
+                        {t('workspace.addMembersFirst')}
                       </span>
                     )}
                   </div>
@@ -441,12 +446,12 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
         </Panel>
 
         <Panel
-          title="A'zolar"
+          title={t('workspace.members')}
           count={members.length}
           action={
             <Button size="sm" variant="outline" onClick={() => setAddingMember(true)}>
               <UserPlus className="size-3.5" />
-              A'zo
+              {t('workspace.member')}
             </Button>
           }
         >
@@ -456,7 +461,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
                 <Users className="size-4 shrink-0 text-muted-foreground" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-medium">
-                    {member.displayName || 'Ismsiz'}
+                    {member.displayName || t('profile.noName')}
                   </p>
                   <p className="truncate text-[11px] text-muted-foreground">{member.email}</p>
                 </div>
@@ -467,7 +472,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
                   <button
                     type="button"
                     onClick={() => void removeMember(workspaceId, member.userId)}
-                    aria-label="Chiqarish"
+                    aria-label={t('workspace.removeMember')}
                     className="rounded p-1 text-muted-foreground opacity-0 transition hover:bg-accent hover:text-destructive group-hover:opacity-100"
                   >
                     <Trash2 className="size-3.5" />

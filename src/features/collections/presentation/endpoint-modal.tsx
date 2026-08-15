@@ -6,6 +6,7 @@ import { TextField } from '@/shared/ui/text-field'
 import { DataErrorNote } from '@/shared/ui/data-error-note'
 import { flattenFolders } from '../application/tree'
 import { useCollectionsStore } from './collections-store'
+import { useT } from '@/app/providers/i18n-provider'
 
 interface Props {
   workspaceId: string
@@ -24,6 +25,7 @@ export function EndpointModal({
   onClose,
   onCreated,
 }: Props) {
+  const t = useT()
   const folders = useCollectionsStore((state) => state.folders)
   const pending = useCollectionsStore((state) => state.pending)
   const error = useCollectionsStore((state) => state.error)
@@ -69,13 +71,13 @@ export function EndpointModal({
   return (
     <Modal
       open={open}
-      title={endpoint ? 'Endpointni tahrirlash' : 'Yangi endpoint'}
+      title={endpoint ? t('endpoint.edit') : t('endpoint.new')}
       onClose={onClose}
     >
       <div className="flex flex-col gap-3">
         <TextField
-          label="Nomi"
-          placeholder="Foydalanuvchilar ro'yxati"
+          label={t('common.name')}
+          placeholder={t('endpoint.namePlaceholder')}
           value={name}
           onChange={(event) => setName(event.target.value)}
           onKeyDown={(event) => {
@@ -84,13 +86,13 @@ export function EndpointModal({
         />
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium">Papka</label>
+          <label className="text-xs font-medium">{t('endpoint.folder')}</label>
           <select
             value={target}
             onChange={(event) => setTarget(event.target.value)}
             className="rounded-md border border-border bg-card px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-ring"
           >
-            <option value="">To'plam ildizi</option>
+            <option value="">{t('folder.root')}</option>
             {options.map(({ folder, depth }) => (
               <option key={folder.id} value={folder.id}>
                 {`${' '.repeat(depth * 3)}${folder.name}`}
@@ -103,10 +105,10 @@ export function EndpointModal({
 
         <div className="flex justify-end gap-2">
           <Button variant="ghost" size="sm" onClick={onClose}>
-            Bekor qilish
+            {t('common.cancel')}
           </Button>
           <Button size="sm" loading={pending} onClick={() => void submit()}>
-            {endpoint ? 'Saqlash' : "Qo'shish"}
+            {endpoint ? t('common.save') : t('common.add')}
           </Button>
         </div>
       </div>

@@ -6,6 +6,7 @@ import { DataErrorNote } from '@/shared/ui/data-error-note'
 import { flattenFolders } from '../application/tree'
 import type { Folder } from '../domain/folder'
 import { useCollectionsStore } from './collections-store'
+import { useT } from '@/app/providers/i18n-provider'
 
 interface Props {
   workspaceId: string
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function FolderModal({ workspaceId, open, folder, parentId, onClose }: Props) {
+  const t = useT()
   const folders = useCollectionsStore((state) => state.folders)
   const pending = useCollectionsStore((state) => state.pending)
   const error = useCollectionsStore((state) => state.error)
@@ -55,13 +57,13 @@ export function FolderModal({ workspaceId, open, folder, parentId, onClose }: Pr
   return (
     <Modal
       open={open}
-      title={folder ? 'Papkani tahrirlash' : 'Yangi papka'}
-      description="Papkalar bir-birining ichida joylasha oladi"
+      title={folder ? t('folder.edit') : t('folder.new')}
+      description={t('folder.hint')}
       onClose={onClose}
     >
       <div className="flex flex-col gap-3">
         <TextField
-          label="Nomi"
+          label={t('common.name')}
           placeholder="Auth"
           value={name}
           onChange={(event) => setName(event.target.value)}
@@ -71,13 +73,13 @@ export function FolderModal({ workspaceId, open, folder, parentId, onClose }: Pr
         />
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium">Joylashuvi</label>
+          <label className="text-xs font-medium">{t('folder.location')}</label>
           <select
             value={target}
             onChange={(event) => setTarget(event.target.value)}
             className="rounded-md border border-border bg-card px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-ring"
           >
-            <option value="">To'plam ildizi</option>
+            <option value="">{t('folder.root')}</option>
             {options.map(({ folder: option, depth }) => (
               <option key={option.id} value={option.id}>
                 {`${' '.repeat(depth * 3)}${option.name}`}
@@ -90,10 +92,10 @@ export function FolderModal({ workspaceId, open, folder, parentId, onClose }: Pr
 
         <div className="flex justify-end gap-2">
           <Button variant="ghost" size="sm" onClick={onClose}>
-            Bekor qilish
+            {t('common.cancel')}
           </Button>
           <Button size="sm" loading={pending} onClick={() => void submit()}>
-            {folder ? 'Saqlash' : 'Yaratish'}
+            {folder ? t('common.save') : t('common.create')}
           </Button>
         </div>
       </div>

@@ -9,6 +9,7 @@ export type DataErrorKind =
 export interface DataErrorDetail {
   kind: DataErrorKind
   message: string
+  params?: Record<string, string | number>
 }
 
 export class DataFailure extends Error {
@@ -24,13 +25,13 @@ export class DataFailure extends Error {
 const FIRESTORE_CODES: Record<string, DataErrorDetail> = {
   'permission-denied': {
     kind: 'permission-denied',
-    message: 'Bu amalga ruxsatingiz yo‘q',
+    message: 'data.error.permission-denied',
   },
-  'not-found': { kind: 'not-found', message: 'Topilmadi' },
-  unavailable: { kind: 'network', message: 'Firestore bilan aloqa yo‘q' },
+  'not-found': { kind: 'not-found', message: 'data.error.not-found' },
+  unavailable: { kind: 'network', message: 'data.error.network' },
   'failed-precondition': {
     kind: 'unknown',
-    message: 'Firestore indeksi yetishmayapti yoki shart bajarilmadi',
+    message: 'data.error.indexMissing',
   },
 }
 
@@ -47,6 +48,6 @@ export function toDataFailure(error: unknown): DataFailure {
 
   return new DataFailure({
     kind: 'unknown',
-    message: error instanceof Error ? error.message : 'Noma’lum xatolik',
+    message: error instanceof Error ? error.message : 'data.error.unknown',
   })
 }

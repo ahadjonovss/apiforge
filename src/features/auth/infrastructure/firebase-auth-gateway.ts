@@ -24,51 +24,51 @@ import type { AuthUser } from '../domain/user'
 const ERROR_MAP: Record<string, { kind: AuthErrorKind; message: string }> = {
   'auth/invalid-credential': {
     kind: 'invalid-credentials',
-    message: "Email yoki parol noto'g'ri",
+    message: 'auth.error.invalid-credentials',
   },
   'auth/invalid-login-credentials': {
     kind: 'invalid-credentials',
-    message: "Email yoki parol noto'g'ri",
+    message: 'auth.error.invalid-credentials',
   },
   'auth/user-not-found': {
     kind: 'invalid-credentials',
-    message: 'Bunday foydalanuvchi topilmadi',
+    message: 'auth.error.userNotFound',
   },
   'auth/wrong-password': {
     kind: 'invalid-credentials',
-    message: "Parol noto'g'ri",
+    message: 'auth.error.invalid-credentials',
   },
   'auth/email-already-in-use': {
     kind: 'email-in-use',
-    message: 'Bu email allaqachon ro‘yxatdan o‘tgan',
+    message: 'auth.error.email-in-use',
   },
   'auth/weak-password': {
     kind: 'weak-password',
-    message: 'Parol juda oddiy',
+    message: 'auth.error.weak-password',
   },
   'auth/invalid-email': {
     kind: 'invalid-email',
-    message: "Email manzil noto'g'ri",
+    message: 'auth.error.invalid-email',
   },
   'auth/user-disabled': {
     kind: 'user-disabled',
-    message: 'Bu hisob bloklangan',
+    message: 'auth.error.user-disabled',
   },
   'auth/too-many-requests': {
     kind: 'too-many-requests',
-    message: 'Juda ko‘p urinish. Biroz kutib, qayta urinib ko‘ring',
+    message: 'auth.error.too-many-requests',
   },
   'auth/requires-recent-login': {
     kind: 'requires-recent-login',
-    message: 'Xavfsizlik uchun qaytadan kiring va amalni takrorlang',
+    message: 'auth.error.requires-recent-login',
   },
   'auth/network-request-failed': {
     kind: 'network',
-    message: 'Tarmoqqa ulanib bo‘lmadi',
+    message: 'auth.error.network',
   },
   'auth/operation-not-allowed': {
     kind: 'unknown',
-    message: 'Email/parol usuli Firebase konsolida yoqilmagan',
+    message: 'auth.error.not-enabled',
   },
 }
 
@@ -85,7 +85,7 @@ function toFailure(error: unknown): AuthFailure {
 
   return new AuthFailure({
     kind: 'unknown',
-    message: error instanceof Error ? error.message : 'Noma’lum xatolik',
+    message: error instanceof Error ? error.message : 'auth.error.unknown',
   })
 }
 
@@ -108,7 +108,7 @@ function toAuthUser(user: User): AuthUser {
 function requireUser(): User {
   const user = auth.currentUser
   if (!user) {
-    throw new AuthFailure({ kind: 'requires-recent-login', message: 'Avval tizimga kiring' })
+    throw new AuthFailure({ kind: 'requires-recent-login', message: 'auth.error.signInFirst' })
   }
   return user
 }
@@ -169,7 +169,7 @@ export const firebaseAuthGateway: AuthGateway = {
     if (!user.email) {
       throw new AuthFailure({
         kind: 'unknown',
-        message: 'Bu hisobda email yo‘q, parolni almashtirib bo‘lmaydi',
+        message: 'auth.error.no-email',
       })
     }
     try {

@@ -8,7 +8,7 @@ function assertValid(result: { success: boolean; error?: { issues: { message: st
   if (!result.success) {
     throw new DataFailure({
       kind: 'validation',
-      message: result.error?.issues[0]?.message ?? "Ma'lumot noto'g'ri",
+      message: result.error?.issues[0]?.message ?? 'data.error.validation',
     })
   }
 }
@@ -59,7 +59,8 @@ export function createWorkspaceService(gateway: WorkspaceGateway, users: UserLoo
       if (!user) {
         throw new DataFailure({
           kind: 'not-found',
-          message: `${email} hali APIForge'da ro'yxatdan o'tmagan`,
+          message: 'data.error.notRegistered',
+          params: { email },
         })
       }
 
@@ -67,7 +68,7 @@ export function createWorkspaceService(gateway: WorkspaceGateway, users: UserLoo
       if (workspace?.memberIds.includes(user.id)) {
         throw new DataFailure({
           kind: 'already-exists',
-          message: 'Bu foydalanuvchi allaqachon a’zo',
+          message: 'data.error.already-exists',
         })
       }
 
@@ -79,7 +80,7 @@ export function createWorkspaceService(gateway: WorkspaceGateway, users: UserLoo
       if (workspace?.ownerId === userId) {
         throw new DataFailure({
           kind: 'validation',
-          message: 'Egani ish maydonidan chiqarib bo‘lmaydi',
+          message: 'data.error.ownerRemove',
         })
       }
       return gateway.removeMember(workspaceId, userId)

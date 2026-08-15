@@ -6,9 +6,15 @@ export interface CapturedValue {
   value: string
 }
 
+export interface CaptureMiss {
+  target: string
+  reason: string
+  path?: string
+}
+
 export interface CaptureOutcome {
   captured: CapturedValue[]
-  missed: { target: string; reason: string }[]
+  missed: CaptureMiss[]
 }
 
 function pick(root: unknown, path: string): unknown {
@@ -78,7 +84,7 @@ export function applyCaptures(
   }
 
   const captured: CapturedValue[] = []
-  const missed: { target: string; reason: string }[] = []
+  const missed: CaptureMiss[] = []
 
   for (const rule of active) {
     const target = rule.target.trim()
@@ -86,7 +92,7 @@ export function applyCaptures(
     if (rule.source === 'header') {
       const value = headerValue(response.headers, rule.path)
       if (value === undefined) {
-        missed.push({ target, reason: `«${rule.path}» headeri javobda yo'q` })
+        missed.push({ target, reason: 'capture.reason.noHeader', path: rule.path })
         continue
       }
       captured.push({ key: target, value })
@@ -94,13 +100,13 @@ export function applyCaptures(
     }
 
     if (!bodyParsed) {
-      missed.push({ target, reason: 'Javob JSON emas' })
+      missed.push({ target, reason: 'capture.reason.notJson' })
       continue
     }
 
     const value = stringify(pick(body, rule.path))
     if (value === null) {
-      missed.push({ target, reason: `«${rule.path}» javobda topilmadi` })
+      missed.push({ target, reason: 'capture.reason.notFound', path: rule.path })
       continue
     }
 

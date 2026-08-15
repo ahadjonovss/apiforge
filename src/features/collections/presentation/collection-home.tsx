@@ -7,6 +7,7 @@ import { MarkdownEditor } from '@/shared/ui/markdown-editor'
 import { DataErrorNote } from '@/shared/ui/data-error-note'
 import type { ApiCollection } from '../domain/collection'
 import { useCollectionsStore } from './collections-store'
+import { useT } from '@/app/providers/i18n-provider'
 
 const TEMPLATE = `# Kirish
 
@@ -33,6 +34,7 @@ export function CollectionHome({
   collection: ApiCollection
   onOpenSettings: () => void
 }) {
+  const t = useT()
   const endpoints = useCollectionsStore((state) => state.endpoints)
   const folders = useCollectionsStore((state) => state.folders)
   const pending = useCollectionsStore((state) => state.pending)
@@ -57,7 +59,7 @@ export function CollectionHome({
           <div className="min-w-0">
             <h1 className="text-xl font-semibold">{collection.name}</h1>
             <p className="mt-1 text-xs text-muted-foreground">
-              {collection.description || 'Tavsifsiz'}
+              {collection.description || t('workspaces.noDescription')}
             </p>
           </div>
 
@@ -73,22 +75,22 @@ export function CollectionHome({
                   }}
                 >
                   <X className="size-3.5" />
-                  Bekor
+                  {t('common.cancel')}
                 </Button>
                 <Button size="sm" loading={pending} onClick={() => void save()}>
                   <Check className="size-3.5" />
-                  Saqlash
+                  {t('common.save')}
                 </Button>
               </>
             ) : (
               <>
                 <Button size="sm" variant="ghost" onClick={onOpenSettings}>
                   <Settings className="size-3.5" />
-                  Sozlamalar
+                  {t('collection.settings')}
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
                   <Pencil className="size-3.5" />
-                  Tahrirlash
+                  {t('common.edit')}
                 </Button>
               </>
             )}
@@ -97,10 +99,10 @@ export function CollectionHome({
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { label: 'Endpoint', value: endpoints.length },
-            { label: 'Papka', value: folders.length },
-            { label: "O'zgaruvchi", value: collection.variables.length },
-            { label: 'Header', value: collection.headers.length },
+            { label: t('collection.statEndpoints'), value: endpoints.length },
+            { label: t('collection.statFolders'), value: folders.length },
+            { label: t('collection.statVariables'), value: collection.variables.length },
+            { label: t('collection.statHeaders'), value: collection.headers.length },
           ].map((stat) => (
             <div key={stat.label} className="rounded-lg border border-border bg-card p-3">
               <p className="text-lg font-semibold">{stat.value}</p>
@@ -111,15 +113,15 @@ export function CollectionHome({
 
         <div className="flex flex-wrap gap-4 border-y border-border py-2 text-[11px] text-muted-foreground">
           <span>
-            Base URL:{' '}
+            {t('collection.baseUrl')}:{' '}
             <span className="font-mono text-foreground">
-              {collection.baseUrl || 'belgilanmagan'}
+              {collection.baseUrl || t('collection.baseUrlUnset')}
             </span>
           </span>
           <span>
             Auth: <span className="font-mono text-foreground">{collection.auth.mode}</span>
           </span>
-          <span>Yangilangan: {formatDateTime(collection.updatedAt)}</span>
+          <span>{t('collection.updatedAt')}: {formatDateTime(collection.updatedAt)}</span>
         </div>
 
         <DataErrorNote error={error} />
@@ -133,7 +135,7 @@ export function CollectionHome({
                 onClick={() => setDraft(TEMPLATE)}
                 className="w-fit text-[11px] text-primary hover:underline"
               >
-                Namuna shablonni qo'yish
+                {t('collection.template')}
               </button>
             )}
           </div>
@@ -143,14 +145,14 @@ export function CollectionHome({
           <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border p-10 text-center">
             <FileText className="size-7 text-muted-foreground/40" />
             <div>
-              <p className="text-sm font-medium">Hujjat yozilmagan</p>
+              <p className="text-sm font-medium">{t('collection.docsEmpty')}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Markdown formatida to'plam haqida yozing — jamoa shu yerdan boshlaydi
+                {t('collection.docsEmptyHint')}
               </p>
             </div>
             <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
               <Pencil className="size-3.5" />
-              Yozishni boshlash
+              {t('collection.startWriting')}
             </Button>
           </div>
         )}
