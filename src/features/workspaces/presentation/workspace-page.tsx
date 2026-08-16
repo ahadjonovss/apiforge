@@ -335,7 +335,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
             <div className="flex items-center gap-1">
               <Button size="sm" variant="ghost" onClick={() => setImporting(true)}>
                 <Upload className="size-3.5" />
-                {t('workspace.fromPostman')}
+                {t('workspace.import')}
               </Button>
               <Button size="sm" variant="outline" onClick={() => setAddingCollection(true)}>
                 <Plus className="size-3.5" />

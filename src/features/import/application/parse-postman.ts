@@ -4,6 +4,7 @@ import type { EnvVariable } from '@/features/environments/domain/environment'
 import type { AuthConfig, RequestBody, ResponseDoc } from '@/features/request/domain/request'
 import {
   ImportFailure,
+  type ImportMessage,
   type ImportPlan,
   type PlannedEndpoint,
   type PlannedFolder,
@@ -41,10 +42,10 @@ function lookup(entries: PostmanKeyValue[] | undefined, key: string): string {
   return entries?.find((entry) => entry.key === key)?.value ?? ''
 }
 
-function toMethod(raw: string | undefined, name: string, warnings: string[]): HttpMethod {
+function toMethod(raw: string | undefined, name: string, warnings: ImportMessage[]): HttpMethod {
   const method = (raw ?? 'GET').toUpperCase() as HttpMethod
   if (HTTP_METHODS.includes(method)) return method
-  warnings.push(`«${name}»: ${raw} metodi qo'llab-quvvatlanmaydi, GET qilib olindi`)
+  warnings.push({ key: 'import.warning.unsupportedMethod', params: { name, method: raw ?? '' } })
   return 'GET'
 }
 
@@ -67,7 +68,7 @@ function toUrl(url: PostmanUrl | string | undefined): { raw: string; params: Key
 function toAuth(
   auth: PostmanAuth | undefined,
   name: string,
-  warnings: string[],
+  warnings: ImportMessage[],
   fallback: AuthConfig,
 ): AuthConfig {
   if (!auth?.type) return fallback
@@ -102,15 +103,15 @@ function toAuth(
 
     default:
       if (UNSUPPORTED_AUTH.includes(auth.type)) {
-        warnings.push(`«${name}»: ${auth.type} auth qo'llab-quvvatlanmaydi, o'tkazib yuborildi`)
+        warnings.push({ key: 'import.warning.unsupportedAuth', params: { name, type: auth.type } })
       } else {
-        warnings.push(`«${name}»: notanish auth turi «${auth.type}», o'tkazib yuborildi`)
+        warnings.push({ key: 'import.warning.unknownAuth', params: { name, type: auth.type } })
       }
       return { mode: 'none' }
   }
 }
 
-function toBody(body: PostmanBody | undefined, name: string, warnings: string[]): RequestBody {
+function toBody(body: PostmanBody | undefined, name: string, warnings: ImportMessage[]): RequestBody {
   const empty: RequestBody = {
     mode: 'none',
     raw: '',
@@ -139,9 +140,7 @@ function toBody(body: PostmanBody | undefined, name: string, warnings: string[])
     case 'formdata': {
       const files = (body.formdata ?? []).filter((entry) => entry.type === 'file')
       if (files.length > 0) {
-        warnings.push(
-          `«${name}»: form-data ichidagi ${files.length} ta fayl maydoni ko'chirilmadi`,
-        )
+        warnings.push({ key: 'import.warning.formDataFiles', params: { name, count: files.length } })
       }
       return {
         ...empty,
@@ -159,7 +158,7 @@ function toBody(body: PostmanBody | undefined, name: string, warnings: string[])
     }
 
     case 'graphql':
-      warnings.push(`«${name}»: GraphQL body JSON ko'rinishiga o'girildi`)
+      warnings.push({ key: 'import.warning.graphqlBody', params: { name } })
       return {
         ...empty,
         mode: 'json',
@@ -174,11 +173,11 @@ function toBody(body: PostmanBody | undefined, name: string, warnings: string[])
       }
 
     case 'file':
-      warnings.push(`«${name}»: fayl body'si ko'chirilmadi`)
+      warnings.push({ key: 'import.warning.fileBody', params: { name } })
       return empty
 
     default:
-      warnings.push(`«${name}»: «${body.mode}» body turi qo'llab-quvvatlanmaydi`)
+      warnings.push({ key: 'import.warning.unsupportedBodyMode', params: { name, mode: body.mode } })
       return empty
   }
 }
@@ -204,7 +203,7 @@ function leadingVariable(url: string): string | null {
   return LEADING_VARIABLE.exec(url.trim())?.[1] ?? null
 }
 
-function promoteBaseUrl(endpoints: PlannedEndpoint[], warnings: string[]): string {
+function promoteBaseUrl(endpoints: PlannedEndpoint[], warnings: ImportMessage[]): string {
   if (endpoints.length === 0) return ''
 
   const candidate = leadingVariable(endpoints[0].url)
@@ -215,9 +214,10 @@ function promoteBaseUrl(endpoints: PlannedEndpoint[], warnings: string[]): strin
     endpoint.url = endpoint.url.trim().replace(LEADING_VARIABLE, '')
   }
 
-  warnings.push(
-    `Barcha so'rovlar «{{${candidate}}}» bilan boshlangani uchun u base URL sifatida ajratildi — qiymatini sozlamalardagi o'zgaruvchilardan bering`,
-  )
+  warnings.push({
+    key: 'import.warning.baseUrlPromoted',
+    params: { variable: `{{${candidate}}}` },
+  })
 
   return `{{${candidate}}}`
 }
@@ -240,20 +240,20 @@ export function parsePostmanCollection(source: string): ImportPlan {
   try {
     parsed = JSON.parse(source) as PostmanCollection
   } catch {
-    throw new ImportFailure("Fayl JSON emas yoki buzilgan")
+    throw new ImportFailure('import.error.notJson')
   }
 
   if (!parsed || typeof parsed !== 'object' || !parsed.info) {
-    throw new ImportFailure("Bu Postman collection fayliga o'xshamaydi (info bo'limi yo'q)")
+    throw new ImportFailure('import.error.notCollection')
   }
 
-  const warnings: string[] = []
+  const warnings: ImportMessage[] = []
   const schema = parsed.info.schema ?? ''
   if (schema && !schema.includes('v2.1') && !schema.includes('v2.0')) {
-    warnings.push('Collection formati v2.x emas — ba’zi maydonlar tushib qolishi mumkin')
+    warnings.push({ key: 'import.warning.schemaVersion' })
   }
   if (hasScript(parsed.event)) {
-    warnings.push("Collection darajasidagi skriptlar ko'chirilmadi")
+    warnings.push({ key: 'import.warning.collectionScript' })
   }
 
   const collectionAuth = toAuth(parsed.auth, parsed.info.name ?? 'collection', warnings, {
@@ -289,7 +289,7 @@ export function parsePostmanCollection(source: string): ImportPlan {
       }
 
       if (!item.request) {
-        warnings.push(`«${name}» na papka, na so'rov — o'tkazib yuborildi`)
+        warnings.push({ key: 'import.warning.notFolderOrRequest', params: { name } })
         return
       }
 
@@ -320,19 +320,18 @@ export function parsePostmanCollection(source: string): ImportPlan {
   walk(parsed.item ?? [], null)
 
   if (scriptedFolders.length > 0) {
-    warnings.push(
-      `«${scriptedFolders.join('», «')}» papkasidagi skriptlar ko'chirilmadi — agar ular token yoki o'zgaruvchi o'rnatgan bo'lsa, qiymatni qo'lda kiritish kerak`,
-    )
+    warnings.push({
+      key: 'import.warning.folderScripts',
+      params: { names: scriptedFolders.join(', ') },
+    })
   }
 
   if (scriptedRequests > 0) {
-    warnings.push(
-      `${scriptedRequests} ta so'rovdagi pre-request/test skriptlari ko'chirilmadi`,
-    )
+    warnings.push({ key: 'import.warning.requestScripts', params: { count: scriptedRequests } })
   }
 
   if (endpoints.length === 0 && folders.length === 0) {
-    throw new ImportFailure("Collection bo'sh — ko'chiradigan narsa topilmadi")
+    throw new ImportFailure('import.error.empty')
   }
 
   const baseUrl = promoteBaseUrl(endpoints, warnings)

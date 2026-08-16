@@ -39,16 +39,26 @@ export interface PlannedEndpoint {
   auth: AuthConfig
 }
 
+export interface ImportMessage {
+  key: string
+  params?: Record<string, string | number>
+}
+
 export interface ImportPlan {
   collection: PlannedCollection
   folders: PlannedFolder[]
   endpoints: PlannedEndpoint[]
-  warnings: string[]
+  warnings: ImportMessage[]
 }
 
 export class ImportFailure extends Error {
-  constructor(message: string) {
-    super(message)
+  readonly key: string
+  readonly params?: Record<string, string | number>
+
+  constructor(key: string, params?: Record<string, string | number>) {
+    super(key)
     this.name = 'ImportFailure'
+    this.key = key
+    this.params = params
   }
 }

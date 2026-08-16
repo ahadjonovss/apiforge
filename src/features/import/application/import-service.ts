@@ -1,19 +1,19 @@
 import { createRequest } from '@/features/request/application/request-factory'
-import type { ImportPlan } from '../domain/import-plan'
+import type { ImportMessage, ImportPlan } from '../domain/import-plan'
 import type { ImportSink } from '../domain/import-sink'
-import { parsePostmanCollection } from './parse-postman'
+import { parseCollectionSource } from './parse-collection-source'
 
 export interface ImportOutcome {
   collectionId: string
   folders: number
   endpoints: number
-  warnings: string[]
+  warnings: ImportMessage[]
 }
 
 export function createImportService(sink: ImportSink) {
   return {
     preview(source: string): ImportPlan {
-      return parsePostmanCollection(source)
+      return parseCollectionSource(source)
     },
 
     async apply(

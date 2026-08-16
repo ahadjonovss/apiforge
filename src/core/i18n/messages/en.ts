@@ -125,7 +125,7 @@ export const en: typeof uz = {
   'workspace.addMembersFirst': 'Add members to the workspace first',
   'workspace.unassigned': 'Unassigned',
   'workspace.removeMember': 'Remove',
-  'workspace.fromPostman': 'From Postman',
+  'workspace.import': 'Import',
 
   'data.error.not-found': 'Not found',
   'data.error.permission-denied': 'You do not have permission for this',
@@ -295,8 +295,12 @@ export const en: typeof uz = {
   'error.hint.urlInvalid': 'Check for stray spaces or characters.',
   'error.title.failed': 'The request failed',
 
-  'import.title': 'Import from Postman',
-  'import.hint': 'Choose a Collection v2.1 JSON file',
+  'import.title': 'Import',
+  'import.hint': 'Import a Postman collection, an OpenAPI/Swagger file (JSON or YAML), or a link',
+  'import.tab.file': 'File',
+  'import.tab.url': 'URL',
+  'import.urlPlaceholder': 'https://api.example.com/swagger.json',
+  'import.urlFetch': 'Fetch',
   'import.pickFile': 'Choose a file',
   'import.pickAnother': 'Choose another file',
   'import.summary': '{folders} folders · {endpoints} endpoints · {variables} variables',
@@ -305,8 +309,32 @@ export const en: typeof uz = {
   'import.readFailed': 'Could not read the file',
   'import.failed': 'Import failed',
   'import.error.notJson': 'The file is not JSON, or it is corrupted',
+  'import.error.notStructured': 'The file could not be read as JSON or YAML',
   'import.error.notCollection': 'This does not look like a Postman collection (no info section)',
+  'import.error.notOpenApi': 'This does not look like an OpenAPI/Swagger document',
+  'import.error.unknownFormat':
+    'Could not detect the file format — it does not look like a Postman collection or an OpenAPI/Swagger document',
   'import.error.empty': 'The collection is empty — nothing to import',
+  'import.error.emptyOpenApi': 'No paths were found in the document — nothing to import',
+  'import.error.fetchFailed': 'Could not fetch from "{url}"',
+  'import.warning.schemaVersion':
+    'The document version could not be detected or is unsupported — some fields may be missing',
+  'import.warning.collectionScript': 'Collection-level scripts were not carried over',
+  'import.warning.unsupportedAuth': '"{name}": {type} auth is not supported, it was skipped',
+  'import.warning.unknownAuth': '"{name}": unknown auth type "{type}", it was skipped',
+  'import.warning.formDataFiles': '"{name}": {count} file field(s) in form-data were not carried over',
+  'import.warning.graphqlBody': '"{name}": the GraphQL body was converted to JSON',
+  'import.warning.fileBody': '"{name}": the file body was not carried over',
+  'import.warning.unsupportedBodyMode': '"{name}": "{mode}" body type is not supported',
+  'import.warning.unsupportedMethod': '"{name}": {method} method is not supported, GET was used instead',
+  'import.warning.notFolderOrRequest': '"{name}" is neither a folder nor a request — it was skipped',
+  'import.warning.folderScripts':
+    'Scripts in folder(s) "{names}" were not carried over — if they set a token or variable, enter the value manually',
+  'import.warning.requestScripts': 'Pre-request/test scripts in {count} request(s) were not carried over',
+  'import.warning.baseUrlPromoted':
+    'All requests started with "{variable}", so it was extracted as the base URL — set its value in the settings variables',
+  'import.warning.multipleTags':
+    '"{name}": has multiple tags ({tags}) — only the first one was used as a folder',
 
   'landing.badge': 'An API workbench for teams',
   'landing.title': 'Your APIs in one place — documented, testable, shared',

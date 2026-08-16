@@ -123,7 +123,7 @@ export const uz = {
   'workspace.addMembersFirst': "Avval ish maydoniga a'zo qo'shing",
   'workspace.unassigned': 'Biriktirilmagan',
   'workspace.removeMember': 'Chiqarish',
-  'workspace.fromPostman': "Postman'dan",
+  'workspace.import': 'Import',
 
   'data.error.not-found': 'Topilmadi',
   'data.error.permission-denied': "Bu amalga ruxsatingiz yo'q",
@@ -294,8 +294,12 @@ export const uz = {
   'error.hint.urlInvalid': "Manzilda ortiqcha bo'sh joy yoki belgi bormi tekshiring.",
   'error.title.failed': "So'rov bajarilmadi",
 
-  'import.title': "Postman'dan import",
-  'import.hint': 'Collection v2.1 JSON faylini tanlang',
+  'import.title': 'Import',
+  'import.hint': "Postman collection, OpenAPI/Swagger fayl (JSON yoki YAML) yoki havola orqali import qiling",
+  'import.tab.file': 'Fayl',
+  'import.tab.url': 'Havola',
+  'import.urlPlaceholder': 'https://api.example.com/swagger.json',
+  'import.urlFetch': 'Yuklab olish',
   'import.pickFile': 'Fayl tanlash',
   'import.pickAnother': 'Boshqa fayl tanlash',
   'import.summary': '{folders} papka · {endpoints} endpoint · {variables} o‘zgaruvchi',
@@ -304,8 +308,32 @@ export const uz = {
   'import.readFailed': "Faylni o'qib bo'lmadi",
   'import.failed': 'Import bajarilmadi',
   'import.error.notJson': 'Fayl JSON emas yoki buzilgan',
+  'import.error.notStructured': "Fayl JSON yoki YAML sifatida o'qib bo'lmadi",
   'import.error.notCollection': "Bu Postman collection fayliga o'xshamaydi (info bo'limi yo'q)",
+  'import.error.notOpenApi': "Bu OpenAPI/Swagger hujjatiga o'xshamaydi",
+  'import.error.unknownFormat':
+    "Fayl formati aniqlanmadi — bu Postman collection yoki OpenAPI/Swagger hujjatiga o'xshamaydi",
   'import.error.empty': "Collection bo'sh — ko'chiradigan narsa topilmadi",
+  'import.error.emptyOpenApi': "Hujjatda birorta ham yo'l (path) topilmadi — ko'chiradigan narsa yo'q",
+  'import.error.fetchFailed': "«{url}» havoladan yuklab bo'lmadi",
+  'import.warning.schemaVersion':
+    "Hujjat versiyasi aniqlanmadi yoki qo'llab-quvvatlanmagan — ba'zi maydonlar tushib qolishi mumkin",
+  'import.warning.collectionScript': "Collection darajasidagi skriptlar ko'chirilmadi",
+  'import.warning.unsupportedAuth': "«{name}»: {type} auth qo'llab-quvvatlanmaydi, o'tkazib yuborildi",
+  'import.warning.unknownAuth': "«{name}»: notanish auth turi «{type}», o'tkazib yuborildi",
+  'import.warning.formDataFiles': "«{name}»: form-data ichidagi {count} ta fayl maydoni ko'chirilmadi",
+  'import.warning.graphqlBody': "«{name}»: GraphQL body JSON ko'rinishiga o'girildi",
+  'import.warning.fileBody': "«{name}»: fayl body'si ko'chirilmadi",
+  'import.warning.unsupportedBodyMode': "«{name}»: «{mode}» body turi qo'llab-quvvatlanmaydi",
+  'import.warning.unsupportedMethod': "«{name}»: {method} metodi qo'llab-quvvatlanmaydi, GET qilib olindi",
+  'import.warning.notFolderOrRequest': "«{name}» na papka, na so'rov — o'tkazib yuborildi",
+  'import.warning.folderScripts':
+    "«{names}» papkasidagi skriptlar ko'chirilmadi — agar ular token yoki o'zgaruvchi o'rnatgan bo'lsa, qiymatni qo'lda kiritish kerak",
+  'import.warning.requestScripts': '{count} ta so‘rovdagi pre-request/test skriptlari ko‘chirilmadi',
+  'import.warning.baseUrlPromoted':
+    "Barcha so'rovlar «{variable}» bilan boshlangani uchun u base URL sifatida ajratildi — qiymatini sozlamalardagi o'zgaruvchilardan bering",
+  'import.warning.multipleTags':
+    "«{name}»: bir nechta tag bor ({tags}) — faqat birinchisi papka sifatida ishlatildi",
 
   'landing.badge': 'Jamoa uchun API ish stoli',
   'landing.title': 'API’laringiz bir joyda — hujjatlangan, sinaladigan, ulashiladigan',

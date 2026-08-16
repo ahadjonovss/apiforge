@@ -125,7 +125,7 @@ export const ru: typeof uz = {
   'workspace.addMembersFirst': 'Сначала добавьте участников в пространство',
   'workspace.unassigned': 'Без команды',
   'workspace.removeMember': 'Исключить',
-  'workspace.fromPostman': 'Из Postman',
+  'workspace.import': 'Импорт',
 
   'data.error.not-found': 'Не найдено',
   'data.error.permission-denied': 'Нет прав на это действие',
@@ -295,8 +295,12 @@ export const ru: typeof uz = {
   'error.hint.urlInvalid': 'Проверьте, нет ли лишних пробелов или символов.',
   'error.title.failed': 'Запрос не выполнен',
 
-  'import.title': 'Импорт из Postman',
-  'import.hint': 'Выберите JSON файл Collection v2.1',
+  'import.title': 'Импорт',
+  'import.hint': 'Импортируйте коллекцию Postman, файл OpenAPI/Swagger (JSON или YAML) или ссылку',
+  'import.tab.file': 'Файл',
+  'import.tab.url': 'Ссылка',
+  'import.urlPlaceholder': 'https://api.example.com/swagger.json',
+  'import.urlFetch': 'Загрузить',
   'import.pickFile': 'Выбрать файл',
   'import.pickAnother': 'Выбрать другой файл',
   'import.summary': '{folders} папок · {endpoints} эндпоинтов · {variables} переменных',
@@ -305,8 +309,32 @@ export const ru: typeof uz = {
   'import.readFailed': 'Не удалось прочитать файл',
   'import.failed': 'Импорт не выполнен',
   'import.error.notJson': 'Файл не является JSON или повреждён',
+  'import.error.notStructured': 'Не удалось прочитать файл как JSON или YAML',
   'import.error.notCollection': 'Это не похоже на файл коллекции Postman (нет раздела info)',
+  'import.error.notOpenApi': 'Это не похоже на документ OpenAPI/Swagger',
+  'import.error.unknownFormat':
+    'Не удалось определить формат файла — это не похоже ни на коллекцию Postman, ни на документ OpenAPI/Swagger',
   'import.error.empty': 'Коллекция пуста — переносить нечего',
+  'import.error.emptyOpenApi': 'В документе не найдено ни одного пути (path) — переносить нечего',
+  'import.error.fetchFailed': 'Не удалось загрузить по ссылке «{url}»',
+  'import.warning.schemaVersion':
+    'Версия документа не определена или не поддерживается — некоторые поля могут быть потеряны',
+  'import.warning.collectionScript': 'Скрипты уровня коллекции не перенесены',
+  'import.warning.unsupportedAuth': '«{name}»: авторизация {type} не поддерживается, пропущена',
+  'import.warning.unknownAuth': '«{name}»: неизвестный тип авторизации «{type}», пропущена',
+  'import.warning.formDataFiles': '«{name}»: {count} файловых полей в form-data не перенесены',
+  'import.warning.graphqlBody': '«{name}»: тело GraphQL преобразовано в JSON',
+  'import.warning.fileBody': '«{name}»: файловое тело запроса не перенесено',
+  'import.warning.unsupportedBodyMode': '«{name}»: тип тела «{mode}» не поддерживается',
+  'import.warning.unsupportedMethod': '«{name}»: метод {method} не поддерживается, использован GET',
+  'import.warning.notFolderOrRequest': '«{name}» не является ни папкой, ни запросом — пропущено',
+  'import.warning.folderScripts':
+    'Скрипты в папке(ах) «{names}» не перенесены — если они устанавливали токен или переменную, введите значение вручную',
+  'import.warning.requestScripts': 'Pre-request/test скрипты в {count} запросах не перенесены',
+  'import.warning.baseUrlPromoted':
+    'Все запросы начинались с «{variable}», поэтому это вынесено в base URL — задайте значение в переменных настроек',
+  'import.warning.multipleTags':
+    '«{name}»: указано несколько тегов ({tags}) — как папка использован только первый',
 
   'landing.badge': 'Рабочее место для API',
   'landing.title': 'Все ваши API в одном месте — с документацией, тестами и доступом для команды',
