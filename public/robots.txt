@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /$
+Allow: /login
+Allow: /register
+Disallow: /workspace/
+Disallow: /workspaces
+Disallow: /profile
+
+Sitemap: https://apiforge.uz/sitemap.xml
