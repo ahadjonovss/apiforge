@@ -1,14 +1,8 @@
 import { AlertCircle, Check, Loader2 } from 'lucide-react'
+import { formatTime } from '@/core/lib/format'
 import type { Tab } from '@/features/tabs'
 import { useCollectionsStore } from './collections-store'
 import { useT } from '@/app/providers/i18n-provider'
-
-function clock(value: number): string {
-  return new Date(value).toLocaleTimeString('uz-UZ', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
 
 export function SaveStatus({ tab }: { tab: Tab }) {
   const t = useT()
@@ -49,7 +43,7 @@ export function SaveStatus({ tab }: { tab: Tab }) {
   return (
     <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
       <Check className="size-3 text-status-success" />
-      {savedAt ? t('save.saved', { time: clock(savedAt) }) : t('save.savedPlain')}
+      {savedAt ? t('save.saved', { time: formatTime(savedAt) }) : t('save.savedPlain')}
     </span>
   )
 }
