@@ -12,6 +12,7 @@ import { ResponsePanel } from '@/features/request/presentation/response-panel'
 import { EndpointDocs } from '@/features/request/presentation/endpoint-docs'
 import { buildTree } from '../application/tree'
 import type { Folder } from '../domain/folder'
+import { useConfirm } from '@/shared/ui/confirm-dialog'
 import { useCollectionsStore } from './collections-store'
 import { CollectionHome } from './collection-home'
 import { SaveStatus } from './save-status'
@@ -45,6 +46,7 @@ export function CollectionPage({
   const setActiveTab = useTabsStore((state) => state.setActiveTab)
   const syncInherited = useTabsStore((state) => state.syncInherited)
 
+  const { ask, dialog } = useConfirm()
   const [view, setView] = useState<'home' | 'endpoint'>('home')
   const [docsOpen, setDocsOpen] = useState(false)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
@@ -121,9 +123,20 @@ export function CollectionPage({
       setEndpointModal({ endpoint: null, parentId })
     },
     onEditFolder: (folder) => setFolderModal({ folder, parentId: folder.parentId }),
-    onDeleteFolder: (folderId) => void removeFolder(workspaceId, folderId),
+    onDeleteFolder: (folderId) =>
+      ask({
+        title: t('confirm.deleteFolder'),
+        description: t('confirm.deleteFolderHint'),
+        onConfirm: () => removeFolder(workspaceId, folderId),
+      }),
     onEditEndpoint: (endpoint) => setEndpointModal({ endpoint, parentId: endpoint.folderId }),
-    onDeleteEndpoint: (endpointId) => void removeEndpoint(workspaceId, endpointId),
+    onDeleteEndpoint: (endpointId) =>
+      ask({
+        title: t('confirm.deleteEndpoint', {
+          name: endpoints.find((item) => item.id === endpointId)?.name ?? '',
+        }),
+        onConfirm: () => removeEndpoint(workspaceId, endpointId),
+      }),
   }
 
   if (loading && !current) {
@@ -302,6 +315,7 @@ export function CollectionPage({
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
       />
+      {dialog}
     </Group>
   )
 }

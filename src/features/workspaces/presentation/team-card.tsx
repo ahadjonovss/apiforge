@@ -1,12 +1,14 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Pencil, Plus, Trash2, UserMinus } from 'lucide-react'
+import { ChevronDown, ChevronRight, Pencil, Trash2, UserMinus, UserPlus } from 'lucide-react'
 import { cn } from '@/core/lib/cn'
 import { Button } from '@/shared/ui/button'
 import { TextField } from '@/shared/ui/text-field'
+import { useConfirm } from '@/shared/ui/confirm-dialog'
 import { useT } from '@/app/providers/i18n-provider'
 import { TEAM_ROLES, type Team, type TeamRole } from '../domain/team'
 import type { WorkspaceMember } from '../domain/workspace'
 import { useWorkspacesStore } from './workspaces-store'
+import { TeamInviteDialog } from './team-invite-dialog'
 
 interface Props {
   team: Team
@@ -21,13 +23,14 @@ export function TeamCard({ team, members, canManage }: Props) {
   const renameTeam = useWorkspacesStore((state) => state.renameTeam)
   const setTeamMemberRole = useWorkspacesStore((state) => state.setTeamMemberRole)
 
+  const { ask, dialog } = useConfirm()
   const [open, setOpen] = useState(false)
+  const [inviting, setInviting] = useState(false)
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(team.name)
   const [description, setDescription] = useState(team.description)
 
   const inTeam = members.filter((member) => team.members[member.userId])
-  const available = members.filter((member) => !team.members[member.userId])
 
   const label = (member: WorkspaceMember) => member.displayName || member.email
 
@@ -68,7 +71,13 @@ export function TeamCard({ team, members, canManage }: Props) {
             </button>
             <button
               type="button"
-              onClick={() => void removeTeam(team.workspaceId, team.id)}
+              onClick={() =>
+                ask({
+                  title: t('confirm.deleteTeam', { name: team.name }),
+                  description: t('confirm.deleteTeamHint'),
+                  onConfirm: () => removeTeam(team.workspaceId, team.id),
+                })
+              }
               aria-label={t('common.delete')}
               className="rounded p-1 text-muted-foreground transition hover:bg-accent hover:text-destructive"
             >
@@ -153,7 +162,14 @@ export function TeamCard({ team, members, canManage }: Props) {
                   {canManage && (
                     <button
                       type="button"
-                      onClick={() => void setTeamMemberRole(team, member.userId, null)}
+                      onClick={() =>
+                        ask({
+                          title: t('confirm.removeFromTeam', { name: label(member) }),
+                          description: t('confirm.removeFromTeamHint'),
+                          confirmLabel: t('workspace.removeMember'),
+                          onConfirm: () => setTeamMemberRole(team, member.userId, null),
+                        })
+                      }
                       aria-label={t('workspace.removeMember')}
                       className="rounded p-1 text-muted-foreground transition hover:bg-accent hover:text-destructive"
                     >
@@ -166,31 +182,25 @@ export function TeamCard({ team, members, canManage }: Props) {
           )}
 
           {canManage && (
-            <div className="flex flex-col gap-1">
-              <p className="text-[11px] font-medium text-muted-foreground">
+            <div>
+              <Button size="sm" variant="ghost" onClick={() => setInviting(true)}>
+                <UserPlus className="size-3.5" />
                 {t('team.addPerson')}
-              </p>
-              {available.length === 0 ? (
-                <p className="text-[11px] text-muted-foreground">{t('team.allAdded')}</p>
-              ) : (
-                <div className="flex flex-wrap gap-1">
-                  {available.map((member) => (
-                    <button
-                      key={member.userId}
-                      type="button"
-                      onClick={() => void setTeamMemberRole(team, member.userId, 'member')}
-                      className="flex items-center gap-1 rounded-full border border-dashed border-border px-2 py-0.5 text-[11px] text-muted-foreground transition hover:border-primary hover:text-foreground"
-                    >
-                      <Plus className="size-3" />
-                      {label(member)}
-                    </button>
-                  ))}
-                </div>
-              )}
+              </Button>
             </div>
           )}
+
         </div>
       )}
+
+      <TeamInviteDialog
+        workspaceId={team.workspaceId}
+        team={team}
+        members={members}
+        open={inviting}
+        onClose={() => setInviting(false)}
+      />
+      {dialog}
     </li>
   )
 }

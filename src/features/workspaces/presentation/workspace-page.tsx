@@ -13,6 +13,7 @@ import { collectionSchema, type CollectionValues } from '@/features/collections/
 import { ImportDialog } from '@/features/import/presentation/import-dialog'
 import { memberSchema, teamSchema, type MemberValues, type TeamValues } from '../application/schemas'
 import { canManage, canManageCollections } from '../domain/workspace'
+import { useConfirm } from '@/shared/ui/confirm-dialog'
 import { useWorkspacesStore } from './workspaces-store'
 import { WorkspaceHome } from './workspace-home'
 import { TeamCard } from './team-card'
@@ -276,6 +277,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
   const loadCollections = useCollectionsStore((state) => state.loadCollections)
   const removeCollection = useCollectionsStore((state) => state.removeCollection)
 
+  const { ask, dialog } = useConfirm()
   const [addingMember, setAddingMember] = useState(false)
   const [addingTeam, setAddingTeam] = useState(false)
   const [addingCollection, setAddingCollection] = useState(false)
@@ -377,7 +379,13 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
                   {manages && (
                     <button
                       type="button"
-                      onClick={() => void removeCollection(workspaceId, item.id)}
+                      onClick={() =>
+                        ask({
+                          title: t('confirm.deleteCollection', { name: item.name }),
+                          description: t('confirm.deleteCollectionHint'),
+                          onConfirm: () => removeCollection(workspaceId, item.id),
+                        })
+                      }
                       aria-label={t('common.delete')}
                       className="rounded p-1 text-muted-foreground opacity-0 transition hover:bg-accent hover:text-destructive group-hover:opacity-100"
                     >
@@ -468,7 +476,16 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
                 {owner && member.role !== 'owner' && (
                   <button
                     type="button"
-                    onClick={() => void removeMember(workspaceId, member.userId)}
+                    onClick={() =>
+                      ask({
+                        title: t('confirm.removeMember', {
+                          name: member.displayName || member.email,
+                        }),
+                        description: t('confirm.removeMemberHint'),
+                        confirmLabel: t('workspace.removeMember'),
+                        onConfirm: () => removeMember(workspaceId, member.userId),
+                      })
+                    }
                     aria-label={t('workspace.removeMember')}
                     className="rounded p-1 text-muted-foreground opacity-0 transition hover:bg-accent hover:text-destructive group-hover:opacity-100"
                   >
@@ -503,6 +520,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
         onClose={() => setImporting(false)}
         onImported={() => void loadCollections(workspaceId)}
       />
+      {dialog}
     </div>
   )
 }

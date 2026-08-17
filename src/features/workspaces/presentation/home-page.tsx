@@ -10,6 +10,7 @@ import { TextField } from '@/shared/ui/text-field'
 import { DataErrorNote } from '@/shared/ui/data-error-note'
 import { useAuthStore } from '@/features/auth'
 import { workspaceSchema, type WorkspaceValues } from '../application/schemas'
+import { useConfirm } from '@/shared/ui/confirm-dialog'
 import { useWorkspacesStore } from './workspaces-store'
 import { useT } from '@/app/providers/i18n-provider'
 
@@ -89,6 +90,7 @@ export function HomePage() {
   const loadWorkspaces = useWorkspacesStore((state) => state.loadWorkspaces)
   const removeWorkspace = useWorkspacesStore((state) => state.removeWorkspace)
 
+  const { ask, dialog } = useConfirm()
   const [creating, setCreating] = useState(false)
 
   useEffect(() => {
@@ -154,7 +156,13 @@ export function HomePage() {
               {workspace.ownerId === user?.id && (
                 <button
                   type="button"
-                  onClick={() => void removeWorkspace(workspace.id)}
+                  onClick={() =>
+                    ask({
+                      title: t('confirm.deleteWorkspace', { name: workspace.name }),
+                      description: t('confirm.deleteWorkspaceHint'),
+                      onConfirm: () => removeWorkspace(workspace.id),
+                    })
+                  }
                   aria-label={t('common.delete')}
                   className="absolute right-3 top-3 rounded p-1 text-muted-foreground opacity-0 transition hover:bg-accent hover:text-destructive group-hover:opacity-100"
                 >
@@ -167,6 +175,7 @@ export function HomePage() {
       </div>
 
       <CreateWorkspaceModal open={creating} onClose={() => setCreating(false)} />
+      {dialog}
     </div>
   )
 }

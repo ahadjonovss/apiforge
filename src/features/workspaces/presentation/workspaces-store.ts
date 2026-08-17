@@ -34,6 +34,12 @@ interface WorkspacesState {
   setTeamMemberRole: (team: Team, userId: string, role: TeamRole | null) => Promise<boolean>
   renameTeam: (workspaceId: string, teamId: string, name: string, description: string) => Promise<boolean>
   changeMemberRole: (workspaceId: string, userId: string, role: WorkspaceRole) => Promise<boolean>
+  inviteToTeam: (
+    workspaceId: string,
+    team: Team,
+    email: string,
+    role: TeamRole,
+  ) => Promise<boolean>
 }
 
 function toDetail(error: unknown): DataErrorDetail {
@@ -159,6 +165,23 @@ export const useWorkspacesStore = create<WorkspacesState>((set, get) => {
     renameTeam: (workspaceId, teamId, name, description) =>
       run(async () => {
         await teamService.rename(workspaceId, teamId, name, description)
+        set({ teams: await teamService.list(workspaceId) })
+      }),
+
+    inviteToTeam: (workspaceId, team, email, role) =>
+      run(async () => {
+        const wanted = email.trim().toLowerCase()
+        let target = get().members.find(
+          (member) => member.email.toLowerCase() === wanted,
+        )
+
+        if (!target) {
+          target = await workspaceService.addMemberByEmail(workspaceId, email, 'member')
+          set({ members: await workspaceService.listMembers(workspaceId) })
+        }
+
+        const fresh = (await teamService.list(workspaceId)).find((item) => item.id === team.id)
+        await teamService.setMemberRole(fresh ?? team, target.userId, role)
         set({ teams: await teamService.list(workspaceId) })
       }),
 
