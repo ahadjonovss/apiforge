@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
+import { xml } from '@codemirror/lang-xml'
+import { html } from '@codemirror/lang-html'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { Send, Loader2 } from 'lucide-react'
 import { cn } from '@/core/lib/cn'
@@ -11,6 +13,8 @@ import { useTabsStore, type Tab } from '@/features/tabs'
 import type { BodyMode } from '../domain/request'
 import { interpolate } from '../application/interpolate'
 import { AuthEditor } from './auth-editor'
+import { BinaryEditor } from './binary-editor'
+import { FormDataEditor } from './form-data-editor'
 import { CaptureEditor } from './capture-editor'
 import { InheritedHeaders } from './inherited-headers'
 import { useT } from '@/app/providers/i18n-provider'
@@ -20,7 +24,17 @@ const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i
 const SECTIONS = ['Params', 'Headers', 'Body', 'Auth', 'Capture'] as const
 type Section = (typeof SECTIONS)[number]
 
-const BODY_MODES: BodyMode[] = ['none', 'json', 'raw', 'urlencoded', 'form-data']
+const BODY_MODES: BodyMode[] = ['none', 'json', 'raw', 'urlencoded', 'form-data', 'binary']
+
+const RAW_LANGUAGES = ['json', 'xml', 'html', 'text'] as const
+type RawLanguage = (typeof RAW_LANGUAGES)[number]
+
+function languageExtension(language: RawLanguage) {
+  if (language === 'json') return [json()]
+  if (language === 'xml') return [xml()]
+  if (language === 'html') return [html()]
+  return []
+}
 
 export function RequestPanel({ tab }: { tab: Tab }) {
   const t = useT()
@@ -146,11 +160,39 @@ export function RequestPanel({ tab }: { tab: Tab }) {
               ))}
             </div>
 
+            {request.body.mode === 'raw' && (
+              <div className="flex items-center gap-2 border-b border-border px-3 py-1.5">
+                <span className="text-[11px] text-muted-foreground">{t('body.language')}</span>
+                <select
+                  value={request.body.rawLanguage ?? 'text'}
+                  onChange={(event) =>
+                    patchRequest(tab.id, {
+                      body: {
+                        ...request.body,
+                        rawLanguage: event.target.value as RawLanguage,
+                      },
+                    })
+                  }
+                  className="rounded border border-border bg-card px-1.5 py-0.5 text-[11px] outline-none focus:ring-1 focus:ring-ring"
+                >
+                  {RAW_LANGUAGES.map((language) => (
+                    <option key={language} value={language}>
+                      {t(`body.lang.${language}` as never)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             {(request.body.mode === 'json' || request.body.mode === 'raw') && (
               <CodeMirror
                 value={request.body.raw ?? ''}
                 onChange={(raw) => patchRequest(tab.id, { body: { ...request.body, raw } })}
-                extensions={request.body.mode === 'json' ? [json()] : []}
+                extensions={
+                  request.body.mode === 'json'
+                    ? [json()]
+                    : languageExtension(request.body.rawLanguage ?? 'text')
+                }
                 theme={resolved === 'dark' ? oneDark : 'light'}
                 height="100%"
                 className="min-h-0 flex-1 text-xs"
@@ -167,11 +209,9 @@ export function RequestPanel({ tab }: { tab: Tab }) {
               />
             )}
 
-            {request.body.mode === 'form-data' && (
-              <div className="p-4 text-xs text-muted-foreground">
-                {t('request.formDataMissing')}
-              </div>
-            )}
+            {request.body.mode === 'form-data' && <FormDataEditor tab={tab} />}
+
+            {request.body.mode === 'binary' && <BinaryEditor tab={tab} />}
 
             {request.body.mode === 'none' && (
               <div className="p-4 text-xs text-muted-foreground">

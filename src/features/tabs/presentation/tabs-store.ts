@@ -18,6 +18,7 @@ interface TabsState {
   setActiveTab: (tabId: string) => void
   patchRequest: (tabId: string, patch: Partial<RequestDef>) => void
   markSaved: (tabId: string, revision: number) => void
+  setFile: (tabId: string, key: string, file: File | null) => void
   clearCaptures: (tabId: string) => void
   syncInherited: (collectionId: string, inherited: InheritedConfig) => void
   send: (tabId: string) => Promise<void>
@@ -35,6 +36,7 @@ function makeTab(request: RequestDef, inherited: InheritedConfig | null): Tab {
     revision: 0,
     captures: null,
     captureMisses: [],
+    files: {},
   }
 }
 
@@ -83,6 +85,17 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       ),
     })),
 
+  setFile: (tabId, key, file) =>
+    set((state) => ({
+      tabs: state.tabs.map((tab) => {
+        if (tab.id !== tabId) return tab
+        const files = { ...tab.files }
+        if (file) files[key] = file
+        else delete files[key]
+        return { ...tab, files }
+      }),
+    })),
+
   clearCaptures: (tabId) =>
     set((state) => ({
       tabs: state.tabs.map((tab) => (tab.id === tabId ? { ...tab, captures: null } : tab)),
@@ -109,6 +122,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     try {
       const response = await sendRequest(tab.request, {
         inherited: tab.inherited ?? undefined,
+        files: tab.files,
       })
       const outcome = applyCaptures(tab.request.captures ?? [], response)
       patchTab({

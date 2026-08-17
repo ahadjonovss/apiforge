@@ -13,7 +13,7 @@ export function createSendRequest(gateway: RequestGateway) {
     const scope = { ...(options.inherited?.variables ?? {}), ...(options.scope ?? {}) }
     const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS
 
-    const call = buildHttpCall(request, scope, options.inherited)
+    const call = buildHttpCall(request, scope, options.inherited, options.files)
 
     const timeoutSignal = AbortSignal.timeout(timeoutMs)
     const signal = options.signal

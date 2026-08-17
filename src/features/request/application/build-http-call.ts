@@ -7,6 +7,8 @@ import { interpolate } from './interpolate'
 
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i
 
+export const BINARY_FILE_KEY = '__binary__'
+
 export function joinUrl(baseUrl: string, path: string): string {
   const base = baseUrl.trim()
   const raw = path.trim()
@@ -116,7 +118,12 @@ function buildHeaders(
   return headers
 }
 
-function buildBody(request: RequestDef, headers: Headers, scope: VariableScope): BodyInit | null {
+function buildBody(
+  request: RequestDef,
+  headers: Headers,
+  scope: VariableScope,
+  files?: Record<string, File>,
+): BodyInit | null {
   const body = request.body
 
   if (request.method === 'GET' || request.method === 'HEAD') return null
@@ -147,10 +154,25 @@ function buildBody(request: RequestDef, headers: Headers, scope: VariableScope):
       const form = new FormData()
       for (const field of body.formData ?? []) {
         if (!field.enabled || !field.key.trim()) continue
-        form.append(interpolate(field.key, scope), interpolate(field.value, scope))
+        const key = interpolate(field.key, scope)
+
+        if (field.type === 'file') {
+          const file = files?.[field.id]
+          if (file) form.append(key, file, file.name)
+          continue
+        }
+
+        form.append(key, interpolate(field.value, scope))
       }
       headers.delete('Content-Type')
       return form
+    }
+
+    case 'binary': {
+      const file = files?.[BINARY_FILE_KEY]
+      if (!file) return null
+      if (!headers.has('Content-Type') && file.type) headers.set('Content-Type', file.type)
+      return file
     }
 
     default:
@@ -162,10 +184,11 @@ export function buildHttpCall(
   request: RequestDef,
   scope: VariableScope,
   inherited?: InheritedConfig,
+  files?: Record<string, File>,
 ): HttpCall {
   const url = buildUrl(request, scope, inherited)
   const headers = buildHeaders(request, scope, inherited)
-  const body = buildBody(request, headers, scope)
+  const body = buildBody(request, headers, scope, files)
 
   const auth = effectiveAuth(request, inherited)
   if (auth.mode === 'apiKey' && auth.apiKey?.addTo === 'query') {

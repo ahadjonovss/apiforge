@@ -161,6 +161,27 @@ katalogda faqat email, ism va avatar bor.
 so'raladi — bu kompozit indeks talab qiladi, u `firestore.indexes.json` da.
 Emulyator indekssiz ham ishlaydi, real Firestore esa yo'q.
 
+## Body turlari va fayllar
+
+Qo'llab-quvvatlanadi: `none`, `json`, `raw` (json/xml/html/text tanlanadi),
+`urlencoded`, `form-data` (matn va fayl maydonlari), `binary`.
+
+**Fayllar `RequestDef` da saqlanmaydi.** Brauzerdagi `File` obyektini Firestore'ga
+yozib bo'lmaydi, shuning uchun hujjatda faqat maydon nomi va `fileName` qoladi;
+faylning o'zi `Tab.files` da, ya'ni sessiyada yashaydi. Sahifa yangilangach
+foydalanuvchi qayta tanlaydi — UI buni ochiq aytadi (`body.fileHint`,
+«qayta tanlang» belgisi).
+
+`buildHttpCall` fayllarni to'rtinchi argument sifatida oladi (`files`), ular
+`SendOptions.files` orqali `tabs-store` dan keladi. Binary fayl `BINARY_FILE_KEY`
+kaliti bilan, form-data fayllari esa maydon `id` si bilan saqlanadi.
+
+Fayl tanlanmagan `file` maydoni **jimgina tushib qoladi** — bo'sh qiymat
+yuborilmaydi, chunki bu serverda ko'pincha validatsiya xatosiga aylanadi.
+
+`form-data` da `Content-Type` ataylab o'chiriladi: boundary'ni brauzer o'zi
+qo'yadi. `binary` da esa fayl turidan olinadi, agar qo'lda yozilmagan bo'lsa.
+
 ## Konfiguratsiya qayerda turadi
 
 Firebase web konfiguratsiyasi `core/config/firebase-config.ts` da, `.env` faqat

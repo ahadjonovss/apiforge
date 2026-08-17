@@ -13,4 +13,5 @@ export interface Tab {
   revision: number
   captures: CapturedValue[] | null
   captureMisses: CaptureMiss[]
+  files: Record<string, File>
 }

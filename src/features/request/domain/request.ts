@@ -14,6 +14,7 @@ export interface RequestBody {
   rawLanguage?: 'json' | 'xml' | 'html' | 'text'
   formData?: FormField[]
   urlencoded?: KeyValue[]
+  binaryName?: string
 }
 
 export type AuthMode = 'none' | 'inherit' | 'bearer' | 'basic' | 'apiKey'

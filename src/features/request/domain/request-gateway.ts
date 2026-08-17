@@ -15,6 +15,7 @@ export interface SendOptions {
   timeoutMs?: number
   signal?: AbortSignal
   inherited?: InheritedConfig
+  files?: Record<string, File>
 }
 
 export interface RequestGateway {

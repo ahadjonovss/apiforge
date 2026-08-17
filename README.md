@@ -116,7 +116,7 @@ Ishlaydi:
 - Markdown hujjatlar: to'plam bosh sahifasi, endpoint docs, status kod misollari
 - Javobdan o'zgaruvchiga olish (capture)
 - Postman collection import
-- Method + URL + params + headers + body (`none`, `json`, `raw`, `urlencoded`)
+- Method + URL + params + headers + body (`none`, `json`, `raw`, `urlencoded`, `form-data`, `binary`)
 - Auth: `inherit`, `bearer`, `basic`, `apiKey`
 - Avtomatik saqlash, xatolarni tasniflash
 - Light/dark tema
