@@ -79,6 +79,18 @@ export function createWorkspaceService(gateway: WorkspaceGateway, users: UserLoo
       return gateway.addMember({ workspaceId, user, role })
     },
 
+    async changeRole(
+      workspaceId: string,
+      userId: string,
+      role: WorkspaceRole,
+    ): Promise<void> {
+      const workspace = await gateway.get(workspaceId)
+      if (workspace?.ownerId === userId) {
+        throw new DataFailure({ kind: 'validation', message: 'data.error.ownerRole' })
+      }
+      return gateway.changeRole(workspaceId, userId, role)
+    },
+
     async removeMember(workspaceId: string, userId: string): Promise<void> {
       const workspace = await gateway.get(workspaceId)
       if (workspace?.ownerId === userId) {

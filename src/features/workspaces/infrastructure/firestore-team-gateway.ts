@@ -10,11 +10,19 @@ import {
 import { db } from '@/core/config/firebase'
 import { toDataFailure } from '@/core/domain/data-error'
 import { newId } from '@/core/lib/id'
-import type { Team } from '../domain/team'
+import type { Team, TeamRole } from '../domain/team'
 import type { CreateTeamInput, TeamGateway } from '../domain/workspace-gateway'
 
 const WORKSPACES = 'workspaces'
 const TEAMS = 'teams'
+
+function toMembers(data: DocumentData): Record<string, TeamRole> {
+  if (data.members && typeof data.members === 'object') {
+    return data.members as Record<string, TeamRole>
+  }
+  const legacy: string[] = data.memberIds ?? []
+  return Object.fromEntries(legacy.map((id) => [id, 'member' as TeamRole]))
+}
 
 function toTeam(workspaceId: string, id: string, data: DocumentData): Team {
   return {
@@ -22,7 +30,7 @@ function toTeam(workspaceId: string, id: string, data: DocumentData): Team {
     workspaceId,
     name: data.name ?? '',
     description: data.description ?? '',
-    memberIds: data.memberIds ?? [],
+    members: toMembers(data),
     createdAt: data.createdAt ?? 0,
     updatedAt: data.updatedAt ?? 0,
   }
@@ -49,7 +57,7 @@ export const firestoreTeamGateway: TeamGateway = {
         workspaceId,
         name,
         description,
-        memberIds: [],
+        members: {},
         createdAt: now,
         updatedAt: now,
       }
@@ -57,7 +65,7 @@ export const firestoreTeamGateway: TeamGateway = {
       await setDoc(doc(db, WORKSPACES, workspaceId, TEAMS, id), {
         name: team.name,
         description: team.description,
-        memberIds: team.memberIds,
+        members: team.members,
         createdAt: now,
         updatedAt: now,
       })
@@ -88,10 +96,10 @@ export const firestoreTeamGateway: TeamGateway = {
     }
   },
 
-  async setMembers(workspaceId, teamId, memberIds) {
+  async setMembers(workspaceId, teamId, members) {
     try {
       await updateDoc(doc(db, WORKSPACES, workspaceId, TEAMS, teamId), {
-        memberIds,
+        members,
         updatedAt: Date.now(),
       })
     } catch (error) {

@@ -1,5 +1,5 @@
 import { DataFailure } from '@/core/domain/data-error'
-import type { Team } from '../domain/team'
+import type { Team, TeamRole } from '../domain/team'
 import type { TeamGateway } from '../domain/workspace-gateway'
 import { teamSchema } from './schemas'
 
@@ -32,10 +32,17 @@ export function createTeamService(gateway: TeamGateway) {
       return gateway.remove(workspaceId, teamId)
     },
 
-    toggleMember(team: Team, userId: string): Promise<void> {
-      const next = team.memberIds.includes(userId)
-        ? team.memberIds.filter((id) => id !== userId)
-        : [...team.memberIds, userId]
+    setMemberRole(team: Team, userId: string, role: TeamRole | null): Promise<void> {
+      const next = { ...team.members }
+
+      if (role === null) delete next[userId]
+      else next[userId] = role
+
+      if (role === null && Object.values(team.members).filter((r) => r === 'lead').length === 1
+          && team.members[userId] === 'lead') {
+        throw new DataFailure({ kind: 'validation', message: 'team.error.lastLead' })
+      }
+
       return gateway.setMembers(team.workspaceId, team.id, next)
     },
   }

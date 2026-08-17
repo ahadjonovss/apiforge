@@ -100,6 +100,29 @@ IndexedDB'ga tayanadi va u bloklangan muhitlarda (private rejim, ba'zi ichki bra
 headless Chrome) na xato, na javob qaytaradi — bunda ilova abadiy spinnerda qolardi.
 Kechikkan javob kelsa status o'zi to'g'rilanadi.
 
+## Rollar
+
+Ikki daraja, bir-biridan mustaqil:
+
+| Daraja | Qayerda | Qiymatlar |
+|---|---|---|
+| Ish maydoni | `workspaces/{wid}/members/{uid}.role` | `owner`, `admin`, `member` |
+| Jamoa | `teams/{tid}.members[uid]` | `lead`, `member` |
+
+`Team.members` — **map** (`uid → rol`), massiv emas. Ilgari `memberIds: string[]` edi;
+rollar qo'shilganda massiv + rollar ikki manba bo'lib, bir-biridan uzilib ketardi.
+Gateway eski massivni o'qishda avtomatik map'ga o'giradi, migratsiya skripti kerak emas.
+
+**Qoidalar** (`firestore.rules`), UI emas, haqiqiy chegara:
+
+- jamoalarni yaratish/tahrirlash/o'chirish — `owner` yoki `admin`
+- a'zo qo'shish/chiqarish — `owner` yoki `admin`
+- **rolni o'zgartirish — faqat `owner`**
+- o'z rolini o'zi o'zgartira olmaydi (aks holda oxirgi admin o'zini tushirib,
+  ish maydonini boshqaruvsiz qoldirardi)
+- `owner` roli boshqaga berilmaydi va o'chirilmaydi
+- a'zolar hamma narsani o'qiy oladi
+
 ## Ma'lumot modeli
 
 ```

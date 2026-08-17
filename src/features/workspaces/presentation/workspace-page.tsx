@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
 import { ArrowLeft, FolderOpen, Plus, Trash2, Upload, UserPlus, Users } from 'lucide-react'
-import { cn } from '@/core/lib/cn'
 import { Button } from '@/shared/ui/button'
 import { Modal } from '@/shared/ui/modal'
 import { TextField } from '@/shared/ui/text-field'
@@ -16,6 +15,7 @@ import { memberSchema, teamSchema, type MemberValues, type TeamValues } from '..
 import { canManage, canManageCollections } from '../domain/workspace'
 import { useWorkspacesStore } from './workspaces-store'
 import { WorkspaceHome } from './workspace-home'
+import { TeamCard } from './team-card'
 import { useT } from '@/app/providers/i18n-provider'
 
 function Panel({
@@ -269,8 +269,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
   const error = useWorkspacesStore((state) => state.error)
   const openWorkspace = useWorkspacesStore((state) => state.openWorkspace)
   const removeMember = useWorkspacesStore((state) => state.removeMember)
-  const removeTeam = useWorkspacesStore((state) => state.removeTeam)
-  const toggleTeamMember = useWorkspacesStore((state) => state.toggleTeamMember)
+  const changeMemberRole = useWorkspacesStore((state) => state.changeMemberRole)
 
   const collections = useCollectionsStore((state) => state.collections)
   const collectionsError = useCollectionsStore((state) => state.error)
@@ -395,10 +394,12 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
           title={t('workspace.teams')}
           count={teams.length}
           action={
-            <Button size="sm" variant="outline" onClick={() => setAddingTeam(true)}>
-              <Plus className="size-3.5" />
-              {t('common.team')}
-            </Button>
+            manages ? (
+              <Button size="sm" variant="outline" onClick={() => setAddingTeam(true)}>
+                <Plus className="size-3.5" />
+                {t('common.team')}
+              </Button>
+            ) : undefined
           }
         >
           {teams.length === 0 ? (
@@ -408,50 +409,12 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
           ) : (
             <ul className="divide-y divide-border">
               {teams.map((team) => (
-                <li key={team.id} className="px-4 py-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-xs font-medium">{team.name}</p>
-                      <p className="truncate text-[11px] text-muted-foreground">
-                        {team.description || t('workspaces.noDescription')}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => void removeTeam(workspaceId, team.id)}
-                      aria-label={t('common.delete')}
-                      className="rounded p-1 text-muted-foreground transition hover:bg-accent hover:text-destructive"
-                    >
-                      <Trash2 className="size-3.5" />
-                    </button>
-                  </div>
-
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {members.map((member) => {
-                      const active = team.memberIds.includes(member.userId)
-                      return (
-                        <button
-                          key={member.id}
-                          type="button"
-                          onClick={() => void toggleTeamMember(team, member.userId)}
-                          className={cn(
-                            'rounded-full border px-2 py-0.5 text-[11px] transition',
-                            active
-                              ? 'border-primary bg-primary/10 text-primary'
-                              : 'border-border text-muted-foreground hover:text-foreground',
-                          )}
-                        >
-                          {member.displayName || member.email}
-                        </button>
-                      )
-                    })}
-                    {members.length === 0 && (
-                      <span className="text-[11px] text-muted-foreground">
-                        {t('workspace.addMembersFirst')}
-                      </span>
-                    )}
-                  </div>
-                </li>
+                <TeamCard
+                  key={team.id}
+                  team={team}
+                  members={members}
+                  canManage={manages}
+                />
               ))}
             </ul>
           )}
@@ -461,10 +424,12 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
           title={t('workspace.members')}
           count={members.length}
           action={
-            <Button size="sm" variant="outline" onClick={() => setAddingMember(true)}>
-              <UserPlus className="size-3.5" />
-              {t('workspace.member')}
-            </Button>
+            manages ? (
+              <Button size="sm" variant="outline" onClick={() => setAddingMember(true)}>
+                <UserPlus className="size-3.5" />
+                {t('workspace.member')}
+              </Button>
+            ) : undefined
           }
         >
           <ul className="divide-y divide-border">
@@ -477,9 +442,29 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
                   </p>
                   <p className="truncate text-[11px] text-muted-foreground">{member.email}</p>
                 </div>
-                <span className="rounded-full border border-border px-2 py-0.5 text-[10px] uppercase text-muted-foreground">
-                  {member.role}
-                </span>
+                {owner && member.role !== 'owner' ? (
+                  <select
+                    value={member.role}
+                    onChange={(event) =>
+                      void changeMemberRole(
+                        workspaceId,
+                        member.userId,
+                        event.target.value as 'admin' | 'member',
+                      )
+                    }
+                    className="rounded border border-border bg-card px-1.5 py-0.5 text-[11px] outline-none focus:ring-1 focus:ring-ring"
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="member">Member</option>
+                  </select>
+                ) : (
+                  <span
+                    title={member.role === 'owner' ? undefined : t('workspace.roleHint')}
+                    className="rounded-full border border-border px-2 py-0.5 text-[10px] uppercase text-muted-foreground"
+                  >
+                    {member.role}
+                  </span>
+                )}
                 {owner && member.role !== 'owner' && (
                   <button
                     type="button"

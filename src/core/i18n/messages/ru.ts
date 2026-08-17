@@ -149,6 +149,18 @@ export const ru: typeof uz = {
   'data.error.notRegistered': '{email} ещё не зарегистрирован в APIForge',
   'data.error.ownerRemove': 'Владельца нельзя исключить из пространства',
 
+  'team.role.lead': 'Руководитель',
+  'team.role.member': 'Участник',
+  'team.addPerson': 'Добавить человека',
+  'team.noMembers': 'В команде пока никого нет',
+  'team.allAdded': 'Все участники пространства уже добавлены',
+  'team.memberCount': '{count} чел.',
+  'team.edit': 'Редактировать команду',
+  'team.error.lastLead': 'Нельзя убрать единственного руководителя — сначала назначьте другого',
+  'team.manageHint': 'Командами управляют только владелец и админ',
+  'data.error.ownerRole': 'Роль владельца изменить нельзя',
+  'workspace.roleHint': 'Роль может менять только владелец',
+
   'collection.home': 'Главная',
   'collection.settings': 'Настройки',
   'collection.settingsTitle': 'Настройки коллекции',

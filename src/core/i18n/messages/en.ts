@@ -149,6 +149,18 @@ export const en: typeof uz = {
   'data.error.notRegistered': '{email} has not signed up to APIForge yet',
   'data.error.ownerRemove': 'The owner cannot be removed from the workspace',
 
+  'team.role.lead': 'Lead',
+  'team.role.member': 'Member',
+  'team.addPerson': 'Add someone',
+  'team.noMembers': 'Nobody in this team yet',
+  'team.allAdded': 'Everyone in the workspace is already here',
+  'team.memberCount': '{count} people',
+  'team.edit': 'Edit team',
+  'team.error.lastLead': 'The only lead cannot be removed — make someone else lead first',
+  'team.manageHint': 'Only the owner and admins manage teams',
+  'data.error.ownerRole': "The owner's role cannot be changed",
+  'workspace.roleHint': 'Only the owner can change roles',
+
   'collection.home': 'Home',
   'collection.settings': 'Settings',
   'collection.settingsTitle': 'Collection settings',

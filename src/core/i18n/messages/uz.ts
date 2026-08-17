@@ -147,6 +147,18 @@ export const uz = {
   'data.error.notRegistered': "{email} hali APIForge'da ro'yxatdan o'tmagan",
   'data.error.ownerRemove': "Egani ish maydonidan chiqarib bo'lmaydi",
 
+  'team.role.lead': 'Rahbar',
+  'team.role.member': "A'zo",
+  'team.addPerson': "Odam qo'shish",
+  'team.noMembers': "Jamoada hali odam yo'q",
+  'team.allAdded': "Ish maydonining barcha a'zolari qo'shilgan",
+  'team.memberCount': '{count} kishi',
+  'team.edit': 'Jamoani tahrirlash',
+  'team.error.lastLead': "Yagona rahbarni chiqarib bo'lmaydi — avval boshqasini rahbar qiling",
+  'team.manageHint': 'Jamoalarni faqat owner va admin boshqaradi',
+  'data.error.ownerRole': "Ega rolini o'zgartirib bo'lmaydi",
+  'workspace.roleHint': "Rolni faqat ega o'zgartira oladi",
+
   'collection.home': 'Bosh sahifa',
   'collection.settings': 'Sozlamalar',
   'collection.settingsTitle': "To'plam sozlamalari",

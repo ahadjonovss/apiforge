@@ -1,4 +1,4 @@
-import type { Team } from './team'
+import type { Team, TeamRole } from './team'
 import type { Workspace, WorkspaceMember, WorkspaceRole } from './workspace'
 
 export interface CreateWorkspaceInput {
@@ -23,6 +23,7 @@ export interface WorkspaceGateway {
   listMembers(workspaceId: string): Promise<WorkspaceMember[]>
   addMember(input: AddMemberInput): Promise<WorkspaceMember>
   removeMember(workspaceId: string, userId: string): Promise<void>
+  changeRole(workspaceId: string, userId: string, role: WorkspaceRole): Promise<void>
 }
 
 export interface CreateTeamInput {
@@ -36,5 +37,9 @@ export interface TeamGateway {
   create(input: CreateTeamInput): Promise<Team>
   rename(workspaceId: string, teamId: string, name: string, description: string): Promise<void>
   remove(workspaceId: string, teamId: string): Promise<void>
-  setMembers(workspaceId: string, teamId: string, memberIds: string[]): Promise<void>
+  setMembers(
+    workspaceId: string,
+    teamId: string,
+    members: Record<string, TeamRole>,
+  ): Promise<void>
 }

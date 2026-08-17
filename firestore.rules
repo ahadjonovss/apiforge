@@ -25,7 +25,7 @@ service cloud.firestore {
       ).data.role;
     }
 
-    function canManageCollections(workspaceId) {
+    function isAdminOf(workspaceId) {
       return isOwnerOf(workspaceId) || roleIn(workspaceId) in ['owner', 'admin'];
     }
 
@@ -46,18 +46,29 @@ service cloud.firestore {
 
       match /members/{memberId} {
         allow read: if isMemberOf(workspaceId);
-        allow write: if isMemberOf(workspaceId);
+        allow create: if isAdminOf(workspaceId);
+        allow delete: if isAdminOf(workspaceId) && resource.data.role != 'owner';
+        allow update: if isAdminOf(workspaceId)
+          && (
+            request.resource.data.role == resource.data.role
+            || (
+              isOwnerOf(workspaceId)
+              && memberId != request.auth.uid
+              && resource.data.role != 'owner'
+              && request.resource.data.role != 'owner'
+            )
+          );
       }
 
       match /teams/{teamId} {
         allow read: if isMemberOf(workspaceId);
-        allow write: if isMemberOf(workspaceId);
+        allow write: if isAdminOf(workspaceId);
       }
 
       match /collections/{collectionId} {
         allow read: if isMemberOf(workspaceId);
         allow create, update: if isMemberOf(workspaceId);
-        allow delete: if canManageCollections(workspaceId);
+        allow delete: if isAdminOf(workspaceId);
 
         match /folders/{folderId} {
           allow read, write: if isMemberOf(workspaceId);

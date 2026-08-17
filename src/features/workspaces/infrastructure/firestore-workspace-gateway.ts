@@ -188,6 +188,14 @@ export const firestoreWorkspaceGateway: WorkspaceGateway = {
     }
   },
 
+  async changeRole(workspaceId, userId, role) {
+    try {
+      await updateDoc(doc(db, WORKSPACES, workspaceId, MEMBERS, userId), { role })
+    } catch (error) {
+      throw toDataFailure(error)
+    }
+  },
+
   async removeMember(workspaceId, userId) {
     try {
       await deleteDoc(doc(db, WORKSPACES, workspaceId, MEMBERS, userId))

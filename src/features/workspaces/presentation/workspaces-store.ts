@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { DataFailure, type DataErrorDetail } from '@/core/domain/data-error'
 import { teamService, workspaceService } from '../composition'
-import type { Team } from '../domain/team'
+import type { Team, TeamRole } from '../domain/team'
 import type { Workspace, WorkspaceMember, WorkspaceRole } from '../domain/workspace'
 
 interface WorkspacesState {
@@ -31,7 +31,9 @@ interface WorkspacesState {
 
   createTeam: (workspaceId: string, name: string, description: string) => Promise<boolean>
   removeTeam: (workspaceId: string, teamId: string) => Promise<boolean>
-  toggleTeamMember: (team: Team, userId: string) => Promise<boolean>
+  setTeamMemberRole: (team: Team, userId: string, role: TeamRole | null) => Promise<boolean>
+  renameTeam: (workspaceId: string, teamId: string, name: string, description: string) => Promise<boolean>
+  changeMemberRole: (workspaceId: string, userId: string, role: WorkspaceRole) => Promise<boolean>
 }
 
 function toDetail(error: unknown): DataErrorDetail {
@@ -148,10 +150,22 @@ export const useWorkspacesStore = create<WorkspacesState>((set, get) => {
         set({ teams: await teamService.list(workspaceId) })
       }),
 
-    toggleTeamMember: (team, userId) =>
+    setTeamMemberRole: (team, userId, role) =>
       run(async () => {
-        await teamService.toggleMember(team, userId)
+        await teamService.setMemberRole(team, userId, role)
         set({ teams: await teamService.list(team.workspaceId) })
+      }),
+
+    renameTeam: (workspaceId, teamId, name, description) =>
+      run(async () => {
+        await teamService.rename(workspaceId, teamId, name, description)
+        set({ teams: await teamService.list(workspaceId) })
+      }),
+
+    changeMemberRole: (workspaceId, userId, role) =>
+      run(async () => {
+        await workspaceService.changeRole(workspaceId, userId, role)
+        set({ members: await workspaceService.listMembers(workspaceId) })
       }),
   }
 })
