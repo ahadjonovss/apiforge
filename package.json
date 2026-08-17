@@ -10,6 +10,8 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "emulators": "firebase emulators:start --only auth,firestore --import=./.firebase-data --export-on-exit",
+    "rules:dev": "firebase deploy -P dev --only firestore:rules,firestore:indexes",
+    "rules:prod": "firebase deploy -P prod --only firestore:rules,firestore:indexes",
     "deploy:dev": "npm run build:dev && firebase deploy -P dev --only hosting,firestore:rules",
     "deploy:prod": "npm run build && firebase deploy -P prod --only hosting,firestore:rules"
   },

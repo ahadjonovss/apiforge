@@ -21,16 +21,44 @@ npm run dev
 
 ## Muhitlar
 
-Ikki muhit, Vite mode fayllari orqali ajratilgan:
+Ikki muhit — branch, domen va Firebase project bo'yicha to'liq ajratilgan:
 
-| Muhit | Fayl | Firebase project | Buyruq |
-|---|---|---|---|
-| dev | `.env.development` | `apiforge-dev` | `npm run dev`, `npm run build:dev`, `npm run deploy:dev` |
-| prod | `.env.production` | `apiforge-prod` | `npm run build`, `npm run deploy:prod` |
+| Muhit | Branch | Domen | Firebase project | Vercel deploy |
+|---|---|---|---|---|
+| production | `main` | `apiforge.uz` | `apiforge-prod` | Production |
+| dev | `dev` | `apiforge-git-dev-*.vercel.app` (yoki `dev.apiforge.uz`) | `apiforge-dev` | Preview |
+
+Kundalik ish `dev` branch'ida boradi; `main` ga merge qilish — relizning o'zi.
+`*.vercel.app` loyiha manzilini dev'ga qaratib bo'lmaydi, u har doim production
+deploy'ga ergashadi — shuning uchun dev uchun branch preview URL ishlatiladi.
+
+**Ajralish qayerda sodir bo'ladi.** `firebase-config.ts` dagi **default qiymatlar
+dev'niki**, shuning uchun preview deploy'lar hech qanday sozlamasiz `apiforge-dev`
+ga ishlaydi. Vercel'da faqat **Production scope** ga `VITE_FIREBASE_*` qo'yiladi —
+prod project qiymatlari bilan. Bitta joyda, bitta marta.
+
+Lokal buyruqlar:
+
+| Buyruq | Nima qiladi |
+|---|---|
+| `npm run dev` | `.env.development` → `apiforge-dev` |
+| `npm run build` | `.env.production` → prod build (typecheck bilan) |
+| `npm run rules:dev` / `rules:prod` | Firestore rules va indekslarni tegishli project'ga deploy qiladi |
 
 Firebase web konfiguratsiyasi (`apiKey` va boshqalar) maxfiy emas — u baribir brauzer
 bundle'iga tushadi. Himoya `firestore.rules` va Auth orqali bo'ladi. Shuning uchun mode
 fayllari repoga commit qilinadi; faqat `.env.*.local` gitignore'da.
+
+### Yangi prod muhitini ko'tarish
+
+1. Firebase Console → yangi project `apiforge-prod`
+2. Authentication → Email/parol usulini yoqish
+3. Firestore Database → yaratish, region **europe-west3** (dev bilan bir xil)
+4. Authentication → Settings → Authorized domains → `apiforge.uz`
+5. Project settings → Web app qo'shish → konfiguratsiyani `.env.production` ga
+   va Vercel'ning **Production** scope'iga yozish
+6. `npm run rules:prod` — qoidalar va indekslarni prod'ga deploy qilish
+   (kompozit indekssiz workspaces ro'yxati ishlamaydi)
 
 Lokal ravishda emulyatorlarga o'tish uchun `.env.development.local` yarating:
 
@@ -162,6 +190,12 @@ Shuning uchun build har qanday hostingda ishlaydi.
 
 Boshqa Firebase project'ga o'tish uchun Vercel dashboard'ida `VITE_FIREBASE_*` ni
 belgilang yoki `firebase-config.ts` dagi qiymatlarni almashtiring.
+
+**Prod va dev ajratmasi shu yerda amalga oshadi:** Vercel'da o'zgaruvchilar scope
+bo'yicha beriladi (Production / Preview / Development). `VITE_FIREBASE_*` ni faqat
+**Production** scope'ga `apiforge-prod` qiymatlari bilan qo'ying. Preview'da hech
+narsa bermang — koddagi default'lar dev project'ga qaraydi, ya'ni `dev` branch
+deploy'lari o'z-o'zidan dev bazaga tushadi.
 
 **Deploydan keyin bitta qo'lda qadam:** Firebase Console → Authentication →
 Settings → Authorized domains ga Vercel domenini qo'shing (`*.vercel.app` yoki
