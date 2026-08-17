@@ -11,12 +11,14 @@ import { useAuthStore } from '@/features/auth'
 import { useCollectionsStore } from '@/features/collections/presentation/collections-store'
 import { collectionSchema, type CollectionValues } from '@/features/collections/application/schemas'
 import { ImportDialog } from '@/features/import/presentation/import-dialog'
+import type { AccessSubject } from '@/features/collections/domain/access'
 import { memberSchema, teamSchema, type MemberValues, type TeamValues } from '../application/schemas'
 import { canManage, canManageCollections } from '../domain/workspace'
 import { useConfirm } from '@/shared/ui/confirm-dialog'
 import { useWorkspacesStore } from './workspaces-store'
 import { WorkspaceHome } from './workspace-home'
 import { TeamCard } from './team-card'
+import { SubjectAccessDialog } from './subject-access-dialog'
 import { useT } from '@/app/providers/i18n-provider'
 
 function Panel({
@@ -183,6 +185,7 @@ function CreateCollectionModal({
   onClose: () => void
 }) {
   const t = useT()
+  const user = useAuthStore((state) => state.user)
   const teams = useWorkspacesStore((state) => state.teams)
   const pending = useCollectionsStore((state) => state.pending)
   const error = useCollectionsStore((state) => state.error)
@@ -205,6 +208,7 @@ function CreateCollectionModal({
       values.name,
       values.description,
       teamId || null,
+      user?.id ?? '',
     )
     if (created) {
       reset()
@@ -278,6 +282,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
   const removeCollection = useCollectionsStore((state) => state.removeCollection)
 
   const { ask, dialog } = useConfirm()
+  const [subject, setSubject] = useState<AccessSubject | null>(null)
   const [addingMember, setAddingMember] = useState(false)
   const [addingTeam, setAddingTeam] = useState(false)
   const [addingCollection, setAddingCollection] = useState(false)
@@ -422,6 +427,8 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
                   team={team}
                   members={members}
                   canManage={manages}
+                  onShowAccess={() => setSubject({ type: 'team', id: team.id })}
+                  onShowMemberAccess={(userId) => setSubject({ type: 'user', id: userId })}
                 />
               ))}
             </ul>
@@ -444,12 +451,17 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
             {members.map((member) => (
               <li key={member.id} className="group flex items-center gap-3 px-4 py-2.5">
                 <Users className="size-4 shrink-0 text-muted-foreground" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-medium">
+                <button
+                  type="button"
+                  onClick={() => setSubject({ type: 'user', id: member.userId })}
+                  title={t('access.subjectUserHint')}
+                  className="min-w-0 flex-1 text-left"
+                >
+                  <p className="truncate text-xs font-medium group-hover:underline">
                     {member.displayName || t('profile.noName')}
                   </p>
                   <p className="truncate text-[11px] text-muted-foreground">{member.email}</p>
-                </div>
+                </button>
                 {owner && member.role !== 'owner' ? (
                   <select
                     value={member.role}
@@ -519,6 +531,12 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
         open={importing}
         onClose={() => setImporting(false)}
         onImported={() => void loadCollections(workspaceId)}
+      />
+      <SubjectAccessDialog
+        subject={subject}
+        members={members}
+        teams={teams}
+        onClose={() => setSubject(null)}
       />
       {dialog}
     </div>

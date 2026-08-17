@@ -1,4 +1,5 @@
 import type { RequestDef } from '@/features/request/domain/request'
+import type { AccessGrant } from './access'
 import type { ApiCollection } from './collection'
 import type { Folder } from './folder'
 
@@ -7,6 +8,7 @@ export interface CreateCollectionInput {
   teamId: string | null
   name: string
   description: string
+  createdBy?: string
 }
 
 export type CollectionPatch = Partial<
@@ -22,6 +24,12 @@ export interface CollectionGateway {
   create(input: CreateCollectionInput): Promise<ApiCollection>
   update(workspaceId: string, collectionId: string, patch: CollectionPatch): Promise<void>
   remove(workspaceId: string, collectionId: string): Promise<void>
+  setAccess(
+    workspaceId: string,
+    collectionId: string,
+    key: string,
+    grant: AccessGrant | null,
+  ): Promise<void>
 
   listEndpoints(workspaceId: string, collectionId: string): Promise<RequestDef[]>
   saveEndpoint(workspaceId: string, collectionId: string, endpoint: RequestDef): Promise<void>

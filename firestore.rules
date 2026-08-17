@@ -67,7 +67,12 @@ service cloud.firestore {
 
       match /collections/{collectionId} {
         allow read: if isMemberOf(workspaceId);
-        allow create, update: if isMemberOf(workspaceId);
+        allow create: if isMemberOf(workspaceId);
+        allow update: if isMemberOf(workspaceId)
+          && (
+            isAdminOf(workspaceId)
+            || request.resource.data.get('access', {}) == resource.data.get('access', {})
+          );
         allow delete: if isAdminOf(workspaceId);
 
         match /folders/{folderId} {

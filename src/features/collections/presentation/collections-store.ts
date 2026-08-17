@@ -3,6 +3,7 @@ import { DataFailure, type DataErrorDetail } from '@/core/domain/data-error'
 import { newId } from '@/core/lib/id'
 import type { RequestDef } from '@/features/request/domain/request'
 import { collectionService } from '../composition'
+import { grantKey, type AccessSubject, type CollectionRole } from '../domain/access'
 import type { ApiCollection } from '../domain/collection'
 import type { CollectionPatch } from '../domain/collection-gateway'
 import type { Folder } from '../domain/folder'
@@ -31,7 +32,20 @@ interface CollectionsState {
     name: string,
     description: string,
     teamId: string | null,
+    createdBy?: string,
   ) => Promise<ApiCollection | null>
+  grantAccess: (
+    workspaceId: string,
+    collectionId: string,
+    subject: AccessSubject,
+    role: CollectionRole,
+    actorId: string,
+  ) => Promise<boolean>
+  revokeAccess: (
+    workspaceId: string,
+    collectionId: string,
+    subject: AccessSubject,
+  ) => Promise<boolean>
   removeCollection: (workspaceId: string, collectionId: string) => Promise<boolean>
 
   openCollection: (workspaceId: string, collectionId: string) => Promise<void>
@@ -78,6 +92,25 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => {
       set({ pending: false, error: toDetail(error) })
       return false
     }
+  }
+
+  function patchAccess(
+    collectionId: string,
+    key: string,
+    grant: { role: CollectionRole; addedBy: string; addedAt: number } | null,
+  ) {
+    const apply = (item: ApiCollection): ApiCollection => {
+      if (item.id !== collectionId) return item
+      const access = { ...item.access }
+      if (grant) access[key] = grant
+      else delete access[key]
+      return { ...item, access }
+    }
+
+    set((state) => ({
+      collections: state.collections.map(apply),
+      current: state.current ? apply(state.current) : null,
+    }))
   }
 
   return {
@@ -154,14 +187,40 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => {
       }
     },
 
-    createCollection: async (workspaceId, name, description, teamId) => {
+    createCollection: async (workspaceId, name, description, teamId, createdBy = '') => {
       let created: ApiCollection | null = null
       await run(async () => {
-        created = await collectionService.create(workspaceId, name, description, teamId)
+        created = await collectionService.create(
+          workspaceId,
+          name,
+          description,
+          teamId,
+          createdBy,
+        )
         set((state) => ({ collections: [...state.collections, created as ApiCollection] }))
       })
       return created
     },
+
+    grantAccess: (workspaceId, collectionId, subject, role, actorId) =>
+      run(async () => {
+        const addedAt = Date.now()
+        await collectionService.grantAccess(
+          workspaceId,
+          collectionId,
+          subject,
+          role,
+          actorId,
+          addedAt,
+        )
+        patchAccess(collectionId, grantKey(subject), { role, addedBy: actorId, addedAt })
+      }),
+
+    revokeAccess: (workspaceId, collectionId, subject) =>
+      run(async () => {
+        await collectionService.revokeAccess(workspaceId, collectionId, subject)
+        patchAccess(collectionId, grantKey(subject), null)
+      }),
 
     removeCollection: (workspaceId, collectionId) =>
       run(async () => {

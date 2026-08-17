@@ -2,6 +2,11 @@ import { DataFailure } from '@/core/domain/data-error'
 import { newId } from '@/core/lib/id'
 import { createRequest } from '@/features/request/application/request-factory'
 import type { RequestDef } from '@/features/request/domain/request'
+import {
+  grantKey,
+  type AccessSubject,
+  type CollectionRole,
+} from '../domain/access'
 import type { ApiCollection } from '../domain/collection'
 import type { CollectionGateway, CollectionPatch } from '../domain/collection-gateway'
 import type { Folder } from '../domain/folder'
@@ -32,14 +37,39 @@ export function createCollectionService(gateway: CollectionGateway) {
       name: string,
       description: string,
       teamId: string | null,
+      createdBy = '',
     ): Promise<ApiCollection> {
       assertValid(collectionSchema.safeParse({ name, description }))
       return gateway.create({
         workspaceId,
         teamId,
+        createdBy,
         name: name.trim(),
         description: description.trim(),
       })
+    },
+
+    grantAccess(
+      workspaceId: string,
+      collectionId: string,
+      subject: AccessSubject,
+      role: CollectionRole,
+      addedBy: string,
+      addedAt: number,
+    ): Promise<void> {
+      return gateway.setAccess(workspaceId, collectionId, grantKey(subject), {
+        role,
+        addedBy,
+        addedAt,
+      })
+    },
+
+    revokeAccess(
+      workspaceId: string,
+      collectionId: string,
+      subject: AccessSubject,
+    ): Promise<void> {
+      return gateway.setAccess(workspaceId, collectionId, grantKey(subject), null)
     },
 
     updateSettings(

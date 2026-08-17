@@ -1,7 +1,9 @@
 import {
   collection,
   deleteDoc,
+  deleteField,
   doc,
+  FieldPath,
   getDoc,
   getDocs,
   setDoc,
@@ -14,6 +16,7 @@ import { newId } from '@/core/lib/id'
 import { stripUndefined } from '@/core/lib/plain'
 import { createRequest } from '@/features/request/application/request-factory'
 import type { RequestDef } from '@/features/request/domain/request'
+import type { AccessGrant } from '../domain/access'
 import type { ApiCollection } from '../domain/collection'
 import type { Folder } from '../domain/folder'
 import type {
@@ -39,6 +42,20 @@ function toFolder(collectionId: string, id: string, data: DocumentData): Folder 
   }
 }
 
+function toAccess(data: DocumentData): Record<string, AccessGrant> {
+  if (data.access && typeof data.access === 'object') {
+    return data.access as Record<string, AccessGrant>
+  }
+  if (!data.teamId) return {}
+  return {
+    [`team:${data.teamId}`]: {
+      role: 'editor',
+      addedAt: data.createdAt ?? 0,
+      addedBy: data.ownerId ?? '',
+    },
+  }
+}
+
 function toCollection(workspaceId: string, id: string, data: DocumentData): ApiCollection {
   return {
     id,
@@ -51,6 +68,7 @@ function toCollection(workspaceId: string, id: string, data: DocumentData): ApiC
     headers: data.headers ?? [],
     auth: data.auth ?? { mode: 'none' },
     variables: data.variables ?? [],
+    access: toAccess(data),
     createdAt: data.createdAt ?? 0,
     updatedAt: data.updatedAt ?? 0,
   }
@@ -83,10 +101,13 @@ export const firestoreCollectionGateway: CollectionGateway = {
     }
   },
 
-  async create({ workspaceId, teamId, name, description }: CreateCollectionInput) {
+  async create({ workspaceId, teamId, name, description, createdBy }: CreateCollectionInput) {
     try {
       const id = newId()
       const now = Date.now()
+      const access: Record<string, AccessGrant> = teamId
+        ? { [`team:${teamId}`]: { role: 'editor', addedAt: now, addedBy: createdBy ?? '' } }
+        : {}
       const created: ApiCollection = {
         id,
         workspaceId,
@@ -98,6 +119,7 @@ export const firestoreCollectionGateway: CollectionGateway = {
         headers: [],
         auth: { mode: 'none' },
         variables: [],
+        access,
         createdAt: now,
         updatedAt: now,
       }
@@ -113,6 +135,7 @@ export const firestoreCollectionGateway: CollectionGateway = {
           headers: created.headers,
           auth: created.auth,
           variables: created.variables,
+          access: created.access,
           createdAt: now,
           updatedAt: now,
         }),
@@ -129,6 +152,20 @@ export const firestoreCollectionGateway: CollectionGateway = {
       await updateDoc(
         doc(db, WORKSPACES, workspaceId, COLLECTIONS, collectionId),
         stripUndefined({ ...patch, updatedAt: Date.now() }),
+      )
+    } catch (error) {
+      throw toDataFailure(error)
+    }
+  },
+
+  async setAccess(workspaceId, collectionId, key, grant) {
+    try {
+      await updateDoc(
+        doc(db, WORKSPACES, workspaceId, COLLECTIONS, collectionId),
+        new FieldPath('access', key),
+        grant ?? deleteField(),
+        'updatedAt',
+        Date.now(),
       )
     } catch (error) {
       throw toDataFailure(error)

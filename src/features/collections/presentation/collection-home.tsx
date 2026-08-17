@@ -6,6 +6,7 @@ import { Markdown } from '@/shared/ui/markdown'
 import { MarkdownEditor } from '@/shared/ui/markdown-editor'
 import { DataErrorNote } from '@/shared/ui/data-error-note'
 import type { ApiCollection } from '../domain/collection'
+import { CollectionAccessPanel } from './collection-access-panel'
 import { useCollectionsStore } from './collections-store'
 import { useT } from '@/app/providers/i18n-provider'
 
@@ -123,6 +124,8 @@ export function CollectionHome({
           </span>
           <span>{t('collection.updatedAt')}: {formatDateTime(collection.updatedAt)}</span>
         </div>
+
+        <CollectionAccessPanel workspaceId={workspaceId} collection={collection} />
 
         <DataErrorNote error={error} />
 

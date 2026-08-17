@@ -1,5 +1,13 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Pencil, Trash2, UserMinus, UserPlus } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronRight,
+  Pencil,
+  ShieldCheck,
+  Trash2,
+  UserMinus,
+  UserPlus,
+} from 'lucide-react'
 import { cn } from '@/core/lib/cn'
 import { Button } from '@/shared/ui/button'
 import { TextField } from '@/shared/ui/text-field'
@@ -14,9 +22,17 @@ interface Props {
   team: Team
   members: WorkspaceMember[]
   canManage: boolean
+  onShowAccess: () => void
+  onShowMemberAccess: (userId: string) => void
 }
 
-export function TeamCard({ team, members, canManage }: Props) {
+export function TeamCard({
+  team,
+  members,
+  canManage,
+  onShowAccess,
+  onShowMemberAccess,
+}: Props) {
   const t = useT()
   const pending = useWorkspacesStore((state) => state.pending)
   const removeTeam = useWorkspacesStore((state) => state.removeTeam)
@@ -55,6 +71,18 @@ export function TeamCard({ team, members, canManage }: Props) {
             </p>
           </div>
         </button>
+
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            onClick={onShowAccess}
+            aria-label={t('access.title')}
+            title={t('access.subjectTeamHint')}
+            className="rounded p-1 text-muted-foreground transition hover:bg-accent hover:text-foreground"
+          >
+            <ShieldCheck className="size-3.5" />
+          </button>
+        </div>
 
         {canManage && (
           <div className="flex shrink-0 items-center gap-1">
@@ -130,7 +158,14 @@ export function TeamCard({ team, members, canManage }: Props) {
             <ul className="flex flex-col gap-1">
               {inTeam.map((member) => (
                 <li key={member.userId} className="flex items-center gap-2">
-                  <span className="min-w-0 flex-1 truncate text-xs">{label(member)}</span>
+                  <button
+                    type="button"
+                    onClick={() => onShowMemberAccess(member.userId)}
+                    title={t('access.subjectUserHint')}
+                    className="min-w-0 flex-1 truncate text-left text-xs hover:underline"
+                  >
+                    {label(member)}
+                  </button>
 
                   {canManage ? (
                     <select

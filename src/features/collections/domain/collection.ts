@@ -1,6 +1,7 @@
 import type { KeyValue } from '@/core/domain/http'
 import type { EnvVariable } from '@/features/environments/domain/environment'
 import type { AuthConfig } from '@/features/request/domain/request'
+import type { AccessGrant } from './access'
 
 export interface ApiCollection {
   id: string
@@ -13,6 +14,7 @@ export interface ApiCollection {
   headers: KeyValue[]
   auth: AuthConfig
   variables: EnvVariable[]
+  access: Record<string, AccessGrant>
   createdAt: number
   updatedAt: number
 }
