@@ -1,3 +1,4 @@
+import { auth } from '@/core/config/firebase'
 import { describeNetworkError } from '../application/describe-error'
 import type { HttpCall, RequestGateway } from '../domain/request-gateway'
 import { HttpRequestFailure, type ResponseResult } from '../domain/response'
@@ -6,6 +7,9 @@ const DEV_PROXY_PATH = '/__apiforge_proxy'
 const DEPLOYED_PROXY_PATH = '/api/proxy'
 const PROXY_ERROR_HEADER = 'x-apiforge-proxy-error'
 const PROXY_CODE_HEADER = 'x-apiforge-error-code'
+const PROXY_CONTENT_TYPE_HEADER = 'x-apiforge-content-type'
+const PROXY_TOKEN_HEADER = 'x-apiforge-token'
+const PROXY_ADDED_HEADERS = new Set(['x-content-type-options', 'content-security-policy'])
 
 function proxyPath(): string {
   if (__DEV_PROXY__) {
@@ -26,11 +30,17 @@ export const fetchRequestGateway: RequestGateway = {
     const startedAt = performance.now()
     const viaProxy = proxyPath() !== ''
 
+    const headers = new Headers(call.headers)
+    if (viaProxy) {
+      const token = await auth.currentUser?.getIdToken().catch(() => null)
+      if (token) headers.set(PROXY_TOKEN_HEADER, token)
+    }
+
     let response: Response
     try {
       response = await fetch(resolveTarget(call.url), {
         method: call.method,
-        headers: call.headers,
+        headers,
         body: call.body,
         signal,
       })
@@ -82,17 +92,22 @@ export const fetchRequestGateway: RequestGateway = {
       )
     }
 
-    const headers: Record<string, string> = {}
+    const upstreamType = response.headers.get(PROXY_CONTENT_TYPE_HEADER)
+
+    const received: Record<string, string> = {}
     response.headers.forEach((value, key) => {
-      headers[key] = value
+      if (key === PROXY_CONTENT_TYPE_HEADER) return
+      if (viaProxy && PROXY_ADDED_HEADERS.has(key)) return
+      received[key] = key === 'content-type' && upstreamType ? upstreamType : value
     })
+    if (upstreamType) received['content-type'] = upstreamType
 
     return {
       status: response.status,
       statusText: response.statusText,
-      headers,
+      headers: received,
       body: text,
-      contentType: response.headers.get('content-type'),
+      contentType: upstreamType ?? response.headers.get('content-type'),
       durationMs,
       sizeBytes: new Blob([text]).size,
       receivedAt: Date.now(),

@@ -119,9 +119,12 @@ export function ImportDialog({ workspaceId, teams, open, onClose, onImported }: 
                   </p>
                 </div>
                 <ul className="mt-2 flex list-disc flex-col gap-1 pl-5">
-                  {plan.warnings.map((warning) => (
-                    <li key={warning} className="text-[11px] text-muted-foreground">
-                      {warning}
+                  {plan.warnings.map((warning, index) => (
+                    <li
+                      key={`${warning.key}:${index}`}
+                      className="text-[11px] text-muted-foreground"
+                    >
+                      {t(warning.key as never, warning.params)}
                     </li>
                   ))}
                 </ul>

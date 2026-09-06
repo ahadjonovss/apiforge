@@ -23,7 +23,7 @@ const FEATURES = [
 
 const STEPS = ['s1', 's2', 's3'] as const
 
-const STACK = ['React 19', 'TypeScript', 'Vite', 'Firebase', 'Tailwind v4', 'CodeMirror']
+const STACK = ['React 19', 'TypeScript', 'Vite', 'Firebase', 'Tailwind v4']
 
 function Preview() {
   return (

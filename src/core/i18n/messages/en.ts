@@ -350,6 +350,13 @@ export const en: typeof uz = {
   'error.msg.cors': 'The browser would not let the response from “{host}” be read ({ms}ms)',
   'error.hint.cors':
     'This is usually CORS. The dev proxy solves it locally; a deployed app needs the Cloud Function relay.',
+  'error.title.unauthorized': 'The proxy refused the request',
+  'error.msg.unauthorized': 'You need to be signed in to send requests ({host}).',
+  'error.hint.unauthorized': 'Refresh the page or sign in again.',
+  'error.title.blocked': 'The address is blocked',
+  'error.msg.blocked': '{host} points at an internal or private address.',
+  'error.hint.blocked':
+    'The proxy only reaches public addresses. Use the dev server to test a local one.',
   'error.title.proxyDown': 'The dev server did not answer',
   'error.msg.proxyDown': 'The request did not even reach the proxy ({ms}ms)',
   'error.hint.proxyDown': 'Check that `npm run dev` is running.',
@@ -374,6 +381,23 @@ export const en: typeof uz = {
   'import.error.notJson': 'The file is not JSON, or it is corrupted',
   'import.error.notCollection': 'This does not look like a Postman collection (no info section)',
   'import.error.empty': 'The collection is empty — nothing to import',
+  'import.warn.schema': 'The collection format is not v2.x — some fields may be dropped',
+  'import.warn.collectionScripts': 'Collection-level scripts were not imported',
+  'import.warn.folderScripts':
+    'Scripts in the «{names}» folders were not imported — if they set a token or a variable, enter the value by hand',
+  'import.warn.requestScripts':
+    'Pre-request/test scripts in {count} requests were not imported',
+  'import.warn.method': '«{name}»: the {method} method is not supported, GET was used',
+  'import.warn.authUnsupported': '«{name}»: {type} auth is not supported, skipped',
+  'import.warn.authUnknown': '«{name}»: unknown auth type «{type}», skipped',
+  'import.warn.formDataFiles':
+    '«{name}»: {count} file fields inside form-data were not imported',
+  'import.warn.graphql': '«{name}»: the GraphQL body was converted to JSON',
+  'import.warn.fileBody': '«{name}»: the file body was not imported',
+  'import.warn.bodyMode': '«{name}»: the «{mode}» body type is not supported',
+  'import.warn.skipped': '«{name}» is neither a folder nor a request — skipped',
+  'import.warn.baseUrl':
+    'Every request starts with «{{{variable}}}», so it was promoted to the base URL — set its value in the settings variables',
 
   'landing.badge': 'An API workbench for teams',
   'landing.title': 'Your APIs in one place — documented, testable, shared',

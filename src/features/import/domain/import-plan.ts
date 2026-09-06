@@ -39,11 +39,16 @@ export interface PlannedEndpoint {
   auth: AuthConfig
 }
 
+export interface ImportWarning {
+  key: string
+  params?: Record<string, string | number>
+}
+
 export interface ImportPlan {
   collection: PlannedCollection
   folders: PlannedFolder[]
   endpoints: PlannedEndpoint[]
-  warnings: string[]
+  warnings: ImportWarning[]
 }
 
 export class ImportFailure extends Error {

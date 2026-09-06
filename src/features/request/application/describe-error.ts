@@ -20,6 +20,8 @@ const BY_CODE: Record<string, Descriptor> = {
   SELF_SIGNED_CERT_IN_CHAIN: { kind: 'tls', slug: 'tls' },
   UNABLE_TO_VERIFY_LEAF_SIGNATURE: { kind: 'tls', slug: 'tls' },
   EPROTO: { kind: 'tls', slug: 'tls' },
+  UNAUTHORIZED: { kind: 'blocked', slug: 'unauthorized' },
+  BLOCKED: { kind: 'blocked', slug: 'blocked' },
 }
 
 const UNKNOWN: Descriptor = { kind: 'network', slug: 'network' }

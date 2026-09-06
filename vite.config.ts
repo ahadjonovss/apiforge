@@ -20,6 +20,7 @@ const STRIPPED_REQUEST_HEADERS = new Set([
   'referer',
   'accept-encoding',
   'content-length',
+  'x-apiforge-token',
 ])
 
 const STRIPPED_RESPONSE_HEADERS = new Set([
@@ -28,7 +29,15 @@ const STRIPPED_RESPONSE_HEADERS = new Set([
   'transfer-encoding',
   'connection',
   'keep-alive',
+  'set-cookie',
+  'set-cookie2',
+  'strict-transport-security',
+  'clear-site-data',
+  'content-security-policy',
+  'content-security-policy-report-only',
 ])
+
+const CONTENT_TYPE_HEADER = 'x-apiforge-content-type'
 
 function devProxy(): Plugin {
   return {
@@ -97,12 +106,15 @@ function devProxy(): Plugin {
         res.statusMessage = upstream.statusText
 
         upstream.headers.forEach((value, key) => {
-          if (STRIPPED_RESPONSE_HEADERS.has(key) || key === 'set-cookie') return
+          if (STRIPPED_RESPONSE_HEADERS.has(key)) return
           res.setHeader(key, value)
         })
 
-        const setCookie = upstream.headers.getSetCookie()
-        if (setCookie.length > 0) res.setHeader('set-cookie', setCookie)
+        const upstreamType = upstream.headers.get('content-type')
+        if (upstreamType) res.setHeader(CONTENT_TYPE_HEADER, upstreamType)
+        res.setHeader('content-type', 'application/octet-stream')
+        res.setHeader('x-content-type-options', 'nosniff')
+        res.setHeader('content-security-policy', "sandbox; default-src 'none'")
 
         res.end(Buffer.from(await upstream.arrayBuffer()))
       })

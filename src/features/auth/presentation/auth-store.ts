@@ -75,7 +75,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
     signUp: (input) =>
       run(async () => {
-        await authService.signUp(input)
+        const user = await authService.signUp(input)
+        set({ user })
       }),
 
     signOut: async () => {

@@ -58,6 +58,11 @@ function AddMemberModal({
   const pending = useWorkspacesStore((state) => state.pending)
   const error = useWorkspacesStore((state) => state.error)
   const addMember = useWorkspacesStore((state) => state.addMember)
+  const clearError = useWorkspacesStore((state) => state.clearError)
+
+  useEffect(() => {
+    clearError()
+  }, [open, clearError])
 
   const {
     register,
@@ -293,6 +298,9 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
     void loadCollections(workspaceId)
   }, [workspaceId, openWorkspace, loadCollections])
 
+  const modalOpen =
+    addingMember || addingTeam || addingCollection || importing || subject !== null
+
   const owner = current ? canManage(current, user?.id ?? null) : false
   const manages = canManageCollections(members, user?.id ?? null)
 
@@ -334,7 +342,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
           </p>
         </div>
 
-        <DataErrorNote error={error ?? collectionsError} />
+        <DataErrorNote error={modalOpen ? null : (error ?? collectionsError)} />
 
         <WorkspaceHome
           workspace={current}

@@ -3,9 +3,12 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import {
   STRIPPED_REQUEST_HEADERS,
   STRIPPED_RESPONSE_HEADERS,
+  TOKEN_HEADER,
+  applyInertResponseHeaders,
   isPrivateAddress,
   validateTarget,
 } from './_guard.js'
+import { verifyIdToken } from './_auth.js'
 
 const MAX_REDIRECTS = 5
 const MAX_BODY_BYTES = 8 * 1024 * 1024
@@ -19,7 +22,7 @@ async function resolvesToPublicAddress(hostname: string): Promise<boolean> {
     if (records.length === 0) return false
     return records.every((record) => !isPrivateAddress(record.address))
   } catch {
-    return true
+    return false
   }
 }
 
@@ -32,13 +35,19 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     res.end(message)
   }
 
+  const header = req.headers[TOKEN_HEADER]
+  const token = Array.isArray(header) ? header[0] : header
+  if (!(await verifyIdToken(token))) {
+    return fail(401, 'sign in to use the proxy', 'UNAUTHORIZED')
+  }
+
   const requestUrl = new URL(req.url ?? '/', 'http://localhost')
   const checked = validateTarget(requestUrl.searchParams.get('target'))
   if (!checked.ok) return fail(checked.status, checked.reason)
 
   let target = checked.url
   if (!(await resolvesToPublicAddress(target.hostname))) {
-    return fail(403, 'target resolves to a private address')
+    return fail(403, 'target resolves to a private address', 'BLOCKED')
   }
 
   const headers = new Headers()
@@ -60,10 +69,11 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   const signal = AbortSignal.timeout(TIMEOUT_MS)
   let upstream: Response
   let method = req.method ?? 'GET'
+  let payload = body
 
   try {
     for (let hop = 0; ; hop += 1) {
-      upstream = await fetch(target, { method, headers, body, redirect: 'manual', signal })
+      upstream = await fetch(target, { method, headers, body: payload, redirect: 'manual', signal })
 
       const location = upstream.headers.get('location')
       if (!location || upstream.status < 300 || upstream.status >= 400) break
@@ -73,12 +83,18 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       const next = validateTarget(new URL(location, target).toString())
       if (!next.ok) return fail(next.status, `redirect blocked: ${next.reason}`)
       if (!(await resolvesToPublicAddress(next.url.hostname))) {
-        return fail(403, 'redirect target resolves to a private address')
+        return fail(403, 'redirect target resolves to a private address', 'BLOCKED')
       }
 
       target = next.url
-      if (upstream.status === 303 || ((upstream.status === 301 || upstream.status === 302) && method === 'POST')) {
+      if (
+        upstream.status === 303 ||
+        ((upstream.status === 301 || upstream.status === 302) && method === 'POST')
+      ) {
         method = 'GET'
+        payload = undefined
+        headers.delete('content-type')
+        headers.delete('content-length')
       }
     }
   } catch (error) {
@@ -98,12 +114,14 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   res.statusMessage = upstream.statusText
 
   upstream.headers.forEach((value, key) => {
-    if (STRIPPED_RESPONSE_HEADERS.has(key) || key === 'set-cookie') return
+    if (STRIPPED_RESPONSE_HEADERS.has(key)) return
     res.setHeader(key, value)
   })
 
-  const setCookie = upstream.headers.getSetCookie()
-  if (setCookie.length > 0) res.setHeader('set-cookie', setCookie)
+  applyInertResponseHeaders(
+    (key, value) => res.setHeader(key, value),
+    upstream.headers.get('content-type'),
+  )
 
   res.end(buffer)
 }

@@ -349,6 +349,14 @@ export const uz = {
   'error.msg.cors': "«{host}» javobini brauzer o'qishga ruxsat bermadi ({ms}ms)",
   'error.hint.cors':
     "Ko'pincha bu CORS. Dev server'da proxy shu muammoni hal qiladi; deploy qilingan ilova uchun Cloud Function relay kerak.",
+  'error.title.unauthorized': 'Proxy ruxsat bermadi',
+  'error.msg.unauthorized':
+    "So'rovni yuborish uchun tizimga kirgan bo'lishingiz kerak ({host}).",
+  'error.hint.unauthorized': 'Sahifani yangilang yoki qaytadan kiring.',
+  'error.title.blocked': 'Manzil bloklandi',
+  'error.msg.blocked': "{host} ichki yoki xususiy manzilga ishora qilyapti.",
+  'error.hint.blocked':
+    "Proxy faqat ochiq internetdagi manzillarga so'rov yuboradi. Lokal serverni sinash uchun dev server'dan foydalaning.",
   'error.title.proxyDown': 'Dev server javob bermadi',
   'error.msg.proxyDown': "So'rov proxy'ga ham yetib bormadi ({ms}ms)",
   'error.hint.proxyDown': '`npm run dev` ishlab turibdimi tekshiring.',
@@ -373,6 +381,24 @@ export const uz = {
   'import.error.notJson': 'Fayl JSON emas yoki buzilgan',
   'import.error.notCollection': "Bu Postman collection fayliga o'xshamaydi (info bo'limi yo'q)",
   'import.error.empty': "Collection bo'sh — ko'chiradigan narsa topilmadi",
+  'import.warn.schema': 'Collection formati v2.x emas — ba’zi maydonlar tushib qolishi mumkin',
+  'import.warn.collectionScripts': "Collection darajasidagi skriptlar ko'chirilmadi",
+  'import.warn.folderScripts':
+    "«{names}» papkasidagi skriptlar ko'chirilmadi — agar ular token yoki o'zgaruvchi o'rnatgan bo'lsa, qiymatni qo'lda kiriting",
+  'import.warn.requestScripts':
+    "{count} ta so'rovdagi pre-request/test skriptlari ko'chirilmadi",
+  'import.warn.method': "«{name}»: {method} metodi qo'llab-quvvatlanmaydi, GET qilib olindi",
+  'import.warn.authUnsupported':
+    "«{name}»: {type} auth qo'llab-quvvatlanmaydi, o'tkazib yuborildi",
+  'import.warn.authUnknown': "«{name}»: notanish auth turi «{type}», o'tkazib yuborildi",
+  'import.warn.formDataFiles':
+    "«{name}»: form-data ichidagi {count} ta fayl maydoni ko'chirilmadi",
+  'import.warn.graphql': "«{name}»: GraphQL body JSON ko'rinishiga o'girildi",
+  'import.warn.fileBody': "«{name}»: fayl body'si ko'chirilmadi",
+  'import.warn.bodyMode': "«{name}»: «{mode}» body turi qo'llab-quvvatlanmaydi",
+  'import.warn.skipped': "«{name}» na papka, na so'rov — o'tkazib yuborildi",
+  'import.warn.baseUrl':
+    "Barcha so'rovlar «{{{variable}}}» bilan boshlangani uchun u base URL sifatida ajratildi — qiymatini sozlamalardagi o'zgaruvchilardan bering",
 
   'landing.badge': 'Jamoa uchun API ish stoli',
   'landing.title': 'API’laringiz bir joyda — hujjatlangan, sinaladigan, ulashiladigan',

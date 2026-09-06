@@ -350,6 +350,13 @@ export const ru: typeof uz = {
   'error.msg.cors': 'Браузер не разрешил прочитать ответ «{host}» ({ms}мс)',
   'error.hint.cors':
     'Обычно это CORS. В dev-режиме проблему решает прокси; для развёрнутого приложения нужен Cloud Function relay.',
+  'error.title.unauthorized': 'Прокси не пропустил запрос',
+  'error.msg.unauthorized': 'Чтобы отправить запрос, нужно войти в систему ({host}).',
+  'error.hint.unauthorized': 'Обновите страницу или войдите заново.',
+  'error.title.blocked': 'Адрес заблокирован',
+  'error.msg.blocked': '{host} указывает на внутренний или приватный адрес.',
+  'error.hint.blocked':
+    'Прокси обращается только к публичным адресам. Для локального сервера используйте dev-сервер.',
   'error.title.proxyDown': 'Dev-сервер не ответил',
   'error.msg.proxyDown': 'Запрос не дошёл даже до прокси ({ms}мс)',
   'error.hint.proxyDown': 'Проверьте, запущен ли `npm run dev`.',
@@ -374,6 +381,23 @@ export const ru: typeof uz = {
   'import.error.notJson': 'Файл не является JSON или повреждён',
   'import.error.notCollection': 'Это не похоже на файл коллекции Postman (нет раздела info)',
   'import.error.empty': 'Коллекция пуста — переносить нечего',
+  'import.warn.schema': 'Формат коллекции не v2.x — часть полей может потеряться',
+  'import.warn.collectionScripts': 'Скрипты уровня коллекции не перенесены',
+  'import.warn.folderScripts':
+    'Скрипты в папках «{names}» не перенесены — если они задавали токен или переменную, введите значение вручную',
+  'import.warn.requestScripts':
+    'Pre-request/test скрипты в {count} запросах не перенесены',
+  'import.warn.method': '«{name}»: метод {method} не поддерживается, взят GET',
+  'import.warn.authUnsupported': '«{name}»: auth {type} не поддерживается, пропущен',
+  'import.warn.authUnknown': '«{name}»: неизвестный тип auth «{type}», пропущен',
+  'import.warn.formDataFiles':
+    '«{name}»: {count} файловых полей в form-data не перенесены',
+  'import.warn.graphql': '«{name}»: тело GraphQL преобразовано в JSON',
+  'import.warn.fileBody': '«{name}»: файловое тело запроса не перенесено',
+  'import.warn.bodyMode': '«{name}»: тип тела «{mode}» не поддерживается',
+  'import.warn.skipped': '«{name}» — ни папка, ни запрос, пропущено',
+  'import.warn.baseUrl':
+    'Все запросы начинаются с «{{{variable}}}», поэтому он вынесен в base URL — задайте значение в переменных настроек',
 
   'landing.badge': 'Рабочее место для API',
   'landing.title': 'Все ваши API в одном месте — с документацией, тестами и доступом для команды',

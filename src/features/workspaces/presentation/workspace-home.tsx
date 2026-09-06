@@ -4,7 +4,6 @@ import { formatDateTime } from '@/core/lib/format'
 import { Button } from '@/shared/ui/button'
 import { Markdown } from '@/shared/ui/markdown'
 import { MarkdownEditor } from '@/shared/ui/markdown-editor'
-import { DataErrorNote } from '@/shared/ui/data-error-note'
 import { useT } from '@/app/providers/i18n-provider'
 import type { Workspace, WorkspaceMember } from '../domain/workspace'
 import { useWorkspacesStore } from './workspaces-store'
@@ -26,7 +25,6 @@ export function WorkspaceHome({
 }: Props) {
   const t = useT()
   const pending = useWorkspacesStore((state) => state.pending)
-  const error = useWorkspacesStore((state) => state.error)
   const saveDocs = useWorkspacesStore((state) => state.saveDocs)
 
   const [editing, setEditing] = useState(false)
@@ -99,8 +97,6 @@ export function WorkspaceHome({
       </div>
 
       <div className="mt-4">
-        <DataErrorNote error={error} />
-
         {editing ? (
           <div className="mt-2 flex flex-col gap-2">
             <MarkdownEditor value={draft} onChange={setDraft} minHeight="260px" />

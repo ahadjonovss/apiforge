@@ -121,7 +121,16 @@ Gateway eski massivni o'qishda avtomatik map'ga o'giradi, migratsiya skripti ker
 - o'z rolini o'zi o'zgartira olmaydi (aks holda oxirgi admin o'zini tushirib,
   ish maydonini boshqaruvsiz qoldirardi)
 - `owner` roli boshqaga berilmaydi va o'chirilmaydi
+- **`memberIds` ni faqat `owner`/`admin` o'zgartiradi** — ilgari har qanday a'zo uni
+  qayta yozib, owner'ni ham ro'yxatdan chiqarib yuborishi mumkin edi (keyin owner
+  o'z ish maydonini ham o'qiy olmay qolardi). Boshqa maydonlar (nom, hujjat) a'zoga
+  ochiq, chunki `memberIds` o'zgarmagan update ruxsat etiladi.
 - a'zolar hamma narsani o'qiy oladi
+
+`users/{uid}` ga yozishda `email` **auth tokenidagi email bilan mos** kelishi shart.
+Aks holda foydalanuvchi o'z hujjatiga begona email yozib qo'yishi mumkin edi, va
+o'sha odamni taklif qilgan admin `findByEmail` orqali hujumchining `uid` ini olib,
+uni ish maydoniga qo'shib yuborardi.
 
 ## Ma'lumot modeli
 
@@ -234,9 +243,31 @@ Tanlovni `VITE_PROXY_PATH` qiladi; bo'sh bo'lsa to'g'ridan-to'g'ri `fetch`.
 **Vercel proxy'sida SSRF himoyasi shart**, chunki u ochiq internetda turadi.
 `api/_guard.ts` sof funksiya — shuning uchun sinaladi. Ikki qatlam: URL tekshiruvi
 (protokol, `localhost`, private IP literal) va DNS'dan keyin **yechilgan IP**
-tekshiruvi — ommaviy domen private manzilga ishora qilishi mumkin. Redirect'lar
-qo'lda kuzatiladi va har bir hop qayta tekshiriladi; aks holda ochiq redirect
-butun himoyani bir qadamda chetlab o'tardi.
+tekshiruvi — ommaviy domen private manzilga ishora qilishi mumkin. DNS xato bersa
+manzil **rad etiladi** (fail-closed). Redirect'lar qo'lda kuzatiladi va har bir hop
+qayta tekshiriladi; aks holda ochiq redirect butun himoyani bir qadamda chetlab
+o'tardi. Method 303/POST-redirect'da GET'ga tushganda body va `content-type`
+tashlab yuboriladi — aks holda `fetch` "GET cannot have body" deb yiqilardi.
+
+**Javob hech qachon brauzerda render qilinmaydi.** Target'ning `content-type` i
+`x-apiforge-content-type` ga ko'chiriladi, o'rniga `application/octet-stream` +
+`nosniff` + `content-security-policy: sandbox` qo'yiladi. Sababi: `/api/proxy?target=…`
+ga to'g'ridan-to'g'ri o'tish mumkin, va target HTML qaytarsa u **apiforge.uz origin'ida**
+ishga tushardi — ya'ni Firebase tokeni va localStorage hujumchi qo'lida bo'lardi.
+Klient haqiqiy turni `x-apiforge-content-type` dan tiklaydi.
+
+Shu sababdan `set-cookie`, `strict-transport-security`, `clear-site-data` va
+`content-security-policy` ham uzatilmaydi: ular target'niki bo'lsa ham **bizning
+domenimizga** ta'sir qilardi.
+
+**Proxy anonim emas.** Klient `x-apiforge-token` da Firebase ID tokenini yuboradi,
+`api/_auth.ts` esa uni Google'ning JWKS'i orqali tekshiradi (RS256, `aud` = project id,
+`iss`, `exp`). Tokensiz so'rov 401 va `x-apiforge-error-code: UNAUTHORIZED` oladi.
+Sababi: aks holda apiforge.uz istalgan odam uchun ochiq relay bo'lardi. Token faqat
+proxy yo'liga yuboriladi — to'g'ridan-to'g'ri `fetch` da hech qachon, aks holda u
+begona serverga sizib ketardi. Dev server plagini token talab qilmaydi (u localhost).
+Ruxsat etilgan project id'lar `APIFORGE_PROJECT_IDS` env'ida, standarti
+`apiforge-prod,apiforge-dev`.
 
 
 Dev server'da so'rov `vite.config.ts` dagi `apiforge-dev-proxy` plagini orqali o'tadi

@@ -63,7 +63,7 @@ export function CollectionPage({
   const tree = useMemo(() => buildTree(folders, endpoints), [folders, endpoints])
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null
 
-  useAutoSave(workspaceId, activeTab)
+  useAutoSave(workspaceId, current?.id ?? null)
 
   const captureVariables = useCollectionsStore((state) => state.captureVariables)
   const clearCaptures = useTabsStore((state) => state.clearCaptures)

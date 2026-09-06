@@ -1,5 +1,5 @@
 import { createRequest } from '@/features/request/application/request-factory'
-import type { ImportPlan } from '../domain/import-plan'
+import type { ImportPlan, ImportWarning } from '../domain/import-plan'
 import type { ImportSink } from '../domain/import-sink'
 import { parsePostmanCollection } from './parse-postman'
 
@@ -7,7 +7,7 @@ export interface ImportOutcome {
   collectionId: string
   folders: number
   endpoints: number
-  warnings: string[]
+  warnings: ImportWarning[]
 }
 
 export function createImportService(sink: ImportSink) {

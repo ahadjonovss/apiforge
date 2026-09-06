@@ -59,6 +59,9 @@ export function validateTarget(raw: string | null): TargetRejection {
   return { ok: true, url }
 }
 
+export const CONTENT_TYPE_HEADER = 'x-apiforge-content-type'
+export const TOKEN_HEADER = 'x-apiforge-token'
+
 export const STRIPPED_REQUEST_HEADERS = new Set([
   'host',
   'connection',
@@ -79,6 +82,7 @@ export const STRIPPED_REQUEST_HEADERS = new Set([
   'x-forwarded-host',
   'x-forwarded-proto',
   'x-real-ip',
+  TOKEN_HEADER,
 ])
 
 export const STRIPPED_RESPONSE_HEADERS = new Set([
@@ -87,4 +91,22 @@ export const STRIPPED_RESPONSE_HEADERS = new Set([
   'transfer-encoding',
   'connection',
   'keep-alive',
+  'set-cookie',
+  'set-cookie2',
+  'strict-transport-security',
+  'clear-site-data',
+  'content-security-policy',
+  'content-security-policy-report-only',
+  'public-key-pins',
+  'public-key-pins-report-only',
 ])
+
+export function applyInertResponseHeaders(
+  set: (key: string, value: string) => void,
+  upstreamContentType: string | null,
+) {
+  if (upstreamContentType) set(CONTENT_TYPE_HEADER, upstreamContentType)
+  set('content-type', 'application/octet-stream')
+  set('x-content-type-options', 'nosniff')
+  set('content-security-policy', "sandbox; default-src 'none'")
+}
