@@ -40,3 +40,5 @@ src/app/route-tree.gen.ts
 
 # tanstack router keshi
 .tanstack/
+# vercel CLI
+.vercel
