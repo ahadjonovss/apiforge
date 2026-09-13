@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import {
   createRequest,
   describeRawError,
+  runScript,
   sendRequest,
   HttpRequestFailure,
 } from '@/features/request'
@@ -36,6 +37,7 @@ function makeTab(request: RequestDef, inherited: InheritedConfig | null): Tab {
     revision: 0,
     captures: null,
     captureMisses: [],
+    script: null,
     files: {},
   }
 }
@@ -125,11 +127,16 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         files: tab.files,
       })
       const outcome = applyCaptures(tab.request.captures ?? [], response)
+      const script = await runScript(tab.request, response, {
+        variables: tab.inherited?.variables ?? {},
+      })
+      const captured = [...outcome.captured, ...(script?.variables ?? [])]
       patchTab({
         response,
         isSending: false,
-        captures: outcome.captured.length > 0 ? outcome.captured : null,
+        captures: captured.length > 0 ? captured : null,
         captureMisses: outcome.missed,
+        script,
       })
     } catch (error) {
       const detail: RequestError =
@@ -142,6 +149,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         isSending: false,
         captures: null,
         captureMisses: [],
+        script: null,
       })
     }
   },

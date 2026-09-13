@@ -208,6 +208,12 @@ export const ru: typeof uz = {
   'collection.settings': 'Настройки',
   'collection.settingsTitle': 'Настройки коллекции',
   'collection.settingsHint': 'Эти значения применяются ко всем эндпоинтам коллекции',
+  'collection.settingsBasics': 'Основное',
+  'collection.settingsAuth': 'Аутентификация',
+  'collection.settingsAuthHint': 'Применяется, когда auth эндпоинта — «inherit»',
+  'collection.commonHeadersHint':
+    'Добавляются к каждому запросу; при совпадении имени побеждает заголовок эндпоинта',
+  'collection.backToCollection': 'Назад к коллекции',
   'collection.notFound': 'Коллекция не найдена',
   'collection.backToWorkspace': 'Вернуться в пространство',
   'collection.workspace': 'Пространство',
@@ -294,6 +300,17 @@ export const ru: typeof uz = {
   'capture.reason.notJson': 'Ответ не является JSON',
   'capture.reason.notFound': '«{path}» не найдено в ответе',
   'capture.reason.noHeader': 'Заголовка «{path}» нет в ответе',
+  'request.script': 'Скрипт',
+  'script.title': 'Скрипт после ответа',
+  'script.hint':
+    'Выполняется после получения ответа: условия, вычисления и запись в переменные.',
+  'script.insertExample': 'Вставить пример с токеном',
+  'script.apiTitle': 'Доступный API',
+  'script.sandbox':
+    'Скрипт работает в отдельном Worker — без доступа к сети и данным страницы; если не завершится за 2 секунды, будет остановлен.',
+  'script.saved': 'Скрипт записал в переменные:',
+  'script.timeout': 'Скрипт не завершился за 2 секунды и был остановлен',
+  'script.failed': 'Ошибка скрипта:',
 
   'response.empty': 'Отправьте запрос — ответ появится здесь',
   'response.body': 'Body',
@@ -357,6 +374,11 @@ export const ru: typeof uz = {
   'error.msg.blocked': '{host} указывает на внутренний или приватный адрес.',
   'error.hint.blocked':
     'Прокси обращается только к публичным адресам. Для локального сервера используйте dev-сервер.',
+  'error.title.local': 'Локальный сервер не ответил',
+  'error.msg.local':
+    'Браузер обратился к «{host}» напрямую, но не смог прочитать ответ ({ms}мс)',
+  'error.hint.local':
+    'Локальные адреса вызываются напрямую из браузера, без прокси. Сервер должен вернуть заголовок `Access-Control-Allow-Origin`; Chrome может ещё спросить разрешение на доступ к локальной сети.',
   'error.title.proxyDown': 'Dev-сервер не ответил',
   'error.msg.proxyDown': 'Запрос не дошёл даже до прокси ({ms}мс)',
   'error.hint.proxyDown': 'Проверьте, запущен ли `npm run dev`.',

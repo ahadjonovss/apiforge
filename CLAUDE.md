@@ -240,6 +240,16 @@ va `x-apiforge-error-code` bilan):
 
 Tanlovni `VITE_PROXY_PATH` qiladi; bo'sh bo'lsa to'g'ridan-to'g'ri `fetch`.
 
+**Lokal manzillar proxy'dan chetlab o'tadi.** Deploy qilingan ilovada target
+`localhost`, `*.localhost`, `*.internal` yoki private IP bo'lsa (`core/domain/host.ts`
+dagi `isLocalHost`), so'rov proxy'siz, to'g'ridan-to'g'ri brauzerdan yuboriladi.
+Sababi oddiy: Vercel'dagi funksiya foydalanuvchining mashinasidagi `localhost` ga
+baribir yeta olmaydi — u faqat o'z konteyneridagi loopback'ni ko'rardi, shuning
+uchun guard uni bloklaydi. Brauzer esa aynan o'sha mashinada. Bunda shart faqat
+bitta: lokal server CORS sarlavhalarini qaytarsin — bo'lmasa `error.*.local`
+xatosi shuni aytadi. Dev server'da bu chetlab o'tish yo'q, chunki vite plagini
+lokal manzilga o'zi yetib boradi va CORS umuman kerak bo'lmaydi.
+
 **Vercel proxy'sida SSRF himoyasi shart**, chunki u ochiq internetda turadi.
 `api/_guard.ts` sof funksiya — shuning uchun sinaladi. Ikki qatlam: URL tekshiruvi
 (protokol, `localhost`, private IP literal) va DNS'dan keyin **yechilgan IP**
@@ -299,6 +309,47 @@ collections'ga bog'lanmaydi, aksincha collections tabs'dan o'qiydi.
 Yo'l sintaksisi: `access_token`, `data.tokens.0.access`, `data.tokens[1].access`,
 `$.` prefiksi ham qabul qilinadi.
 
+## Javobdan keyingi skript
+
+Capture deklarativ va shartsiz — shart, hisob-kitob yoki formatlash kerak bo'lganda
+`RequestDef.script` ishlatiladi: javob kelgandan keyin ishlaydigan JS.
+
+| Fayl | Vazifa |
+|---|---|
+| `domain/script.ts` | `ScriptRunner` porti, `ScriptInput` / `ScriptOutcome` |
+| `application/run-script.ts` | use case: kod bo'sh bo'lsa umuman ishga tushmaydi |
+| `infrastructure/script-worker.ts` | sandbox — skript aynan shu yerda bajariladi |
+| `infrastructure/worker-script-runner.ts` | Worker'ni yaratadi, timeout'da terminate qiladi |
+
+**Sandbox — Web Worker, har safar yangisi.** Sababi ikkita. Birinchisi, worker'da DOM
+yo'q: `document`, `localStorage`, `window` umuman ko'rinmaydi. Ikkinchisi, worker'ni
+**to'xtatib bo'ladi** — cheksiz sikl yozilsa 2 soniyadan keyin `terminate()` qiladi,
+asosiy oqim esa muzlab qolmaydi (shuning uchun `eval` yoki `iframe` emas).
+
+Worker ishga tushishi bilan `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`,
+`importScripts`, `indexedDB`, `caches`, `Worker`, `BroadcastChannel` **o'chiriladi**.
+Oddiy `scope[name] = undefined` yetmaydi: `indexedDB` kabilar prototipda getter
+bo'lgani uchun strict rejimda tayinlash xato beradi — shuning uchun `strip()` prototip
+zanjirini yurib `Reflect.deleteProperty` qiladi. Nega muhim: Firebase auth tokeni
+IndexedDB'da yotadi, skriptlar esa import qilingan kolleksiya bilan **birovdan**
+kelishi mumkin — o'qish ham, jo'natish ham yopiladi.
+
+Skript ko'radigan yuza ataylab kichik: `af.response` (status, ok, body, `json()`,
+`header()`, durationMs), `af.request`, `af.vars.get/set` va `console`. Kod
+`AsyncFunction` bilan chaqiriladi, ya'ni `await` ishlaydi.
+
+Natija — `ScriptOutcome`: yozilgan o'zgaruvchilar, loglar, xato va `timedOut`.
+Xato bo'lganda **undan oldin yozilganlar saqlanib qoladi** (Postman ham shunday),
+xato esa javob panelida ko'rinadi — jimgina yo'qolish yo'q.
+
+`tabs-store.send` skript o'zgaruvchilarini capture natijasining **ustiga** qo'shadi,
+shuning uchun ikkalasi ham bitta yo'ldan (`captureVariables`) to'plam o'zgaruvchilariga
+yoziladi va nomlar to'qnashsa skriptniki g'olib bo'ladi.
+
+Postman import'i skriptlarni hamon ogohlantirish bilan tashlab yuboradi: ular `pm.*`
+API'siga yozilgan, bizniki esa `af.*` — jimgina ko'chirish ishlamaydigan kod hosil
+qilardi.
+
 ## Avtomatik saqlash
 
 Endpoint tahrirlanganda 800ms tinchlikdan keyin o'zi saqlanadi. Qo'lda "Saqlash"
@@ -320,6 +371,21 @@ boshqa tugmalarni "yuklanmoqda" holatiga tushirardi va `run()` ichidagi
 
 Collection bosh sahifasi bundan mustasno — u ochiq tahrir rejimiga
 (Saqlash/Bekor) ega, ya'ni foydalanuvchi ataylab kiradi va chiqadi.
+
+**To'plam sozlamalari — modal emas, alohida sahifa:**
+`/workspace/$workspaceId/collection/$collectionId/settings`. Fayl nomidagi pastki
+chiziq (`$collectionId_.settings.tsx`) TanStack'ga "ichma-ich qilma" deydi — aks
+holda sahifa collection sahifasining ichiga `Outlet` bo'lib tushardi. Sabab:
+sozlamalarda to'rtta blok bor (asosiy, auth, o'zgaruvchilar, headerlar) va ular
+modal ichida 70vh ga siqilib, o'zgaruvchilar jadvali ikki qatorga qisilardi.
+Sahifada har blok karta, maydonlar keng, Saqlash/Bekor esa pastda yopishib turadi.
+Saqlangach `navigate` to'plam sahifasiga qaytaradi.
+
+`KeyValueEditor` endi **doim bitta bo'sh qator** ko'rsatadi (ilgari oxirgi qator
+to'lgandagina qo'shilardi — ya'ni saqlangan ro'yxatga yangi qator qo'shish uchun
+avval borini tahrirlash kerak edi). Bo'sh qatorning `id` si `useRef` da turadi va
+faqat u ro'yxatga qo'shilganda yangilanadi, aks holda har render'da yangi `id`
+chiqib, yozayotgan input fokusdan ketardi.
 
 ## Tillar
 
@@ -418,9 +484,17 @@ shu.
 `features/request/application/interpolate.ts` — `{{variable}}` almashtirish. URL, header,
 param, body — hammasida ishlatiladi, `build-http-call` ichida chaqiriladi.
 
-**Ma'lum bo'shliq:** `tabs-store` `sendRequest` ni `scope` uzatmasdan chaqiradi, shuning
-uchun interpolation hozircha hech nima almashtirmaydi. Environment feature'i qo'shilganda
-ulanadi.
+**Almashtirish rekursiv.** O'zgaruvchi qiymatining ichidagi `{{...}}` ham ochiladi
+(`base_url = https://{{domain}}/api`). Ilgari bitta o'tishda ishlangani uchun qiymat
+ichidagi havola xom holida qolib, `{{domain}}` host bo'lib proxy'ga ketardi va u
+"manzil bloklandi" deb rad etardi. Sikl (`a → {{b}} → {{a}}`) `resolving` to'plami
+bilan to'xtatiladi: shu shoxda takrorlangan nom xom matn bo'lib qoladi, rekursiya
+cheksizlikka ketmaydi. `findUnresolved` ham xuddi shunday chuqur yuradi — qiymat
+ichidagi topilmagan nom ham, sikl ham "hal qilinmagan" deb qaytariladi.
+
+Hozircha `scope` faqat to'plam o'zgaruvchilaridan yig'iladi (`send-request` ni
+`options.inherited.variables` bilan). Environment feature'i qo'shilganda ustiga
+`options.scope` qo'shiladi.
 
 ## Keyingi qadamlar
 

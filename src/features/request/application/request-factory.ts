@@ -17,6 +17,7 @@ export function createRequest(partial: Partial<RequestDef> = {}): RequestDef {
     docs: '',
     responseDocs: [],
     captures: [],
+    script: '',
     method: 'GET',
     url: '',
     params: [],

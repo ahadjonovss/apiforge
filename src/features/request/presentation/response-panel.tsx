@@ -4,6 +4,7 @@ import { json } from '@codemirror/lang-json'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { AlertCircle, Clock, HardDrive, Lightbulb } from 'lucide-react'
 import { CaptureNote } from './capture-note'
+import { ScriptNote } from './script-note'
 import { ResponseExamples } from './response-examples'
 import { cn } from '@/core/lib/cn'
 import { useTheme } from '@/app/providers/theme-provider'
@@ -92,6 +93,7 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
     <div className="flex h-full flex-col">
       <ResponseExamples tab={tab} />
       <CaptureNote tab={tab} misses={captureMisses} />
+      <ScriptNote outcome={tab.script} />
       <div className="flex items-center gap-4 border-b border-border px-3 py-2">
         <span className={cn('font-mono text-xs font-bold', statusClass(response.status))}>
           {response.status} {response.statusText}

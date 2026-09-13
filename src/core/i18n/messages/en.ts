@@ -208,6 +208,12 @@ export const en: typeof uz = {
   'collection.settings': 'Settings',
   'collection.settingsTitle': 'Collection settings',
   'collection.settingsHint': 'These values apply to every endpoint in the collection',
+  'collection.settingsBasics': 'Basics',
+  'collection.settingsAuth': 'Authentication',
+  'collection.settingsAuthHint': 'Used whenever an endpoint’s auth is set to “inherit”',
+  'collection.commonHeadersHint':
+    'Added to every request; if an endpoint repeats a name, the endpoint wins',
+  'collection.backToCollection': 'Back to the collection',
   'collection.notFound': 'Collection not found',
   'collection.backToWorkspace': 'Back to the workspace',
   'collection.workspace': 'Workspace',
@@ -294,6 +300,17 @@ export const en: typeof uz = {
   'capture.reason.notJson': 'The response is not JSON',
   'capture.reason.notFound': '“{path}” was not found in the response',
   'capture.reason.noHeader': 'The “{path}” header is not in the response',
+  'request.script': 'Script',
+  'script.title': 'Post-response script',
+  'script.hint':
+    'Runs once the response arrives: branch on it, compute values, write variables.',
+  'script.insertExample': 'Insert the token example',
+  'script.apiTitle': 'Available API',
+  'script.sandbox':
+    'The script runs in its own Worker — no network, no page data — and is stopped if it takes longer than 2 seconds.',
+  'script.saved': 'The script wrote variables:',
+  'script.timeout': 'The script did not finish within 2 seconds and was stopped',
+  'script.failed': 'Script error:',
 
   'response.empty': 'Send a request — the response appears here',
   'response.body': 'Body',
@@ -357,6 +374,11 @@ export const en: typeof uz = {
   'error.msg.blocked': '{host} points at an internal or private address.',
   'error.hint.blocked':
     'The proxy only reaches public addresses. Use the dev server to test a local one.',
+  'error.title.local': 'The local server did not answer',
+  'error.msg.local':
+    'The browser reached “{host}” directly but could not read the response ({ms}ms)',
+  'error.hint.local':
+    'Local addresses are called straight from the browser, without the proxy. Your server has to send `Access-Control-Allow-Origin`; Chrome may also ask for local network permission.',
   'error.title.proxyDown': 'The dev server did not answer',
   'error.msg.proxyDown': 'The request did not even reach the proxy ({ms}ms)',
   'error.hint.proxyDown': 'Check that `npm run dev` is running.',

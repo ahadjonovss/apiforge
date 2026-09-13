@@ -206,6 +206,12 @@ export const uz = {
   'collection.settings': 'Sozlamalar',
   'collection.settingsTitle': "To'plam sozlamalari",
   'collection.settingsHint': "Bu qiymatlar to'plamdagi barcha endpointlarga tegishli",
+  'collection.settingsBasics': 'Asosiy',
+  'collection.settingsAuth': 'Autentifikatsiya',
+  'collection.settingsAuthHint': "Endpoint auth'i «inherit» bo'lganda shu qiymat ishlatiladi",
+  'collection.commonHeadersHint':
+    "Har bir so'rovga qo'shiladi; endpoint bir xil nomni yozsa endpointniki g'olib",
+  'collection.backToCollection': "To'plamga qaytish",
   'collection.notFound': "To'plam topilmadi",
   'collection.backToWorkspace': 'Ish maydoniga qaytish',
   'collection.workspace': 'Ish maydoni',
@@ -292,6 +298,17 @@ export const uz = {
   'capture.reason.notJson': 'Javob JSON emas',
   'capture.reason.notFound': '«{path}» javobda topilmadi',
   'capture.reason.noHeader': "«{path}» headeri javobda yo'q",
+  'request.script': 'Skript',
+  'script.title': 'Javobdan keyingi skript',
+  'script.hint':
+    "Javob kelgandan keyin ishlaydi: shart qo'yish, qiymat hisoblash va o'zgaruvchiga yozish uchun.",
+  'script.insertExample': "Token misolini qo'shish",
+  'script.apiTitle': 'Mavjud API',
+  'script.sandbox':
+    "Skript alohida Worker ichida ishlaydi — tarmoqqa ham, sahifa ma'lumotlariga ham kira olmaydi; 2 soniyada tugamasa to'xtatiladi.",
+  'script.saved': "Skript o'zgaruvchiga yozdi:",
+  'script.timeout': "Skript 2 soniyada tugamadi va to'xtatildi",
+  'script.failed': 'Skript xatosi:',
 
   'response.empty': "So'rov yuboring — javob shu yerda ko'rinadi",
   'response.body': 'Body',
@@ -357,6 +374,11 @@ export const uz = {
   'error.msg.blocked': "{host} ichki yoki xususiy manzilga ishora qilyapti.",
   'error.hint.blocked':
     "Proxy faqat ochiq internetdagi manzillarga so'rov yuboradi. Lokal serverni sinash uchun dev server'dan foydalaning.",
+  'error.title.local': 'Lokal server javob bermadi',
+  'error.msg.local':
+    "Brauzer «{host}» ga to'g'ridan-to'g'ri murojaat qildi, lekin javobni o'qiy olmadi ({ms}ms)",
+  'error.hint.local':
+    "Lokal manzillar proxy'siz, to'g'ridan-to'g'ri brauzerdan chaqiriladi. Serveringiz `Access-Control-Allow-Origin` sarlavhasini qaytarsin; Chrome lokal tarmoq uchun ruxsat ham so'rashi mumkin.",
   'error.title.proxyDown': 'Dev server javob bermadi',
   'error.msg.proxyDown': "So'rov proxy'ga ham yetib bormadi ({ms}ms)",
   'error.hint.proxyDown': '`npm run dev` ishlab turibdimi tekshiring.',

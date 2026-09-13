@@ -32,15 +32,21 @@ export interface NetworkErrorInput {
   host: string
   viaProxy: boolean
   durationMs: number
+  local?: boolean
 }
+
+const DIRECT: Descriptor = { kind: 'cors', slug: 'cors' }
+const DIRECT_LOCAL: Descriptor = { kind: 'cors', slug: 'local' }
 
 export function describeNetworkError({
   code,
   host,
   viaProxy,
+  local,
   durationMs,
 }: NetworkErrorInput): RequestError {
-  const descriptor = viaProxy ? ((code && BY_CODE[code]) || UNKNOWN) : { kind: 'cors' as const, slug: 'cors' }
+  const direct = local ? DIRECT_LOCAL : DIRECT
+  const descriptor = viaProxy ? (code && BY_CODE[code]) || UNKNOWN : direct
 
   return {
     kind: descriptor.kind,

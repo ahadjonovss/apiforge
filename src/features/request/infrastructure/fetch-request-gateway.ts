@@ -1,4 +1,5 @@
 import { auth } from '@/core/config/firebase'
+import { isLocalHost } from '@/core/domain/host'
 import { describeNetworkError } from '../application/describe-error'
 import type { HttpCall, RequestGateway } from '../domain/request-gateway'
 import { HttpRequestFailure, type ResponseResult } from '../domain/response'
@@ -19,8 +20,15 @@ function proxyPath(): string {
   return configured ? configured : DEPLOYED_PROXY_PATH
 }
 
-function resolveTarget(url: URL): string {
+function proxyPathFor(url: URL): string {
   const path = proxyPath()
+  if (!path) return ''
+  if (!__DEV_PROXY__ && isLocalHost(url.hostname)) return ''
+  return path
+}
+
+function resolveTarget(url: URL): string {
+  const path = proxyPathFor(url)
   if (!path) return url.toString()
   return `${path}?target=${encodeURIComponent(url.toString())}`
 }
@@ -28,7 +36,7 @@ function resolveTarget(url: URL): string {
 export const fetchRequestGateway: RequestGateway = {
   async send(call: HttpCall, signal: AbortSignal): Promise<ResponseResult> {
     const startedAt = performance.now()
-    const viaProxy = proxyPath() !== ''
+    const viaProxy = proxyPathFor(call.url) !== ''
 
     const headers = new Headers(call.headers)
     if (viaProxy) {
@@ -63,6 +71,7 @@ export const fetchRequestGateway: RequestGateway = {
           raw: error instanceof Error ? error.message : String(error),
           host: call.url.hostname,
           viaProxy: false,
+          local: isLocalHost(call.url.hostname),
           durationMs,
         }),
       )

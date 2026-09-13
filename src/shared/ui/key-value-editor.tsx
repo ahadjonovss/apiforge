@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Trash2 } from 'lucide-react'
 import type { KeyValue } from '@/core/domain/http'
 import { emptyKeyValue } from '@/core/lib/key-value'
@@ -19,7 +20,12 @@ export function KeyValueEditor({
   const t = useT()
   const keyLabel = keyPlaceholder ?? t('kv.key')
   const valueLabel = valuePlaceholder ?? t('kv.value')
-  const withTrailingRow = rows.length === 0 ? [emptyKeyValue()] : rows
+  const last = rows[rows.length - 1]
+  const trailingRow = useRef(emptyKeyValue())
+  if (last && last.id === trailingRow.current.id) trailingRow.current = emptyKeyValue()
+
+  const needsTrailingRow = !last || last.key.trim() !== '' || last.value.trim() !== ''
+  const withTrailingRow = needsTrailingRow ? [...rows, trailingRow.current] : rows
 
   const update = (id: string, patch: Partial<KeyValue>) => {
     const next = withTrailingRow.map((row) => (row.id === id ? { ...row, ...patch } : row))

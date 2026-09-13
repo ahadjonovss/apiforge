@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { Group, Panel, Separator } from 'react-resizable-panels'
 import { ArrowLeft, BookText, FilePlus2, FolderPlus, Home, Settings } from 'lucide-react'
 import { cn } from '@/core/lib/cn'
@@ -17,7 +17,6 @@ import { useCollectionsStore } from './collections-store'
 import { CollectionHome } from './collection-home'
 import { SaveStatus } from './save-status'
 import { useAutoSave } from './use-auto-save'
-import { CollectionSettingsModal } from './collection-settings-modal'
 import { CollectionTree, type TreeHandlers } from './collection-tree'
 import { EndpointModal } from './endpoint-modal'
 import { FolderModal } from './folder-modal'
@@ -46,11 +45,11 @@ export function CollectionPage({
   const setActiveTab = useTabsStore((state) => state.setActiveTab)
   const syncInherited = useTabsStore((state) => state.syncInherited)
 
+  const navigate = useNavigate()
   const { ask, dialog } = useConfirm()
   const [view, setView] = useState<'home' | 'endpoint'>('home')
   const [docsOpen, setDocsOpen] = useState(false)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const [folderModal, setFolderModal] = useState<{ folder: Folder | null; parentId: string | null } | null>(null)
   const [endpointModal, setEndpointModal] = useState<{ endpoint: RequestDef | null; parentId: string | null } | null>(null)
 
@@ -95,6 +94,12 @@ export function CollectionPage({
   useEffect(() => {
     if (current && inherited) syncInherited(current.id, inherited)
   }, [current, inherited, syncInherited])
+
+  const openSettings = () =>
+    navigate({
+      to: '/workspace/$workspaceId/collection/$collectionId/settings',
+      params: { workspaceId, collectionId },
+    })
 
   const openEndpoint = (endpoint: RequestDef) => {
     const existing = tabs.find((tab) => tab.id === endpoint.id)
@@ -204,7 +209,7 @@ export function CollectionPage({
               variant="ghost"
               aria-label={t('collection.settings')}
               className="ml-auto"
-              onClick={() => setSettingsOpen(true)}
+              onClick={() => void openSettings()}
             >
               <Settings className="size-3.5" />
             </Button>
@@ -247,7 +252,7 @@ export function CollectionPage({
           <CollectionHome
             workspaceId={workspaceId}
             collection={current}
-            onOpenSettings={() => setSettingsOpen(true)}
+            onOpenSettings={() => void openSettings()}
           />
         ) : (
           <div className="flex h-full flex-col">
@@ -308,12 +313,6 @@ export function CollectionPage({
         parentId={endpointModal?.parentId ?? null}
         onClose={() => setEndpointModal(null)}
         onCreated={openEndpoint}
-      />
-      <CollectionSettingsModal
-        workspaceId={workspaceId}
-        collection={current}
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
       />
       {dialog}
     </Group>
