@@ -1,16 +1,23 @@
 import { useEffect, type ReactNode } from 'react'
 import { X } from 'lucide-react'
+import { cn } from '@/core/lib/cn'
 import { useT } from '@/app/providers/i18n-provider'
 
 interface Props {
   open: boolean
   title: string
   description?: string
+  size?: 'md' | 'lg'
   onClose: () => void
   children: ReactNode
 }
 
-export function Modal({ open, title, description, onClose, children }: Props) {
+const SIZE = {
+  md: 'max-w-md',
+  lg: 'max-w-3xl',
+} as const
+
+export function Modal({ open, title, description, size = 'md', onClose, children }: Props) {
   const t = useT()
   useEffect(() => {
     if (!open) return
@@ -36,7 +43,10 @@ export function Modal({ open, title, description, onClose, children }: Props) {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="relative w-full max-w-md rounded-lg border border-border bg-card p-5 shadow-xl"
+        className={cn(
+          'relative w-full rounded-lg border border-border bg-card p-5 shadow-xl',
+          SIZE[size],
+        )}
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>

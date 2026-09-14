@@ -1,4 +1,4 @@
-import type { VariableScope } from '@/core/domain/variables'
+import type { VariableScope, VariableSource } from '@/core/domain/variables'
 import type { HttpMethod } from '@/core/domain/http'
 
 export interface ScriptLog {
@@ -9,6 +9,7 @@ export interface ScriptLog {
 export interface ScriptVariable {
   key: string
   value: string
+  target: VariableSource
 }
 
 export interface ScriptInput {

@@ -71,6 +71,11 @@ service cloud.firestore {
         allow write: if isAdminOf(workspaceId);
       }
 
+      match /environments/{environmentId} {
+        allow read: if isMemberOf(workspaceId);
+        allow write: if isMemberOf(workspaceId);
+      }
+
       match /collections/{collectionId} {
         allow read: if isMemberOf(workspaceId);
         allow create: if isMemberOf(workspaceId);

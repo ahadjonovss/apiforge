@@ -1,21 +1,30 @@
 import { useRef } from 'react'
 import { Trash2 } from 'lucide-react'
 import type { KeyValue } from '@/core/domain/http'
+import { cn } from '@/core/lib/cn'
 import { emptyKeyValue } from '@/core/lib/key-value'
 import { useT } from '@/app/providers/i18n-provider'
+import { VariableInput } from './variable-input'
+import type { VariableLabels, VariableLookup } from './variable-highlight'
 
 interface Props {
   rows: KeyValue[]
   onChange: (rows: KeyValue[]) => void
   keyPlaceholder?: string
   valuePlaceholder?: string
+  variables?: { lookup: VariableLookup; labels: VariableLabels }
+  onEditVariable?: (name: string) => void
 }
+
+const FIELD = 'w-full bg-transparent py-1 font-mono text-xs outline-none'
 
 export function KeyValueEditor({
   rows,
   onChange,
   keyPlaceholder,
   valuePlaceholder,
+  variables,
+  onEditVariable,
 }: Props) {
   const t = useT()
   const keyLabel = keyPlaceholder ?? t('kv.key')
@@ -63,13 +72,25 @@ export function KeyValueEditor({
             spellCheck={false}
             className="bg-transparent py-1 font-mono text-xs outline-none placeholder:text-muted-foreground/60"
           />
-          <input
-            value={row.value}
-            onChange={(event) => update(row.id, { value: event.target.value })}
-            placeholder={valueLabel}
-            spellCheck={false}
-            className="bg-transparent py-1 font-mono text-xs outline-none placeholder:text-muted-foreground/60"
-          />
+          {variables ? (
+            <VariableInput
+              value={row.value}
+              onValueChange={(value) => update(row.id, { value })}
+              placeholder={valueLabel}
+              lookup={variables.lookup}
+              labels={variables.labels}
+              onEditVariable={onEditVariable}
+              className={FIELD}
+            />
+          ) : (
+            <input
+              value={row.value}
+              onChange={(event) => update(row.id, { value: event.target.value })}
+              placeholder={valueLabel}
+              spellCheck={false}
+              className={cn(FIELD, 'placeholder:text-muted-foreground/60')}
+            />
+          )}
           <button
             type="button"
             onClick={() => remove(row.id)}

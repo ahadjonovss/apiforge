@@ -18,6 +18,13 @@ const API_LINES = [
   'console.log(value)',
 ]
 
+const PM_LINES = [
+  "pm.environment.set('token', value) · pm.environment.get(name)",
+  'pm.collectionVariables · pm.globals · pm.variables',
+  'pm.response.json() · .text() · .code · .headers.get(name) · .responseTime',
+  "pm.test('name', () => pm.expect(pm.response.code).to.eql(200))",
+]
+
 export function ScriptEditor({ tab }: { tab: Tab }) {
   const t = useT()
   const { resolved } = useTheme()
@@ -63,6 +70,13 @@ export function ScriptEditor({ tab }: { tab: Tab }) {
             {line}
           </p>
         ))}
+        <p className="mt-2.5 mb-1.5 text-[11px] font-medium">{t('script.pmTitle')}</p>
+        {PM_LINES.map((line) => (
+          <p key={line} className="font-mono text-[10px] leading-5 text-muted-foreground">
+            {line}
+          </p>
+        ))}
+        <p className="mt-1.5 text-[11px] text-muted-foreground">{t('script.pmNote')}</p>
         <p className="mt-1.5 text-[11px] text-muted-foreground">{t('script.sandbox')}</p>
       </div>
     </div>

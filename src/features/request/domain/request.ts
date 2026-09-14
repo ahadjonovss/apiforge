@@ -1,5 +1,5 @@
 import type { HttpMethod, KeyValue } from '@/core/domain/http'
-import type { VariableScope } from '@/core/domain/variables'
+import type { VariableScope, VariableSource } from '@/core/domain/variables'
 
 export type BodyMode = 'none' | 'json' | 'raw' | 'form-data' | 'urlencoded' | 'binary'
 
@@ -31,6 +31,8 @@ export interface InheritedConfig {
   headers: KeyValue[]
   auth: AuthConfig
   variables: VariableScope
+  variableSources?: Record<string, VariableSource>
+  environmentName?: string | null
 }
 
 export interface ResponseDoc {

@@ -8,6 +8,7 @@ import { Send, Loader2 } from 'lucide-react'
 import { cn } from '@/core/lib/cn'
 import { HTTP_METHODS, type HttpMethod } from '@/core/domain/http'
 import { KeyValueEditor } from '@/shared/ui/key-value-editor'
+import { VariableInput } from '@/shared/ui/variable-input'
 import { useTheme } from '@/app/providers/theme-provider'
 import { useTabsStore, type Tab } from '@/features/tabs'
 import type { BodyMode } from '../domain/request'
@@ -18,6 +19,7 @@ import { FormDataEditor } from './form-data-editor'
 import { CaptureEditor } from './capture-editor'
 import { ScriptEditor } from './script-editor'
 import { InheritedHeaders } from './inherited-headers'
+import { useVariables } from './use-variables'
 import { useT } from '@/app/providers/i18n-provider'
 
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i
@@ -37,7 +39,13 @@ function languageExtension(language: RawLanguage) {
   return []
 }
 
-export function RequestPanel({ tab }: { tab: Tab }) {
+export function RequestPanel({
+  tab,
+  onEditVariable,
+}: {
+  tab: Tab
+  onEditVariable?: (name: string) => void
+}) {
   const t = useT()
   const [section, setSection] = useState<Section>('Params')
   const patchRequest = useTabsStore((state) => state.patchRequest)
@@ -49,6 +57,7 @@ export function RequestPanel({ tab }: { tab: Tab }) {
   const resolvedUrl = interpolate(request.url, scope).trim()
   const resolvedBase = interpolate(tab.inherited?.baseUrl ?? '', scope).trim()
   const prefix = resolvedBase && !ABSOLUTE_URL.test(resolvedUrl) ? resolvedBase : ''
+  const variables = useVariables(tab.inherited, onEditVariable)
 
   return (
     <div className="flex h-full flex-col">
@@ -76,15 +85,18 @@ export function RequestPanel({ tab }: { tab: Tab }) {
               <span className="truncate">{prefix}</span>
             </span>
           )}
-          <input
+          <VariableInput
             value={request.url}
-            onChange={(event) => patchRequest(tab.id, { url: event.target.value })}
+            onValueChange={(url) => patchRequest(tab.id, { url })}
             onKeyDown={(event) => {
               if (event.key === 'Enter') void send(tab.id)
             }}
             placeholder={prefix ? t('request.pathPlaceholder') : t('request.urlPlaceholder')}
-            spellCheck={false}
-            className="min-w-0 flex-1 bg-transparent px-3 py-1.5 font-mono text-xs outline-none"
+            lookup={variables.lookup}
+            labels={variables.labels}
+            onEditVariable={onEditVariable}
+            wrapperClassName="min-w-0 flex-1"
+            className="px-3 py-1.5 font-mono text-xs"
           />
         </div>
 
@@ -126,6 +138,8 @@ export function RequestPanel({ tab }: { tab: Tab }) {
           <KeyValueEditor
             rows={request.params}
             onChange={(params) => patchRequest(tab.id, { params })}
+            variables={variables}
+            onEditVariable={onEditVariable}
           />
         )}
 
@@ -135,6 +149,8 @@ export function RequestPanel({ tab }: { tab: Tab }) {
             <KeyValueEditor
               rows={request.headers}
               onChange={(headers) => patchRequest(tab.id, { headers })}
+              variables={variables}
+              onEditVariable={onEditVariable}
             />
           </>
         )}
@@ -189,11 +205,12 @@ export function RequestPanel({ tab }: { tab: Tab }) {
               <CodeMirror
                 value={request.body.raw ?? ''}
                 onChange={(raw) => patchRequest(tab.id, { body: { ...request.body, raw } })}
-                extensions={
-                  request.body.mode === 'json'
+                extensions={[
+                  ...(request.body.mode === 'json'
                     ? [json()]
-                    : languageExtension(request.body.rawLanguage ?? 'text')
-                }
+                    : languageExtension(request.body.rawLanguage ?? 'text')),
+                  ...variables.extension,
+                ]}
                 theme={resolved === 'dark' ? oneDark : 'light'}
                 height="100%"
                 className="min-h-0 flex-1 text-xs"

@@ -1,9 +1,11 @@
+import type { VariableSource } from '@/core/domain/variables'
 import type { CaptureRule } from '../domain/request'
 import type { ResponseResult } from '../domain/response'
 
 export interface CapturedValue {
   key: string
   value: string
+  target: VariableSource
 }
 
 export interface CaptureMiss {
@@ -95,7 +97,7 @@ export function applyCaptures(
         missed.push({ target, reason: 'capture.reason.noHeader', path: rule.path })
         continue
       }
-      captured.push({ key: target, value })
+      captured.push({ key: target, value, target: 'collection' })
       continue
     }
 
@@ -110,7 +112,7 @@ export function applyCaptures(
       continue
     }
 
-    captured.push({ key: target, value })
+    captured.push({ key: target, value, target: 'collection' })
   }
 
   return { captured, missed }

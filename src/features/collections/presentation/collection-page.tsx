@@ -7,6 +7,14 @@ import { Button } from '@/shared/ui/button'
 import { DataErrorNote } from '@/shared/ui/data-error-note'
 import type { RequestDef } from '@/features/request/domain/request'
 import { useTabsStore } from '@/features/tabs'
+import {
+  describeScope,
+  EnvironmentSelector,
+  mergeScopes,
+  toScope,
+  useActiveEnvironment,
+  useEnvironmentsStore,
+} from '@/features/environments'
 import { RequestPanel } from '@/features/request/presentation/request-panel'
 import { ResponsePanel } from '@/features/request/presentation/response-panel'
 import { EndpointDocs } from '@/features/request/presentation/endpoint-docs'
@@ -19,6 +27,7 @@ import { SaveStatus } from './save-status'
 import { useAutoSave } from './use-auto-save'
 import { CollectionTree, type TreeHandlers } from './collection-tree'
 import { EndpointModal } from './endpoint-modal'
+import { VariableEditModal } from './variable-edit-modal'
 import { FolderModal } from './folder-modal'
 import { useT } from '@/app/providers/i18n-provider'
 
@@ -52,12 +61,20 @@ export function CollectionPage({
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [folderModal, setFolderModal] = useState<{ folder: Folder | null; parentId: string | null } | null>(null)
   const [endpointModal, setEndpointModal] = useState<{ endpoint: RequestDef | null; parentId: string | null } | null>(null)
+  const [variableEdit, setVariableEdit] = useState<string | null>(null)
+
+  const loadEnvironments = useEnvironmentsStore((state) => state.load)
+  const activeEnvironment = useActiveEnvironment()
 
   useEffect(() => {
     void openCollection(workspaceId, collectionId)
     setView('home')
     setDocsOpen(false)
   }, [workspaceId, collectionId, openCollection])
+
+  useEffect(() => {
+    void loadEnvironments(workspaceId)
+  }, [workspaceId, loadEnvironments])
 
   const tree = useMemo(() => buildTree(folders, endpoints), [folders, endpoints])
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null
@@ -68,28 +85,57 @@ export function CollectionPage({
   const clearCaptures = useTabsStore((state) => state.clearCaptures)
   const pendingCaptures = activeTab?.captures ?? null
 
+  const setEnvironmentVariables = useEnvironmentsStore((state) => state.setVariables)
+
   useEffect(() => {
     if (!pendingCaptures || !activeTab) return
     const tabId = activeTab.id
-    void captureVariables(workspaceId, pendingCaptures).finally(() => clearCaptures(tabId))
-  }, [pendingCaptures, activeTab, workspaceId, captureVariables, clearCaptures])
+    const hasEnvironment = Boolean(activeEnvironment)
+    const toEnvironment = hasEnvironment
+      ? pendingCaptures.filter((entry) => entry.target === 'environment')
+      : []
+    const toCollection = pendingCaptures.filter(
+      (entry) => !hasEnvironment || entry.target !== 'environment',
+    )
 
-  const inherited = useMemo(
-    () =>
-      current
-        ? {
-            baseUrl: current.baseUrl,
-            headers: current.headers,
-            auth: current.auth,
-            variables: Object.fromEntries(
-              current.variables
-                .filter((variable) => variable.enabled && variable.key.trim() !== '')
-                .map((variable) => [variable.key, variable.value]),
-            ),
-          }
-        : null,
-    [current],
+    void Promise.all([
+      toEnvironment.length > 0
+        ? setEnvironmentVariables(workspaceId, toEnvironment)
+        : Promise.resolve(true),
+      toCollection.length > 0
+        ? captureVariables(workspaceId, toCollection)
+        : Promise.resolve(true),
+    ]).finally(() => clearCaptures(tabId))
+  }, [
+    pendingCaptures,
+    activeTab,
+    workspaceId,
+    activeEnvironment,
+    captureVariables,
+    setEnvironmentVariables,
+    clearCaptures,
+  ])
+
+  const environmentScope = useMemo(
+    () => (activeEnvironment ? toScope(activeEnvironment.variables) : {}),
+    [activeEnvironment],
   )
+
+  const inherited = useMemo(() => {
+    if (!current) return null
+    const collectionScope = toScope(current.variables)
+    const origins = describeScope(collectionScope, environmentScope)
+    return {
+      baseUrl: current.baseUrl,
+      headers: current.headers,
+      auth: current.auth,
+      variables: mergeScopes(collectionScope, environmentScope),
+      variableSources: Object.fromEntries(
+        Object.entries(origins).map(([key, origin]) => [key, origin.source]),
+      ),
+      environmentName: activeEnvironment?.name ?? null,
+    }
+  }, [current, environmentScope, activeEnvironment])
 
   useEffect(() => {
     if (current && inherited) syncInherited(current.id, inherited)
@@ -185,6 +231,10 @@ export function CollectionPage({
             <p className="truncate text-[11px] text-muted-foreground">
               {current.baseUrl || `${t('collection.baseUrl')} — ${t('collection.baseUrlUnset')}`}
             </p>
+
+            <div className="mt-2">
+              <EnvironmentSelector workspaceId={workspaceId} />
+            </div>
           </div>
 
           <div className="flex items-center gap-1 border-b border-border px-2 py-2">
@@ -285,7 +335,7 @@ export function CollectionPage({
             ) : (
             <Group orientation="vertical" className="min-h-0 flex-1">
               <Panel defaultSize="45" minSize="20">
-                <RequestPanel tab={activeTab} />
+                <RequestPanel tab={activeTab} onEditVariable={setVariableEdit} />
               </Panel>
 
               <Separator className="h-px shrink-0 bg-border transition-colors hover:bg-primary data-[state=dragging]:bg-primary" />
@@ -313,6 +363,12 @@ export function CollectionPage({
         parentId={endpointModal?.parentId ?? null}
         onClose={() => setEndpointModal(null)}
         onCreated={openEndpoint}
+      />
+
+      <VariableEditModal
+        workspaceId={workspaceId}
+        name={variableEdit}
+        onClose={() => setVariableEdit(null)}
       />
       {dialog}
     </Group>
