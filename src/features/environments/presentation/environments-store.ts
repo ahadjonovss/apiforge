@@ -65,14 +65,24 @@ export const useEnvironmentsStore = create<EnvironmentsState>((set, get) => ({
   clearError: () => set({ error: null }),
 
   load: async (workspaceId) => {
-    set({ loading: true, error: null })
+    const switching = get().workspaceId !== workspaceId
+    set({
+      workspaceId,
+      loading: true,
+      error: null,
+      ...(switching ? { environments: [], activeId: null } : {}),
+    })
     try {
       const environments = await environmentService.list(workspaceId)
       const stored = readActive(workspaceId)
       const activeId = environments.some((item) => item.id === stored) ? stored : null
-      set({ workspaceId, environments, activeId, loading: false })
+      set((state) =>
+        state.workspaceId === workspaceId ? { environments, activeId, loading: false } : state,
+      )
     } catch (error) {
-      set({ loading: false, error: toDetail(error) })
+      set((state) =>
+        state.workspaceId === workspaceId ? { loading: false, error: toDetail(error) } : state,
+      )
     }
   },
 

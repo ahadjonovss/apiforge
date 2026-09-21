@@ -307,6 +307,7 @@ export const ru: typeof uz = {
     'Переменные хранятся в окружении; значения активного окружения перекрывают переменные коллекции.',
   'environment.create': 'Добавить окружение',
   'environment.newName': 'Новое окружение',
+  'environment.newPlaceholder': 'Название нового окружения — нажмите Enter',
   'environment.name': 'Название окружения',
   'environment.variable': 'Переменная',
   'environment.empty': 'Окружений пока нет',

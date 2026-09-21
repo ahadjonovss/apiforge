@@ -179,8 +179,6 @@ export function EnvironmentModal({
                   />
                 </div>
 
-                <DataErrorNote error={error} />
-
                 <div className="flex items-center gap-2">
                   <Button size="sm" loading={pending} onClick={() => void save()} disabled={pending || !dirty}>
                     {t('common.save')}
@@ -197,6 +195,10 @@ export function EnvironmentModal({
               </>
             )}
           </div>
+        </div>
+
+        <div className="mt-3 empty:mt-0">
+          <DataErrorNote error={error} />
         </div>
       </Modal>
 

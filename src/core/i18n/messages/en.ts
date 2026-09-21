@@ -307,6 +307,7 @@ export const en: typeof uz = {
     'Variables live in the environment; the active one overrides collection variables.',
   'environment.create': 'Add environment',
   'environment.newName': 'New environment',
+  'environment.newPlaceholder': 'New environment name — press Enter',
   'environment.name': 'Environment name',
   'environment.variable': 'Variable',
   'environment.empty': 'No environments yet',

@@ -1,13 +1,17 @@
-import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
+import { createRootRoute, Link, Outlet, useParams } from '@tanstack/react-router'
 import { Moon, Sun, Zap } from 'lucide-react'
 import { useTheme } from '@/app/providers/theme-provider'
 import { useT } from '@/app/providers/i18n-provider'
 import { LanguageSwitcher } from '@/shared/ui/language-switcher'
 import { UserMenu } from '@/features/auth'
+import { EnvironmentSelector, useEnvironmentsStore } from '@/features/environments'
 
 function TopBar() {
   const { resolved, setTheme } = useTheme()
   const t = useT()
+  const routeWorkspaceId = useParams({ strict: false }).workspaceId
+  const scopedWorkspaceId = useEnvironmentsStore((state) => state.workspaceId)
+  const workspaceId = routeWorkspaceId === scopedWorkspaceId ? scopedWorkspaceId : null
 
   return (
     <header className="flex items-center justify-between border-b border-border bg-card px-3 py-2">
@@ -17,6 +21,8 @@ function TopBar() {
       </Link>
 
       <div className="flex items-center gap-1">
+        {workspaceId && <EnvironmentSelector workspaceId={workspaceId} />}
+
         <button
           type="button"
           onClick={() => setTheme(resolved === 'dark' ? 'light' : 'dark')}

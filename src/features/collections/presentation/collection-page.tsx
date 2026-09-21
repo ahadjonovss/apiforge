@@ -9,7 +9,6 @@ import type { RequestDef } from '@/features/request/domain/request'
 import { useTabsStore } from '@/features/tabs'
 import {
   describeScope,
-  EnvironmentSelector,
   mergeScopes,
   toScope,
   useActiveEnvironment,
@@ -63,7 +62,6 @@ export function CollectionPage({
   const [endpointModal, setEndpointModal] = useState<{ endpoint: RequestDef | null; parentId: string | null } | null>(null)
   const [variableEdit, setVariableEdit] = useState<string | null>(null)
 
-  const loadEnvironments = useEnvironmentsStore((state) => state.load)
   const activeEnvironment = useActiveEnvironment()
 
   useEffect(() => {
@@ -71,10 +69,6 @@ export function CollectionPage({
     setView('home')
     setDocsOpen(false)
   }, [workspaceId, collectionId, openCollection])
-
-  useEffect(() => {
-    void loadEnvironments(workspaceId)
-  }, [workspaceId, loadEnvironments])
 
   const tree = useMemo(() => buildTree(folders, endpoints), [folders, endpoints])
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null
@@ -231,10 +225,6 @@ export function CollectionPage({
             <p className="truncate text-[11px] text-muted-foreground">
               {current.baseUrl || `${t('collection.baseUrl')} — ${t('collection.baseUrlUnset')}`}
             </p>
-
-            <div className="mt-2">
-              <EnvironmentSelector workspaceId={workspaceId} />
-            </div>
           </div>
 
           <div className="flex items-center gap-1 border-b border-border px-2 py-2">

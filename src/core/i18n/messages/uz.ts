@@ -305,6 +305,7 @@ export const uz = {
     "O'zgaruvchilar muhitda saqlanadi; faol muhitniki to'plamnikidan ustun turadi.",
   'environment.create': "Muhit qo'shish",
   'environment.newName': 'Yangi muhit',
+  'environment.newPlaceholder': "Yangi muhit nomi — Enter bosing",
   'environment.name': 'Muhit nomi',
   'environment.variable': "O'zgaruvchi",
   'environment.empty': 'Hali muhit yaratilmagan',
