@@ -271,6 +271,10 @@ export const en: typeof uz = {
   'request.body': 'Body',
   'request.auth': 'Auth',
   'request.capture': 'Capture',
+  'request.script': 'Script',
+  'request.scriptTitle': 'Post-response script',
+  'request.scriptHint':
+    'For this endpoint only. Runs after the workspace script; on a name clash this one wins. With an environment active, af.vars.set writes to the environment.',
   'request.docs': 'Docs',
   'request.urlPlaceholder': 'https://api.example.com/users',
   'request.pathPlaceholder': '/users',

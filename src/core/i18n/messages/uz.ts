@@ -269,6 +269,10 @@ export const uz = {
   'request.body': 'Body',
   'request.auth': 'Auth',
   'request.capture': 'Capture',
+  'request.script': 'Skript',
+  'request.scriptTitle': 'Javobdan keyingi skript',
+  'request.scriptHint':
+    "Faqat shu endpoint uchun. Ish maydoni skriptidan keyin ishlaydi; bir xil o'zgaruvchi yozilsa shu yerdagisi g'olib. Muhit faol bo'lsa af.vars.set muhitga yozadi.",
   'request.docs': 'Docs',
   'request.urlPlaceholder': 'https://api.example.com/users',
   'request.pathPlaceholder': '/users',

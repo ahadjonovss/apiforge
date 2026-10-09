@@ -230,6 +230,7 @@ export function createScriptSandbox(input: ScriptInput): ScriptSandbox {
 
   const writeCollection = writeVar('collection')
   const writeEnvironment = writeVar('environment')
+  const writeDefault = input.environmentActive ? writeEnvironment : writeCollection
 
   const parseBody = () => JSON.parse(input.response.body) as unknown
 
@@ -247,7 +248,9 @@ export function createScriptSandbox(input: ScriptInput): ScriptSandbox {
     },
     vars: {
       get: readVar,
-      set: writeCollection,
+      set: writeDefault,
+      setEnvironment: writeEnvironment,
+      setCollection: writeCollection,
     },
   }
 

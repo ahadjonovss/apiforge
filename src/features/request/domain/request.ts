@@ -57,6 +57,7 @@ export interface RequestDef {
   docs: string
   responseDocs: ResponseDoc[]
   captures: CaptureRule[]
+  script: string
   method: HttpMethod
   url: string
   params: KeyValue[]

@@ -17,13 +17,14 @@ import { AuthEditor } from './auth-editor'
 import { BinaryEditor } from './binary-editor'
 import { FormDataEditor } from './form-data-editor'
 import { CaptureEditor } from './capture-editor'
+import { ScriptEditor } from './script-editor'
 import { InheritedHeaders } from './inherited-headers'
 import { useVariables } from './use-variables'
 import { useT } from '@/app/providers/i18n-provider'
 
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i
 
-const SECTIONS = ['Params', 'Headers', 'Body', 'Auth', 'Capture'] as const
+const SECTIONS = ['Params', 'Headers', 'Body', 'Auth', 'Capture', 'Script'] as const
 type Section = (typeof SECTIONS)[number]
 
 const BODY_MODES: BodyMode[] = ['none', 'json', 'raw', 'urlencoded', 'form-data', 'binary']
@@ -245,6 +246,21 @@ export function RequestPanel({
         {section === 'Auth' && <AuthEditor tab={tab} />}
 
         {section === 'Capture' && <CaptureEditor tab={tab} />}
+
+        {section === 'Script' && (
+          <>
+            <div className="px-4 pt-4">
+              <h3 className="text-xs font-semibold">{t('request.scriptTitle')}</h3>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                {t('request.scriptHint')}
+              </p>
+            </div>
+            <ScriptEditor
+              value={request.script}
+              onChange={(script) => patchRequest(tab.id, { script })}
+            />
+          </>
+        )}
       </div>
     </div>
   )

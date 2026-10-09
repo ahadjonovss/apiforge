@@ -271,6 +271,10 @@ export const ru: typeof uz = {
   'request.body': 'Body',
   'request.auth': 'Auth',
   'request.capture': 'Capture',
+  'request.script': 'Скрипт',
+  'request.scriptTitle': 'Скрипт после ответа',
+  'request.scriptHint':
+    'Только для этого эндпоинта. Выполняется после скрипта пространства; при совпадении имён побеждает этот. Если окружение активно, af.vars.set пишет в окружение.',
   'request.docs': 'Docs',
   'request.urlPlaceholder': 'https://api.example.com/users',
   'request.pathPlaceholder': '/users',

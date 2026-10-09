@@ -7,13 +7,15 @@ import { Button } from '@/shared/ui/button'
 import { useT } from '@/app/providers/i18n-provider'
 
 const TOKEN_SNIPPET = `if (af.response.ok) {
-  af.vars.set('token', af.response.json().access_token)
+  const data = af.response.json()
+  if (data.access_token) af.vars.set('token', data.access_token)
 }`
 
 const API_LINES = [
   'af.response.status · .ok · .body · .json() · .header(name) · .durationMs',
   'af.request.method · .url',
   "af.vars.get('base') · af.vars.set('token', value)",
+  'af.vars.setEnvironment(name, value) · af.vars.setCollection(name, value)',
   'console.log(value)',
 ]
 

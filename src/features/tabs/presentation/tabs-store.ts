@@ -9,6 +9,7 @@ import {
 import type { RequestDef, RequestError } from '@/features/request'
 import type { InheritedConfig } from '@/features/request/domain/request'
 import { applyCaptures } from '@/features/request/application/apply-captures'
+import { mergeScriptOutcomes } from '@/features/request/application/run-script'
 import type { Tab } from '../domain/tab'
 
 interface TabsState {
@@ -127,9 +128,27 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         files: tab.files,
       })
       const outcome = applyCaptures(tab.request.captures ?? [], response)
-      const script = await runScript(tab.inherited?.script ?? '', tab.request, response, {
-        variables: tab.inherited?.variables ?? {},
+
+      const scope = tab.inherited?.variables ?? {}
+      const environmentActive = Boolean(tab.inherited?.environmentName)
+
+      const workspaceScript = await runScript(
+        tab.inherited?.script ?? '',
+        tab.request,
+        response,
+        { variables: scope, environmentActive },
+      )
+      const endpointScript = await runScript(tab.request.script, tab.request, response, {
+        variables: {
+          ...scope,
+          ...Object.fromEntries(
+            (workspaceScript?.variables ?? []).map((item) => [item.key, item.value]),
+          ),
+        },
+        environmentActive,
       })
+      const script = mergeScriptOutcomes(workspaceScript, endpointScript)
+
       const captured = [...outcome.captured, ...(script?.variables ?? [])]
       patchTab({
         response,

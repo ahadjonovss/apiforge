@@ -23,6 +23,7 @@ export interface ScriptInput {
     durationMs: number
   }
   variables: VariableScope
+  environmentActive: boolean
 }
 
 export interface ScriptOutcome {
