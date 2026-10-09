@@ -125,6 +125,13 @@ export const uz = {
   'workspace.removeMember': 'Chiqarish',
   'workspace.fromPostman': "Postman'dan",
 
+  'workspace.settingsTitle': 'Sozlamalar',
+  'workspace.scriptTitle': 'Umumiy skript',
+  'workspace.scriptHint':
+    "Bu ish maydonidagi har bir so'rovning javobidan keyin ishlaydi. Ilgari har bir endpointda alohida turardi — endi bitta joyda.",
+  'workspace.scriptReadOnly':
+    "Skriptni faqat ish maydoni egasi yoki admin o'zgartira oladi.",
+  'workspace.scriptEmpty': "Skript yozilmagan",
   'workspace.docs': 'Ish maydoni haqida',
   'workspace.docsEmpty': 'Hujjat yozilmagan',
   'workspace.docsEmptyHint': "Bu ish maydoni nima uchun ekanini, kim nima bilan shug'ullanishini yozing",
@@ -154,6 +161,7 @@ export const uz = {
   'team.allAdded': "Ish maydonining barcha a'zolari qo'shilgan",
   'team.memberCount': '{count} kishi',
   'team.edit': 'Jamoani tahrirlash',
+  'team.delete': "Jamoani o'chirish",
   'team.error.lastLead': "Yagona rahbarni chiqarib bo'lmaydi — avval boshqasini rahbar qiling",
   'team.manageHint': 'Jamoalarni faqat owner va admin boshqaradi',
   'data.error.ownerRole': "Ega rolini o'zgartirib bo'lmaydi",
@@ -310,6 +318,16 @@ export const uz = {
   'environment.empty': 'Hali muhit yaratilmagan',
   'environment.pick': 'Chapdan muhit tanlang',
   'environment.activate': 'Faol qilish',
+  'environment.isActive': 'Faol',
+  'environment.saved': 'Saqlandi',
+  'environment.namePlaceholder': 'dev, prod, staging…',
+  'collection.dangerZone': 'Xavfli hudud',
+  'collection.dangerHint':
+    "To'plam, uning barcha papkalari va endpointlari butunlay o'chadi. Buni qaytarib bo'lmaydi.",
+  'collection.delete': "To'plamni o'chirish",
+  'environment.section': 'Muhitlar',
+  'environment.sectionHint':
+    "dev, prod va boshqa muhitlar uchun alohida {{o'zgaruvchi}} to'plamlari. Faol muhit so'rov yuborilganda to'plam o'zgaruvchilarining ustiga qo'yiladi.",
   'environment.peek': "O'zgaruvchilarni ko'rish",
   'environment.noVariables': "O'zgaruvchi yo'q",
   'environment.emptyValue': "(bo'sh)",
@@ -326,10 +344,6 @@ export const uz = {
   'variable.saveTo': 'Qayerga saqlansin',
   'variable.title': "O'zgaruvchi qiymati",
 
-  'request.script': 'Skript',
-  'script.title': 'Javobdan keyingi skript',
-  'script.hint':
-    "Javob kelgandan keyin ishlaydi: shart qo'yish, qiymat hisoblash va o'zgaruvchiga yozish uchun.",
   'script.insertExample': "Token misolini qo'shish",
   'script.apiTitle': 'Mavjud API',
   'script.sandbox':

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
-import { ArrowLeft, FolderOpen, Plus, Trash2, Upload, UserPlus, Users } from 'lucide-react'
+import { ArrowLeft, FolderOpen, Plus, Settings, Trash2, Upload, UserPlus, Users } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Modal } from '@/shared/ui/modal'
 import { TextField } from '@/shared/ui/text-field'
@@ -284,7 +284,6 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
   const collections = useCollectionsStore((state) => state.collections)
   const collectionsError = useCollectionsStore((state) => state.error)
   const loadCollections = useCollectionsStore((state) => state.loadCollections)
-  const removeCollection = useCollectionsStore((state) => state.removeCollection)
 
   const { ask, dialog } = useConfirm()
   const [subject, setSubject] = useState<AccessSubject | null>(null)
@@ -335,11 +334,22 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
           {t('workspaces.title')}
         </Link>
 
-        <div>
-          <h1 className="text-lg font-semibold">{current.name}</h1>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {current.description || t('workspaces.noDescription')}
-          </p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-lg font-semibold">{current.name}</h1>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {current.description || t('workspaces.noDescription')}
+            </p>
+          </div>
+
+          <Link
+            to="/workspace/$workspaceId/settings"
+            params={{ workspaceId }}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs text-muted-foreground transition hover:bg-accent hover:text-foreground"
+          >
+            <Settings className="size-3.5" />
+            {t('workspace.settingsTitle')}
+          </Link>
         </div>
 
         <DataErrorNote error={modalOpen ? null : (error ?? collectionsError)} />
@@ -375,7 +385,7 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
           ) : (
             <ul className="divide-y divide-border">
               {collections.map((item) => (
-                <li key={item.id} className="group flex items-center gap-3 px-4 py-2.5">
+                <li key={item.id} className="flex items-center gap-3 px-4 py-2.5">
                   <FolderOpen className="size-4 shrink-0 text-muted-foreground" />
                   <Link
                     to="/workspace/$workspaceId/collection/$collectionId"
@@ -389,22 +399,6 @@ export function WorkspacePage({ workspaceId }: { workspaceId: string }) {
                         ` · ${teams.find((team) => team.id === item.teamId)?.name ?? 'jamoa'}`}
                     </p>
                   </Link>
-                  {manages && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        ask({
-                          title: t('confirm.deleteCollection', { name: item.name }),
-                          description: t('confirm.deleteCollectionHint'),
-                          onConfirm: () => removeCollection(workspaceId, item.id),
-                        })
-                      }
-                      aria-label={t('common.delete')}
-                      className="rounded p-1 text-muted-foreground opacity-0 transition hover:bg-accent hover:text-destructive group-hover:opacity-100"
-                    >
-                      <Trash2 className="size-3.5" />
-                    </button>
-                  )}
                 </li>
               ))}
             </ul>

@@ -97,20 +97,6 @@ export function TeamCard({
             >
               <Pencil className="size-3.5" />
             </button>
-            <button
-              type="button"
-              onClick={() =>
-                ask({
-                  title: t('confirm.deleteTeam', { name: team.name }),
-                  description: t('confirm.deleteTeamHint'),
-                  onConfirm: () => removeTeam(team.workspaceId, team.id),
-                })
-              }
-              aria-label={t('common.delete')}
-              className="rounded p-1 text-muted-foreground transition hover:bg-accent hover:text-destructive"
-            >
-              <Trash2 className="size-3.5" />
-            </button>
           </div>
         )}
       </div>
@@ -147,6 +133,21 @@ export function TeamCard({
                   }}
                 >
                   {t('common.cancel')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="ml-auto hover:text-destructive"
+                  onClick={() =>
+                    ask({
+                      title: t('confirm.deleteTeam', { name: team.name }),
+                      description: t('confirm.deleteTeamHint'),
+                      onConfirm: () => removeTeam(team.workspaceId, team.id),
+                    })
+                  }
+                >
+                  <Trash2 className="size-3.5" />
+                  {t('team.delete')}
                 </Button>
               </div>
             </div>

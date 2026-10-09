@@ -127,6 +127,13 @@ export const en: typeof uz = {
   'workspace.removeMember': 'Remove',
   'workspace.fromPostman': 'From Postman',
 
+  'workspace.settingsTitle': 'Settings',
+  'workspace.scriptTitle': 'Shared script',
+  'workspace.scriptHint':
+    'Runs after every response in this workspace. It used to live on each endpoint separately — now it is in one place.',
+  'workspace.scriptReadOnly':
+    'Only the workspace owner or an admin can change the script.',
+  'workspace.scriptEmpty': 'No script yet',
   'workspace.docs': 'About this workspace',
   'workspace.docsEmpty': 'No documentation yet',
   'workspace.docsEmptyHint': 'Describe what this workspace is for and who works on what',
@@ -156,6 +163,7 @@ export const en: typeof uz = {
   'team.allAdded': 'Everyone in the workspace is already here',
   'team.memberCount': '{count} people',
   'team.edit': 'Edit team',
+  'team.delete': 'Delete team',
   'team.error.lastLead': 'The only lead cannot be removed — make someone else lead first',
   'team.manageHint': 'Only the owner and admins manage teams',
   'data.error.ownerRole': "The owner's role cannot be changed",
@@ -312,6 +320,16 @@ export const en: typeof uz = {
   'environment.empty': 'No environments yet',
   'environment.pick': 'Pick an environment on the left',
   'environment.activate': 'Make active',
+  'environment.isActive': 'Active',
+  'environment.saved': 'Saved',
+  'environment.namePlaceholder': 'dev, prod, staging…',
+  'collection.dangerZone': 'Danger zone',
+  'collection.dangerHint':
+    'The collection, all its folders and endpoints are deleted for good. This cannot be undone.',
+  'collection.delete': 'Delete collection',
+  'environment.section': 'Environments',
+  'environment.sectionHint':
+    'Separate {{variable}} sets for dev, prod and other environments. The active one overrides collection variables when a request is sent.',
   'environment.peek': 'View variables',
   'environment.noVariables': 'No variables',
   'environment.emptyValue': '(empty)',
@@ -328,10 +346,6 @@ export const en: typeof uz = {
   'variable.saveTo': 'Save to',
   'variable.title': 'Variable value',
 
-  'request.script': 'Script',
-  'script.title': 'Post-response script',
-  'script.hint':
-    'Runs once the response arrives: branch on it, compute values, write variables.',
   'script.insertExample': 'Insert the token example',
   'script.apiTitle': 'Available API',
   'script.sandbox':

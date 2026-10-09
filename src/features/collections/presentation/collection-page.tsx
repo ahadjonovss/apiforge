@@ -7,8 +7,10 @@ import { Button } from '@/shared/ui/button'
 import { DataErrorNote } from '@/shared/ui/data-error-note'
 import type { RequestDef } from '@/features/request/domain/request'
 import { useTabsStore } from '@/features/tabs'
+import { useWorkspacesStore } from '@/features/workspaces'
 import {
   describeScope,
+  EnvironmentPicker,
   EnvironmentSelector,
   mergeScopes,
   toScope,
@@ -65,6 +67,10 @@ export function CollectionPage({
 
   const loadEnvironments = useEnvironmentsStore((state) => state.load)
   const activeEnvironment = useActiveEnvironment()
+  const ensureWorkspace = useWorkspacesStore((state) => state.ensureWorkspace)
+  const workspaceScript = useWorkspacesStore((state) =>
+    state.current?.id === workspaceId ? state.current.script : '',
+  )
 
   useEffect(() => {
     void openCollection(workspaceId, collectionId)
@@ -74,7 +80,8 @@ export function CollectionPage({
 
   useEffect(() => {
     void loadEnvironments(workspaceId)
-  }, [workspaceId, loadEnvironments])
+    void ensureWorkspace(workspaceId)
+  }, [workspaceId, loadEnvironments, ensureWorkspace])
 
   const tree = useMemo(() => buildTree(folders, endpoints), [folders, endpoints])
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null
@@ -134,8 +141,9 @@ export function CollectionPage({
         Object.entries(origins).map(([key, origin]) => [key, origin.source]),
       ),
       environmentName: activeEnvironment?.name ?? null,
+      script: workspaceScript,
     }
-  }, [current, environmentScope, activeEnvironment])
+  }, [current, environmentScope, activeEnvironment, workspaceScript])
 
   useEffect(() => {
     if (current && inherited) syncInherited(current.id, inherited)
@@ -335,7 +343,16 @@ export function CollectionPage({
             ) : (
             <Group orientation="vertical" className="min-h-0 flex-1">
               <Panel defaultSize="45" minSize="20">
-                <RequestPanel tab={activeTab} onEditVariable={setVariableEdit} />
+                <RequestPanel
+                  tab={activeTab}
+                  onEditVariable={setVariableEdit}
+                  environmentSlot={
+                    <EnvironmentPicker
+                      workspaceId={workspaceId}
+                      onManage={() => void openSettings()}
+                    />
+                  }
+                />
               </Panel>
 
               <Separator className="h-px shrink-0 bg-border transition-colors hover:bg-primary data-[state=dragging]:bg-primary" />

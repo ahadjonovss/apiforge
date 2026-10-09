@@ -32,6 +32,7 @@ function toWorkspace(id: string, data: DocumentData): Workspace {
     name: data.name ?? '',
     description: data.description ?? '',
     docs: data.docs ?? '',
+    script: data.script ?? '',
     ownerId: data.ownerId ?? '',
     memberIds: data.memberIds ?? [],
     createdAt: data.createdAt ?? 0,
@@ -85,6 +86,7 @@ export const firestoreWorkspaceGateway: WorkspaceGateway = {
         name,
         description,
         docs: '',
+        script: '',
         ownerId: owner.id,
         memberIds: [owner.id],
         createdAt: now,
@@ -95,6 +97,7 @@ export const firestoreWorkspaceGateway: WorkspaceGateway = {
         name: workspace.name,
         description: workspace.description,
         docs: workspace.docs,
+        script: workspace.script,
         ownerId: workspace.ownerId,
         memberIds: workspace.memberIds,
         createdAt: now,
@@ -139,6 +142,14 @@ export const firestoreWorkspaceGateway: WorkspaceGateway = {
   async saveDocs(workspaceId, docs) {
     try {
       await updateDoc(doc(db, WORKSPACES, workspaceId), { docs, updatedAt: Date.now() })
+    } catch (error) {
+      throw toDataFailure(error)
+    }
+  },
+
+  async saveScript(workspaceId, script) {
+    try {
+      await updateDoc(doc(db, WORKSPACES, workspaceId), { script, updatedAt: Date.now() })
     } catch (error) {
       throw toDataFailure(error)
     }

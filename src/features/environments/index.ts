@@ -1,4 +1,6 @@
 export { EnvironmentSelector } from './presentation/environment-selector'
+export { EnvironmentPicker } from './presentation/environment-picker'
+export { EnvironmentsSection } from './presentation/environments-section'
 export {
   useEnvironmentsStore,
   useActiveEnvironment,

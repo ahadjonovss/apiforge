@@ -47,6 +47,10 @@ service cloud.firestore {
         && (
           request.resource.data.memberIds == resource.data.memberIds
           || isAdminOf(workspaceId)
+        )
+        && (
+          request.resource.data.get('script', '') == resource.data.get('script', '')
+          || isAdminOf(workspaceId)
         );
       allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
 

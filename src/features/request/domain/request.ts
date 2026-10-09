@@ -33,6 +33,7 @@ export interface InheritedConfig {
   variables: VariableScope
   variableSources?: Record<string, VariableSource>
   environmentName?: string | null
+  script?: string
 }
 
 export interface ResponseDoc {
@@ -56,7 +57,6 @@ export interface RequestDef {
   docs: string
   responseDocs: ResponseDoc[]
   captures: CaptureRule[]
-  script: string
   method: HttpMethod
   url: string
   params: KeyValue[]

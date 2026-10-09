@@ -127,6 +127,13 @@ export const ru: typeof uz = {
   'workspace.removeMember': 'Исключить',
   'workspace.fromPostman': 'Из Postman',
 
+  'workspace.settingsTitle': 'Настройки',
+  'workspace.scriptTitle': 'Общий скрипт',
+  'workspace.scriptHint':
+    'Выполняется после ответа на каждый запрос в этом пространстве. Раньше он был у каждого эндпоинта отдельно — теперь в одном месте.',
+  'workspace.scriptReadOnly':
+    'Менять скрипт может только владелец пространства или админ.',
+  'workspace.scriptEmpty': 'Скрипт не задан',
   'workspace.docs': 'О рабочем пространстве',
   'workspace.docsEmpty': 'Документация не написана',
   'workspace.docsEmptyHint': 'Опишите, для чего это пространство и кто чем занимается',
@@ -156,6 +163,7 @@ export const ru: typeof uz = {
   'team.allAdded': 'Все участники пространства уже добавлены',
   'team.memberCount': '{count} чел.',
   'team.edit': 'Редактировать команду',
+  'team.delete': 'Удалить команду',
   'team.error.lastLead': 'Нельзя убрать единственного руководителя — сначала назначьте другого',
   'team.manageHint': 'Командами управляют только владелец и админ',
   'data.error.ownerRole': 'Роль владельца изменить нельзя',
@@ -312,6 +320,16 @@ export const ru: typeof uz = {
   'environment.empty': 'Окружений пока нет',
   'environment.pick': 'Выберите окружение слева',
   'environment.activate': 'Сделать активным',
+  'environment.isActive': 'Активно',
+  'environment.saved': 'Сохранено',
+  'environment.namePlaceholder': 'dev, prod, staging…',
+  'collection.dangerZone': 'Опасная зона',
+  'collection.dangerHint':
+    'Коллекция со всеми папками и эндпоинтами будет удалена безвозвратно.',
+  'collection.delete': 'Удалить коллекцию',
+  'environment.section': 'Окружения',
+  'environment.sectionHint':
+    'Отдельные наборы {{переменных}} для dev, prod и других окружений. Активное окружение перекрывает переменные коллекции при отправке запроса.',
   'environment.peek': 'Посмотреть переменные',
   'environment.noVariables': 'Переменных нет',
   'environment.emptyValue': '(пусто)',
@@ -328,10 +346,6 @@ export const ru: typeof uz = {
   'variable.saveTo': 'Куда сохранить',
   'variable.title': 'Значение переменной',
 
-  'request.script': 'Скрипт',
-  'script.title': 'Скрипт после ответа',
-  'script.hint':
-    'Выполняется после получения ответа: условия, вычисления и запись в переменные.',
   'script.insertExample': 'Вставить пример с токеном',
   'script.apiTitle': 'Доступный API',
   'script.sandbox':

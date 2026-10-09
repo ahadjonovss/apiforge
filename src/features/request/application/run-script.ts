@@ -13,11 +13,12 @@ export interface RunScriptOptions {
 
 export function createRunScript(runner: ScriptRunner) {
   return async function runScript(
+    source: string,
     request: RequestDef,
     response: ResponseResult,
     options: RunScriptOptions = {},
   ): Promise<ScriptOutcome | null> {
-    const code = request.script?.trim() ?? ''
+    const code = source.trim()
     if (!code) return null
 
     const variables = options.variables ?? {}

@@ -23,8 +23,10 @@ interface WorkspacesState {
   removeWorkspace: (workspaceId: string) => Promise<boolean>
 
   openWorkspace: (workspaceId: string) => Promise<void>
+  ensureWorkspace: (workspaceId: string) => Promise<void>
   renameWorkspace: (workspaceId: string, name: string, description: string) => Promise<boolean>
   saveDocs: (workspaceId: string, docs: string) => Promise<boolean>
+  saveScript: (workspaceId: string, script: string) => Promise<boolean>
 
   addMember: (workspaceId: string, email: string, role: WorkspaceRole) => Promise<boolean>
   removeMember: (workspaceId: string, userId: string) => Promise<boolean>
@@ -108,6 +110,16 @@ export const useWorkspacesStore = create<WorkspacesState>((set, get) => {
         }))
       }),
 
+    ensureWorkspace: async (workspaceId) => {
+      if (get().current?.id === workspaceId) return
+      try {
+        const current = await workspaceService.get(workspaceId)
+        if (current) set({ current })
+      } catch {
+        return
+      }
+    },
+
     openWorkspace: async (workspaceId) => {
       set({ loading: true, error: null })
       try {
@@ -122,6 +134,14 @@ export const useWorkspacesStore = create<WorkspacesState>((set, get) => {
       run(async () => {
         await workspaceService.rename(workspaceId, name, description)
         await refreshWorkspace(workspaceId)
+      }),
+
+    saveScript: (workspaceId, script) =>
+      run(async () => {
+        await workspaceService.saveScript(workspaceId, script)
+        set((state) => ({
+          current: state.current ? { ...state.current, script } : state.current,
+        }))
       }),
 
     saveDocs: (workspaceId, docs) =>

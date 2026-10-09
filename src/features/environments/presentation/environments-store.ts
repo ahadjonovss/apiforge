@@ -39,6 +39,7 @@ interface EnvironmentsState {
 
   clearError: () => void
   load: (workspaceId: string) => Promise<void>
+  ensure: (workspaceId: string) => Promise<void>
   activate: (environmentId: string | null) => void
   create: (workspaceId: string, name: string) => Promise<Environment | null>
   rename: (workspaceId: string, environmentId: string, name: string) => Promise<boolean>
@@ -74,6 +75,12 @@ export const useEnvironmentsStore = create<EnvironmentsState>((set, get) => ({
     } catch (error) {
       set({ loading: false, error: toDetail(error) })
     }
+  },
+
+  ensure: async (workspaceId) => {
+    const state = get()
+    if (state.workspaceId === workspaceId || state.loading) return
+    await state.load(workspaceId)
   },
 
   activate: (environmentId) => {

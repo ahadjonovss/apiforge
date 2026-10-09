@@ -127,7 +127,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         files: tab.files,
       })
       const outcome = applyCaptures(tab.request.captures ?? [], response)
-      const script = await runScript(tab.request, response, {
+      const script = await runScript(tab.inherited?.script ?? '', tab.request, response, {
         variables: tab.inherited?.variables ?? {},
       })
       const captured = [...outcome.captured, ...(script?.variables ?? [])]

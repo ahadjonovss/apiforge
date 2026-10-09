@@ -4,7 +4,6 @@ import { oneDark } from '@codemirror/theme-one-dark'
 import { Wand2 } from 'lucide-react'
 import { useTheme } from '@/app/providers/theme-provider'
 import { Button } from '@/shared/ui/button'
-import { useTabsStore, type Tab } from '@/features/tabs'
 import { useT } from '@/app/providers/i18n-provider'
 
 const TOKEN_SNIPPET = `if (af.response.ok) {
@@ -25,28 +24,26 @@ const PM_LINES = [
   "pm.test('name', () => pm.expect(pm.response.code).to.eql(200))",
 ]
 
-export function ScriptEditor({ tab }: { tab: Tab }) {
+export function ScriptEditor({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (value: string) => void
+}) {
   const t = useT()
   const { resolved } = useTheme()
-  const patchRequest = useTabsStore((state) => state.patchRequest)
-  const code = tab.request.script ?? ''
+  const code = value ?? ''
 
   const insertSnippet = () =>
-    patchRequest(tab.id, {
-      script: code.trim() ? `${code.trimEnd()}\n\n${TOKEN_SNIPPET}` : TOKEN_SNIPPET,
-    })
+    onChange(code.trim() ? `${code.trimEnd()}\n\n${TOKEN_SNIPPET}` : TOKEN_SNIPPET)
 
   return (
     <div className="flex flex-col gap-3 p-4">
-      <div>
-        <h3 className="text-xs font-semibold">{t('script.title')}</h3>
-        <p className="mt-0.5 text-[11px] text-muted-foreground">{t('script.hint')}</p>
-      </div>
-
       <div className="overflow-hidden rounded-md border border-border">
         <CodeMirror
           value={code}
-          onChange={(next) => patchRequest(tab.id, { script: next })}
+          onChange={onChange}
           extensions={[javascript()]}
           theme={resolved === 'dark' ? oneDark : 'light'}
           minHeight="180px"

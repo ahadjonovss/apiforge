@@ -2,14 +2,18 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Loader2, Save } from 'lucide-react'
+import { ArrowLeft, Loader2, Save, Trash2 } from 'lucide-react'
 import type { KeyValue } from '@/core/domain/http'
 import { Button } from '@/shared/ui/button'
 import { TextField } from '@/shared/ui/text-field'
 import { KeyValueEditor } from '@/shared/ui/key-value-editor'
 import { DataErrorNote } from '@/shared/ui/data-error-note'
+import { useConfirm } from '@/shared/ui/confirm-dialog'
+import { useAuthStore } from '@/features/auth'
+import { canManageCollections, useWorkspacesStore } from '@/features/workspaces'
 import type { AuthConfig, AuthMode } from '@/features/request/domain/request'
 import { AuthFields } from '@/features/request/presentation/auth-fields'
+import { EnvironmentsSection } from '@/features/environments'
 import {
   collectionSettingsSchema,
   type CollectionSettingsValues,
@@ -50,6 +54,17 @@ function SettingsForm({
   const pending = useCollectionsStore((state) => state.pending)
   const error = useCollectionsStore((state) => state.error)
   const updateSettings = useCollectionsStore((state) => state.updateSettings)
+  const removeCollection = useCollectionsStore((state) => state.removeCollection)
+
+  const { ask, dialog } = useConfirm()
+  const user = useAuthStore((state) => state.user)
+  const members = useWorkspacesStore((state) => state.members)
+  const openWorkspace = useWorkspacesStore((state) => state.openWorkspace)
+  const manages = canManageCollections(members, user?.id ?? null)
+
+  useEffect(() => {
+    void openWorkspace(workspaceId)
+  }, [workspaceId, openWorkspace])
 
   const [headers, setHeaders] = useState<KeyValue[]>(collection.headers)
   const [auth, setAuth] = useState<AuthConfig>(collection.auth)
@@ -66,6 +81,18 @@ function SettingsForm({
     navigate({
       to: '/workspace/$workspaceId/collection/$collectionId',
       params: { workspaceId, collectionId: collection.id },
+    })
+
+  const drop = () =>
+    ask({
+      title: t('confirm.deleteCollection', { name: collection.name }),
+      description: t('confirm.deleteCollectionHint'),
+      confirmLabel: t('collection.delete'),
+      onConfirm: async () => {
+        const removed = await removeCollection(workspaceId, collection.id)
+        if (removed) await navigate({ to: '/workspace/$workspaceId', params: { workspaceId } })
+        return removed
+      },
     })
 
   const {
@@ -147,6 +174,21 @@ function SettingsForm({
         </div>
       </Section>
 
+      <EnvironmentsSection workspaceId={workspaceId} />
+
+      {manages && (
+        <section className="rounded-lg border border-destructive/40 bg-card p-5">
+          <h2 className="text-sm font-semibold text-destructive">
+            {t('collection.dangerZone')}
+          </h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">{t('collection.dangerHint')}</p>
+          <Button variant="destructive" size="sm" className="mt-4" onClick={() => drop()}>
+            <Trash2 className="size-3.5" />
+            {t('collection.delete')}
+          </Button>
+        </section>
+      )}
+
       <DataErrorNote error={error} />
 
       <div className="sticky bottom-0 flex justify-end gap-2 border-t border-border bg-background/95 py-3 backdrop-blur">
@@ -158,6 +200,8 @@ function SettingsForm({
           {t('common.save')}
         </Button>
       </div>
+
+      {dialog}
     </form>
   )
 }

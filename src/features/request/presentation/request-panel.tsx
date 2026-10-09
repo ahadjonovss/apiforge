@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 import { xml } from '@codemirror/lang-xml'
@@ -17,14 +17,13 @@ import { AuthEditor } from './auth-editor'
 import { BinaryEditor } from './binary-editor'
 import { FormDataEditor } from './form-data-editor'
 import { CaptureEditor } from './capture-editor'
-import { ScriptEditor } from './script-editor'
 import { InheritedHeaders } from './inherited-headers'
 import { useVariables } from './use-variables'
 import { useT } from '@/app/providers/i18n-provider'
 
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i
 
-const SECTIONS = ['Params', 'Headers', 'Body', 'Auth', 'Capture', 'Script'] as const
+const SECTIONS = ['Params', 'Headers', 'Body', 'Auth', 'Capture'] as const
 type Section = (typeof SECTIONS)[number]
 
 const BODY_MODES: BodyMode[] = ['none', 'json', 'raw', 'urlencoded', 'form-data', 'binary']
@@ -42,9 +41,11 @@ function languageExtension(language: RawLanguage) {
 export function RequestPanel({
   tab,
   onEditVariable,
+  environmentSlot,
 }: {
   tab: Tab
   onEditVariable?: (name: string) => void
+  environmentSlot?: ReactNode
 }) {
   const t = useT()
   const [section, setSection] = useState<Section>('Params')
@@ -113,6 +114,8 @@ export function RequestPanel({
           )}
           {t('request.send')}
         </button>
+
+        {environmentSlot}
       </div>
 
       <div className="flex items-center gap-1 border-b border-border px-3">
@@ -242,8 +245,6 @@ export function RequestPanel({
         {section === 'Auth' && <AuthEditor tab={tab} />}
 
         {section === 'Capture' && <CaptureEditor tab={tab} />}
-
-        {section === 'Script' && <ScriptEditor tab={tab} />}
       </div>
     </div>
   )

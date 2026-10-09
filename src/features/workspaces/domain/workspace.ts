@@ -7,6 +7,7 @@ export interface Workspace {
   name: string
   description: string
   docs: string
+  script: string
   ownerId: string
   memberIds: string[]
   createdAt: number

@@ -44,6 +44,10 @@ export function createWorkspaceService(gateway: WorkspaceGateway, users: UserLoo
       return gateway.saveDocs(workspaceId, docs)
     },
 
+    saveScript(workspaceId: string, script: string): Promise<void> {
+      return gateway.saveScript(workspaceId, script)
+    },
+
     remove(workspaceId: string): Promise<void> {
       return gateway.remove(workspaceId)
     },
