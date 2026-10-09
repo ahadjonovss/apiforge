@@ -302,6 +302,9 @@ export const en: typeof uz = {
   'auth.notInCollection': 'This request is not part of a collection, so nothing is inherited',
 
   'capture.title': 'Capture a value from the response',
+  'capture.toEnvironment': 'Written to the {name} environment',
+  'capture.toCollection':
+    'Written to collection variables — pick an environment and it goes there instead',
   'capture.hint':
     'After a successful request, a value from the response is written into a collection variable. This replaces the Postman test script.',
   'capture.example': 'For example: write access_token from the login response into authorizationToken',
@@ -327,6 +330,7 @@ export const en: typeof uz = {
   'environment.activate': 'Make active',
   'environment.isActive': 'Active',
   'environment.saved': 'Saved',
+  'environment.save': 'Save environment',
   'environment.namePlaceholder': 'dev, prod, staging…',
   'collection.dangerZone': 'Danger zone',
   'collection.dangerHint':

@@ -302,6 +302,9 @@ export const ru: typeof uz = {
   'auth.notInCollection': 'Этот запрос не привязан к коллекции, наследование недоступно',
 
   'capture.title': 'Сохранение значения из ответа',
+  'capture.toEnvironment': 'Запишется в окружение {name}',
+  'capture.toCollection':
+    'Запишется в переменные коллекции — если выбрать окружение, запись пойдёт в него',
   'capture.hint':
     'После успешного запроса значение из ответа записывается в переменную коллекции. Заменяет тестовый скрипт Postman.',
   'capture.example': 'Например: записать access_token из ответа логина в authorizationToken',
@@ -327,6 +330,7 @@ export const ru: typeof uz = {
   'environment.activate': 'Сделать активным',
   'environment.isActive': 'Активно',
   'environment.saved': 'Сохранено',
+  'environment.save': 'Сохранить окружение',
   'environment.namePlaceholder': 'dev, prod, staging…',
   'collection.dangerZone': 'Опасная зона',
   'collection.dangerHint':

@@ -301,7 +301,9 @@ export const uz = {
 
   'capture.title': "Javobdan o'zgaruvchiga olish",
   'capture.hint':
-    "So'rov muvaffaqiyatli o'tgach, javobdan qiymat olinib to'plam o'zgaruvchisiga yoziladi. Postman'dagi test skriptining o'rnini bosadi.",
+    "So'rov muvaffaqiyatli o'tgach, javobdan qiymat olinib o'zgaruvchiga yoziladi. Postman'dagi test skriptining o'rnini bosadi.",
+  'capture.toEnvironment': '{name} muhitiga yoziladi',
+  'capture.toCollection': "To'plam o'zgaruvchilariga yoziladi — muhit tanlansa, o'sha muhitga yoziladi",
   'capture.example': "Masalan: login javobidagi access_token ni authorizationToken ga yozish",
   'capture.addRule': "Qoida qo'shish",
   'capture.pathHint': "Ichma-ich maydon uchun nuqta ishlating: data.tokens.0.access",
@@ -325,6 +327,7 @@ export const uz = {
   'environment.activate': 'Faol qilish',
   'environment.isActive': 'Faol',
   'environment.saved': 'Saqlandi',
+  'environment.save': 'Muhitni saqlash',
   'environment.namePlaceholder': 'dev, prod, staging…',
   'collection.dangerZone': 'Xavfli hudud',
   'collection.dangerHint':

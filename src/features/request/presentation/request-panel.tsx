@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 import { xml } from '@codemirror/lang-xml'
@@ -42,11 +42,9 @@ function languageExtension(language: RawLanguage) {
 export function RequestPanel({
   tab,
   onEditVariable,
-  environmentSlot,
 }: {
   tab: Tab
   onEditVariable?: (name: string) => void
-  environmentSlot?: ReactNode
 }) {
   const t = useT()
   const [section, setSection] = useState<Section>('Params')
@@ -60,6 +58,20 @@ export function RequestPanel({
   const resolvedBase = interpolate(tab.inherited?.baseUrl ?? '', scope).trim()
   const prefix = resolvedBase && !ABSOLUTE_URL.test(resolvedUrl) ? resolvedBase : ''
   const variables = useVariables(tab.inherited, onEditVariable)
+
+  const filled = (rows: { key: string; enabled: boolean }[]) =>
+    rows.filter((row) => row.enabled && row.key.trim() !== '').length
+
+  const badges: Record<Section, number | boolean> = {
+    Params: filled(request.params),
+    Headers: filled(request.headers),
+    Body: request.body.mode !== 'none',
+    Auth: request.auth.mode !== 'none' && request.auth.mode !== 'inherit',
+    Capture: request.captures.filter(
+      (rule) => rule.enabled && rule.target.trim() !== '' && rule.path.trim() !== '',
+    ).length,
+    Script: request.script.trim() !== '',
+  }
 
   return (
     <div className="flex h-full flex-col">
@@ -115,8 +127,6 @@ export function RequestPanel({
           )}
           {t('request.send')}
         </button>
-
-        {environmentSlot}
       </div>
 
       <div className="flex items-center gap-1 border-b border-border px-3">
@@ -132,7 +142,16 @@ export function RequestPanel({
                 : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >
-            {t(`request.${item.toLowerCase()}` as never)}
+            <span className="flex items-center gap-1.5">
+              {t(`request.${item.toLowerCase()}` as never)}
+              {typeof badges[item] === 'number'
+                ? badges[item] > 0 && (
+                    <span className="rounded-full bg-muted px-1.5 text-[10px] leading-4 text-muted-foreground">
+                      {badges[item]}
+                    </span>
+                  )
+                : badges[item] && <span className="size-1.5 rounded-full bg-primary" />}
+            </span>
           </button>
         ))}
       </div>

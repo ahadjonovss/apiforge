@@ -127,10 +127,10 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         inherited: tab.inherited ?? undefined,
         files: tab.files,
       })
-      const outcome = applyCaptures(tab.request.captures ?? [], response)
-
       const scope = tab.inherited?.variables ?? {}
       const environmentActive = Boolean(tab.inherited?.environmentName)
+
+      const outcome = applyCaptures(tab.request.captures ?? [], response, environmentActive)
 
       const workspaceScript = await runScript(
         tab.inherited?.script ?? '',

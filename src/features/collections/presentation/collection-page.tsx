@@ -10,7 +10,6 @@ import { useTabsStore } from '@/features/tabs'
 import { useWorkspacesStore } from '@/features/workspaces'
 import {
   describeScope,
-  EnvironmentSelector,
   mergeScopes,
   toScope,
   useActiveEnvironment,
@@ -336,13 +335,7 @@ export function CollectionPage({
             ) : (
             <Group orientation="vertical" className="min-h-0 flex-1">
               <Panel defaultSize="45" minSize="20">
-                <RequestPanel
-                  tab={activeTab}
-                  onEditVariable={setVariableEdit}
-                  environmentSlot={
-                    <EnvironmentSelector workspaceId={workspaceId} />
-                  }
-                />
+                <RequestPanel tab={activeTab} onEditVariable={setVariableEdit} />
               </Panel>
 
               <Separator className="h-px shrink-0 bg-border transition-colors hover:bg-primary data-[state=dragging]:bg-primary" />

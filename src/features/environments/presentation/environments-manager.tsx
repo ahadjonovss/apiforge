@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, Layers, Plus, Trash2 } from 'lucide-react'
 import type { KeyValue } from '@/core/domain/http'
 import { cn } from '@/core/lib/cn'
@@ -55,6 +55,7 @@ export function EnvironmentsManager({ workspaceId }: { workspaceId: string }) {
   const [rows, setRows] = useState<KeyValue[]>([])
   const [dirty, setDirty] = useState(false)
   const [saved, setSaved] = useState(false)
+  const nameRef = useRef<HTMLInputElement>(null)
 
   const touch = () => {
     setDirty(true)
@@ -78,7 +79,9 @@ export function EnvironmentsManager({ workspaceId }: { workspaceId: string }) {
 
   const add = async () => {
     const created = await createEnvironment(workspaceId, t('environment.newName'))
-    if (created) setSelectedId(created.id)
+    if (!created) return
+    setSelectedId(created.id)
+    window.setTimeout(() => nameRef.current?.select(), 0)
   }
 
   const save = async () => {
@@ -166,6 +169,7 @@ export function EnvironmentsManager({ workspaceId }: { workspaceId: string }) {
           ) : (
             <>
               <TextField
+                ref={nameRef}
                 label={t('environment.name')}
                 value={name}
                 onChange={(event) => {
@@ -192,7 +196,7 @@ export function EnvironmentsManager({ workspaceId }: { workspaceId: string }) {
                   onClick={() => void save()}
                   disabled={pending || !dirty}
                 >
-                  {t('common.save')}
+                  {t('environment.save')}
                 </Button>
                 {saved && !dirty && (
                   <span className="inline-flex items-center gap-1 text-[11px] text-status-success">

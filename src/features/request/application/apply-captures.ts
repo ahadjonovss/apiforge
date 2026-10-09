@@ -65,6 +65,7 @@ function headerValue(headers: Record<string, string>, name: string): string | un
 export function applyCaptures(
   rules: CaptureRule[],
   response: ResponseResult,
+  environmentActive = false,
 ): CaptureOutcome {
   const active = rules.filter(
     (rule) => rule.enabled && rule.target.trim() !== '' && rule.path.trim() !== '',
@@ -85,6 +86,8 @@ export function applyCaptures(
     }
   }
 
+  const destination: VariableSource = environmentActive ? 'environment' : 'collection'
+
   const captured: CapturedValue[] = []
   const missed: CaptureMiss[] = []
 
@@ -97,7 +100,7 @@ export function applyCaptures(
         missed.push({ target, reason: 'capture.reason.noHeader', path: rule.path })
         continue
       }
-      captured.push({ key: target, value, target: 'collection' })
+      captured.push({ key: target, value, target: destination })
       continue
     }
 
@@ -112,7 +115,7 @@ export function applyCaptures(
       continue
     }
 
-    captured.push({ key: target, value, target: 'collection' })
+    captured.push({ key: target, value, target: destination })
   }
 
   return { captured, missed }

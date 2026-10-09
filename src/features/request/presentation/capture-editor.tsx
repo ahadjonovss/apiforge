@@ -9,6 +9,7 @@ export function CaptureEditor({ tab }: { tab: Tab }) {
   const t = useT()
   const patchRequest = useTabsStore((state) => state.patchRequest)
   const rules = tab.request.captures ?? []
+  const environmentName = tab.inherited?.environmentName ?? ''
 
   const setRules = (next: CaptureRule[]) => patchRequest(tab.id, { captures: next })
 
@@ -21,6 +22,11 @@ export function CaptureEditor({ tab }: { tab: Tab }) {
         <h3 className="text-xs font-semibold">{t('capture.title')}</h3>
         <p className="mt-0.5 text-[11px] text-muted-foreground">
           {t('capture.hint')}
+        </p>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          {environmentName
+            ? t('capture.toEnvironment', { name: environmentName })
+            : t('capture.toCollection')}
         </p>
       </div>
 
