@@ -10,7 +10,6 @@ import { useTabsStore } from '@/features/tabs'
 import { useWorkspacesStore } from '@/features/workspaces'
 import {
   describeScope,
-  EnvironmentPicker,
   EnvironmentSelector,
   mergeScopes,
   toScope,
@@ -65,7 +64,6 @@ export function CollectionPage({
   const [endpointModal, setEndpointModal] = useState<{ endpoint: RequestDef | null; parentId: string | null } | null>(null)
   const [variableEdit, setVariableEdit] = useState<string | null>(null)
 
-  const loadEnvironments = useEnvironmentsStore((state) => state.load)
   const activeEnvironment = useActiveEnvironment()
   const ensureWorkspace = useWorkspacesStore((state) => state.ensureWorkspace)
   const workspaceScript = useWorkspacesStore((state) =>
@@ -79,9 +77,8 @@ export function CollectionPage({
   }, [workspaceId, collectionId, openCollection])
 
   useEffect(() => {
-    void loadEnvironments(workspaceId)
     void ensureWorkspace(workspaceId)
-  }, [workspaceId, loadEnvironments, ensureWorkspace])
+  }, [workspaceId, ensureWorkspace])
 
   const tree = useMemo(() => buildTree(folders, endpoints), [folders, endpoints])
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null
@@ -239,10 +236,6 @@ export function CollectionPage({
             <p className="truncate text-[11px] text-muted-foreground">
               {current.baseUrl || `${t('collection.baseUrl')} — ${t('collection.baseUrlUnset')}`}
             </p>
-
-            <div className="mt-2">
-              <EnvironmentSelector workspaceId={workspaceId} />
-            </div>
           </div>
 
           <div className="flex items-center gap-1 border-b border-border px-2 py-2">
@@ -347,10 +340,7 @@ export function CollectionPage({
                   tab={activeTab}
                   onEditVariable={setVariableEdit}
                   environmentSlot={
-                    <EnvironmentPicker
-                      workspaceId={workspaceId}
-                      onManage={() => void openSettings()}
-                    />
+                    <EnvironmentSelector workspaceId={workspaceId} />
                   }
                 />
               </Panel>

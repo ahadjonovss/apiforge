@@ -185,8 +185,6 @@ export function EnvironmentsManager({ workspaceId }: { workspaceId: string }) {
                 />
               </div>
 
-              <DataErrorNote error={error} />
-
               <div className="flex items-center gap-2">
                 <Button
                   size="sm"
@@ -221,6 +219,10 @@ export function EnvironmentsManager({ workspaceId }: { workspaceId: string }) {
             </>
           )}
         </div>
+      </div>
+
+      <div className="mt-3 empty:mt-0">
+        <DataErrorNote error={error} />
       </div>
 
       {dialog}
