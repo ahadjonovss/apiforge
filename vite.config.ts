@@ -1,4 +1,4 @@
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
@@ -122,6 +122,46 @@ function devProxy(): Plugin {
   }
 }
 
+const DEV_API_ROUTES: Record<string, string> = {
+  '/api/mcp': '/api/mcp.ts',
+  '/api/mcp-token': '/api/mcp-token.ts',
+}
+
+/**
+ * Vercel serves `api/*.ts` as functions; the dev server does not. This mounts the
+ * same handlers so the MCP endpoint can be exercised locally instead of only
+ * after a deploy.
+ */
+function devApi(): Plugin {
+  return {
+    name: 'apiforge-dev-api',
+    configureServer(server) {
+      const env = loadEnv(server.config.mode, process.cwd(), '')
+      process.env.APIFORGE_FIREBASE_API_KEY ||= env.VITE_FIREBASE_API_KEY ?? ''
+      process.env.APIFORGE_MCP_SECRET ||= 'apiforge-local-dev-secret-not-for-production'
+
+      server.middlewares.use(async (req, res, next) => {
+        const path = req.url?.split('?')[0] ?? ''
+        const file = DEV_API_ROUTES[path]
+        if (!file) return next()
+
+        try {
+          const module = await server.ssrLoadModule(file)
+          const handler = module.default as (
+            request: typeof req,
+            response: typeof res,
+          ) => Promise<void>
+          await handler(req, res)
+        } catch (error) {
+          res.statusCode = 500
+          res.setHeader('content-type', 'text/plain; charset=utf-8')
+          res.end(error instanceof Error ? error.stack ?? error.message : String(error))
+        }
+      })
+    },
+  }
+}
+
 export default defineConfig({
   plugins: [
     tanstackRouter({
@@ -133,6 +173,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     devProxy(),
+    devApi(),
   ],
   resolve: {
     alias: {

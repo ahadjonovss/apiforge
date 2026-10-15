@@ -74,6 +74,24 @@ export const uz = {
 
   'profile.title': 'Profil',
   'profile.backToWorkbench': 'Ish stoliga qaytish',
+  'mcp.title': 'Claude bilan ulanish (MCP)',
+  'mcp.hint':
+    "Claude Code shu ish stolingizni ko'radi: to'plamlar, endpointlar, muhitlar \u2014 o'qiydi va yangisini yozadi.",
+  'mcp.urlLabel': 'MCP manzili',
+  'mcp.create': 'Ulanish tokenini yaratish',
+  'mcp.commandLabel': 'Terminalda shu buyruqni bajaring',
+  'mcp.copy': 'Nusxa olish',
+  'mcp.warning':
+    "Token sizning nomingizdan ishlaydi va faqat shu yerda bir marta ko'rsatiladi. Uni begonaga bermang; bekor qilish uchun barcha qurilmalardan chiqib, qaytadan kiring.",
+  'mcp.toolsTitle': 'Claude nima qila oladi',
+  'mcp.toolsList':
+    "Ish maydonlari, to'plamlar va endpointlarni o'qish; yangi endpoint va papka yaratish; endpointni tahrirlash; to'plam va muhit o'zgaruvchilarini yozish.",
+  'mcp.noDelete': "O'chirish tool'i ataylab berilmagan \u2014 agent xatosi ma'lumotni yo'q qila olmaydi.",
+  'mcp.error.signedOut': 'Avval tizimga kiring',
+  'mcp.error.noSession': "Sessiya topilmadi \u2014 chiqib, qaytadan kiring",
+  'mcp.error.unreachable': "Server javob bermadi",
+  'mcp.error.notConfigured': "Server sozlanmagan: APIFORGE_MCP_SECRET yo'q",
+  'mcp.error.failed': 'Token yaratilmadi',
   'profile.info': "Profil ma'lumotlari",
   'profile.infoHint': "Ism va avatar havolasini o'zgartiring",
   'profile.avatarUrl': 'Avatar havolasi',

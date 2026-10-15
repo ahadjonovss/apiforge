@@ -14,6 +14,7 @@ import {
   type ProfileValues,
 } from '@/features/auth/application/schemas'
 import { AuthErrorNote, AuthSuccessNote } from '@/features/auth/presentation/auth-error-note'
+import { McpSection } from '@/features/mcp'
 import { useT } from '@/app/providers/i18n-provider'
 
 function Section({
@@ -263,6 +264,7 @@ export function ProfilePage() {
 
         <IdentityCard />
         <ProfileForm />
+        <McpSection />
         <PasswordForm />
       </div>
     </div>

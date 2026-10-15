@@ -76,6 +76,24 @@ export const en: typeof uz = {
 
   'profile.title': 'Profile',
   'profile.backToWorkbench': 'Back to the workbench',
+  'mcp.title': 'Connect Claude (MCP)',
+  'mcp.hint':
+    'Claude Code sees this workbench: collections, endpoints, environments — reads them and writes new ones.',
+  'mcp.urlLabel': 'MCP URL',
+  'mcp.create': 'Create connection token',
+  'mcp.commandLabel': 'Run this in your terminal',
+  'mcp.copy': 'Copy',
+  'mcp.warning':
+    'The token acts as you and is shown once. Do not share it; to revoke, sign out of all devices and sign in again.',
+  'mcp.toolsTitle': 'What Claude can do',
+  'mcp.toolsList':
+    'Read workspaces, collections and endpoints; create endpoints and folders; edit an endpoint; write collection and environment variables.',
+  'mcp.noDelete': 'No delete tool is exposed on purpose — an agent mistake cannot destroy data.',
+  'mcp.error.signedOut': 'Sign in first',
+  'mcp.error.noSession': 'No session found — sign out and in again',
+  'mcp.error.unreachable': 'The server did not answer',
+  'mcp.error.notConfigured': 'Server is not configured: APIFORGE_MCP_SECRET is missing',
+  'mcp.error.failed': 'Could not create the token',
   'profile.info': 'Profile details',
   'profile.infoHint': 'Change your name and avatar link',
   'profile.avatarUrl': 'Avatar link',

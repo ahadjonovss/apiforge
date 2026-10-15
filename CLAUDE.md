@@ -214,6 +214,46 @@ yuborilmaydi, chunki bu serverda ko'pincha validatsiya xatosiga aylanadi.
 `form-data` da `Content-Type` ataylab o'chiriladi: boundary'ni brauzer o'zi
 qo'yadi. `binary` da esa fayl turidan olinadi, agar qo'lda yozilmagan bo'lsa.
 
+## MCP — Claude'ni ulash
+
+Foydalanuvchi profilida token yaratadi va uni Claude Code'ga beradi; Claude shundan
+keyin uning to'plamlari va endpointlarini **o'qiydi va yozadi**.
+
+| Fayl | Vazifa |
+|---|---|
+| `api/mcp.ts` | Streamable HTTP MCP endpointi (JSON-RPC: initialize, tools/list, tools/call) |
+| `api/mcp-token.ts` | Ulanish tokenini beradi (ID token bilan himoyalangan) |
+| `api/_mcp-auth.ts` | Tokenni shifrlash/ochish va refresh → ID token almashuvi |
+| `api/_firestore.ts` | Firestore REST klienti va tipli qiymat konvertori |
+| `api/_mcp-tools.ts` | Tool ta'riflari va ularning bajarilishi |
+
+**Admin SDK ataylab ishlatilmaydi.** Funksiya Firestore'ga **REST orqali, aynan
+o'sha foydalanuvchining ID tokeni bilan** murojaat qiladi — ya'ni `firestore.rules`
+o'zgarishsiz kuchda qoladi. Admin SDK qo'yilganda funksiya qoidalarni butunlay
+chetlab o'tardi va a'zolik tekshiruvini noldan qayta yozishga to'g'ri kelardi;
+bitta e'tiborsizlik butun ma'lumotni ochib qo'yardi. Shunga qaramay har bir tool
+`assertMember` bilan ish maydoni a'zoligini ham tekshiradi — qoidalar ishlamay
+qolsa ikkinchi to'siq bo'lsin uchun.
+
+**Sessiya qanday uzaytiriladi.** ID token bir soatda tugaydi, MCP ulanishi esa
+undan uzoq yashaydi. Shuning uchun ulanish tokeni ichida foydalanuvchining
+**refresh tokeni** turadi (AES-256-GCM, `APIFORGE_MCP_SECRET` kaliti bilan), server
+uni `securetoken.googleapis.com` orqali ID tokenga almashtirib, 2 daqiqa zaxira
+bilan keshlaydi. Token stateless — hech qanday yangi kolleksiya yoki jadval
+kerak emas.
+
+**Bekor qilish — zaif joy:** token faqat foydalanuvchi barcha qurilmalardan
+chiqqanida (refresh token almashganida) kuchini yo'qotadi. UI shuni ochiq aytadi.
+
+**O'chirish tool'i yo'q.** `create_*` va `update_*` bor, `delete_*` yo'q — agent
+noto'g'ri qadam tashlasa ma'lumot yo'qolmasin uchun.
+
+Vercel'da ikkita env kerak: `APIFORGE_MCP_SECRET` (ixtiyoriy uzun satr) va
+`APIFORGE_FIREBASE_API_KEY` (o'sha project'ning web API kaliti). Dev server'da
+`vite.config.ts` dagi `apiforge-dev-api` plagini `api/*.ts` ni o'zi mount qiladi
+va ikkala qiymatni lokal standart bilan to'ldiradi, ya'ni deploy qilmasdan
+sinash mumkin.
+
 ## Konfiguratsiya qayerda turadi
 
 Firebase web konfiguratsiyasi `core/config/firebase-config.ts` da, `.env` faqat
