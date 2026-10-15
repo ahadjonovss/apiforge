@@ -266,6 +266,17 @@ ga to'g'ridan-to'g'ri o'tish mumkin, va target HTML qaytarsa u **apiforge.uz ori
 ishga tushardi — ya'ni Firebase tokeni va localStorage hujumchi qo'lida bo'lardi.
 Klient haqiqiy turni `x-apiforge-content-type` dan tiklaydi.
 
+Javob paneli esa HTML javobni **Ko'rinishi** (Preview) tabida ko'rsatadi —
+`<iframe sandbox="allow-scripts" srcDoc={body}>`. Bu yuqoridagi qoidaga zid emas:
+`allow-same-origin` berilmagani uchun iframe **opaque origin** oladi, ya'ni
+ichidagi skript bizning `localStorage`, cookie va DOM'imizga yeta olmaydi;
+`allow-top-navigation` va `allow-forms` ham yo'q. Xavfli kombinatsiya
+`allow-scripts` + `allow-same-origin` — aynan shu berilmaydi. Skriptga umuman
+ruxsat berilishining sababi: PHP `dd()`/`dump()` natijasi (Symfony var-dumper)
+ochib-yopish uchun inline JS ishlatadi, usiz dump o'qib bo'lmaydigan devor
+bo'lib qoladi. HTML javobda Preview birinchi bo'lib ochiladi, chunki bunday
+javobning xom matni odatda foydasiz.
+
 Shu sababdan `set-cookie`, `strict-transport-security`, `clear-site-data` va
 `content-security-policy` ham uzatilmaydi: ular target'niki bo'lsa ham **bizning
 domenimizga** ta'sir qilardi.

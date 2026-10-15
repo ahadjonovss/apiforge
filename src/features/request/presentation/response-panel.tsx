@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
+import { html as htmlLang } from '@codemirror/lang-html'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { AlertCircle, Clock, HardDrive, Lightbulb } from 'lucide-react'
 import { CaptureNote } from './capture-note'
@@ -10,8 +11,16 @@ import { useTheme } from '@/app/providers/theme-provider'
 import type { Tab } from '@/features/tabs'
 import { useT } from '@/app/providers/i18n-provider'
 
-const VIEWS = ['Body', 'Headers'] as const
+const VIEWS = ['Body', 'Preview', 'Headers'] as const
 type View = (typeof VIEWS)[number]
+
+const HTML_START = /^\s*<(!doctype\s+html|html\b|body\b|div\b|pre\b|script\b|style\b)/i
+
+function looksLikeHtml(contentType: string | null, body: string): boolean {
+  if (contentType?.includes('html')) return true
+  if (contentType && !contentType.includes('text/plain')) return false
+  return HTML_START.test(body)
+}
 
 function statusClass(status: number) {
   if (status >= 200 && status < 300) return 'text-status-success'
@@ -27,13 +36,21 @@ function formatSize(bytes: number) {
 
 export function ResponsePanel({ tab }: { tab: Tab }) {
   const t = useT()
-  const [view, setView] = useState<View>('Body')
+  const [picked, setPicked] = useState<View | null>(null)
   const { resolved } = useTheme()
   const { response, error } = tab
+
+  useEffect(() => {
+    setPicked(null)
+  }, [tab.id])
 
   const captureMisses = tab.captureMisses ?? []
 
   const isJson = response?.contentType?.includes('json') ?? false
+  const isHtml = response ? looksLikeHtml(response.contentType, response.body) : false
+
+  const views = VIEWS.filter((item) => item !== 'Preview' || isHtml)
+  const view: View = picked && views.includes(picked) ? picked : isHtml ? 'Preview' : 'Body'
 
   const prettyBody = useMemo(() => {
     if (!response) return ''
@@ -105,11 +122,11 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
       </div>
 
       <div className="flex items-center gap-1 border-b border-border px-3">
-        {VIEWS.map((item) => (
+        {views.map((item) => (
           <button
             key={item}
             type="button"
-            onClick={() => setView(item)}
+            onClick={() => setPicked(item)}
             className={cn(
               'border-b-2 px-3 py-2 text-xs font-medium transition',
               view === item
@@ -128,11 +145,19 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
       </div>
 
       <div className="min-h-0 flex-1 overflow-auto">
-        {view === 'Body' ? (
+        {view === 'Preview' ? (
+          <iframe
+            key={response.receivedAt}
+            title={t('response.preview')}
+            srcDoc={response.body}
+            sandbox="allow-scripts"
+            className="h-full w-full border-0 bg-white"
+          />
+        ) : view === 'Body' ? (
           <CodeMirror
             value={prettyBody}
             editable={false}
-            extensions={isJson ? [json()] : []}
+            extensions={isJson ? [json()] : isHtml ? [htmlLang()] : []}
             theme={resolved === 'dark' ? oneDark : 'light'}
             className="text-xs"
             basicSetup={{ lineNumbers: true, foldGutter: true, highlightActiveLine: false }}

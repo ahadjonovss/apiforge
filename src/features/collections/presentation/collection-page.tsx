@@ -48,6 +48,7 @@ export function CollectionPage({
   const openCollection = useCollectionsStore((state) => state.openCollection)
   const removeEndpoint = useCollectionsStore((state) => state.removeEndpoint)
   const removeFolder = useCollectionsStore((state) => state.removeFolder)
+  const duplicateEndpoint = useCollectionsStore((state) => state.duplicateEndpoint)
 
   const tabs = useTabsStore((state) => state.tabs)
   const activeTabId = useTabsStore((state) => state.activeTabId)
@@ -186,6 +187,15 @@ export function CollectionPage({
         onConfirm: () => removeFolder(workspaceId, folderId),
       }),
     onEditEndpoint: (endpoint) => setEndpointModal({ endpoint, parentId: endpoint.folderId }),
+    onDuplicateEndpoint: (endpoint) => {
+      void duplicateEndpoint(workspaceId, endpoint).then((created) => {
+        if (created) openEndpoint(created)
+      })
+    },
+    onAddExample: (endpoint) => {
+      openEndpoint(endpoint)
+      setPanel('responses')
+    },
     onDeleteEndpoint: (endpointId) =>
       ask({
         title: t('confirm.deleteEndpoint', {

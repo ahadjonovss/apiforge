@@ -1,9 +1,22 @@
-import { ChevronDown, ChevronRight, FilePlus2, Folder, FolderOpen, FolderPlus, Pencil, Trash2 } from 'lucide-react'
+import {
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
+  Copy,
+  FilePlus2,
+  Folder,
+  FolderOpen,
+  FolderPlus,
+  Pencil,
+  Trash2,
+} from 'lucide-react'
 import { cn } from '@/core/lib/cn'
 import { MethodBadge } from '@/shared/ui/method-badge'
 import type { RequestDef } from '@/features/request/domain/request'
 import type { TreeNode } from '../application/tree'
 import type { Folder as FolderModel } from '../domain/folder'
+import { MenuTrigger, RowMenu, type MenuItem } from './row-menu'
+import { useRowMenu } from './use-row-menu'
 import { useT } from '@/app/providers/i18n-provider'
 
 export interface TreeHandlers {
@@ -17,36 +30,8 @@ export interface TreeHandlers {
   onDeleteFolder: (folderId: string) => void
   onEditEndpoint: (endpoint: RequestDef) => void
   onDeleteEndpoint: (endpointId: string) => void
-}
-
-function IconButton({
-  label,
-  onClick,
-  children,
-  danger = false,
-}: {
-  label: string
-  onClick: () => void
-  children: React.ReactNode
-  danger?: boolean
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      onClick={(event) => {
-        event.stopPropagation()
-        onClick()
-      }}
-      className={cn(
-        'rounded p-1 text-muted-foreground transition hover:bg-accent',
-        danger ? 'hover:text-destructive' : 'hover:text-foreground',
-      )}
-    >
-      {children}
-    </button>
-  )
+  onDuplicateEndpoint: (endpoint: RequestDef) => void
+  onAddExample: (endpoint: RequestDef) => void
 }
 
 function FolderRow({
@@ -60,12 +45,39 @@ function FolderRow({
 }) {
   const t = useT()
   const open = handlers.expanded.has(node.folder.id)
+  const menu = useRowMenu()
+
+  const items: MenuItem[] = [
+    {
+      label: t('folder.addInside'),
+      icon: <FolderPlus className="size-3.5" />,
+      onClick: () => handlers.onCreateFolder(node.folder.id),
+    },
+    {
+      label: t('endpoint.addInside'),
+      icon: <FilePlus2 className="size-3.5" />,
+      onClick: () => handlers.onCreateEndpoint(node.folder.id),
+    },
+    {
+      label: t('common.edit'),
+      icon: <Pencil className="size-3.5" />,
+      onClick: () => handlers.onEditFolder(node.folder),
+      separated: true,
+    },
+    {
+      label: t('common.delete'),
+      icon: <Trash2 className="size-3.5" />,
+      onClick: () => handlers.onDeleteFolder(node.folder.id),
+      danger: true,
+    },
+  ]
 
   return (
     <>
       <div
         className="group flex items-center gap-1 rounded-md py-1 pr-1 transition hover:bg-accent/50"
         style={{ paddingLeft: `${depth * 12 + 4}px` }}
+        onContextMenu={menu.openAtCursor}
       >
         <button
           type="button"
@@ -85,31 +97,17 @@ function FolderRow({
           <span className="truncate text-xs">{node.folder.name}</span>
         </button>
 
-        <div className="flex shrink-0 items-center opacity-0 transition group-hover:opacity-100">
-          <IconButton
-            label={t('folder.addInside')}
-            onClick={() => handlers.onCreateFolder(node.folder.id)}
-          >
-            <FolderPlus className="size-3" />
-          </IconButton>
-          <IconButton
-            label={t('endpoint.addInside')}
-            onClick={() => handlers.onCreateEndpoint(node.folder.id)}
-          >
-            <FilePlus2 className="size-3" />
-          </IconButton>
-          <IconButton label={t('common.edit')} onClick={() => handlers.onEditFolder(node.folder)}>
-            <Pencil className="size-3" />
-          </IconButton>
-          <IconButton
-            label={t('common.delete')}
-            danger
-            onClick={() => handlers.onDeleteFolder(node.folder.id)}
-          >
-            <Trash2 className="size-3" />
-          </IconButton>
+        <div
+          className={cn(
+            'flex shrink-0 items-center transition group-hover:opacity-100',
+            menu.at ? 'opacity-100' : 'opacity-0',
+          )}
+        >
+          <MenuTrigger label={t('tree.actions')} onOpen={menu.openAtTrigger} />
         </div>
       </div>
+
+      <RowMenu at={menu.at} items={items} onClose={menu.close} />
 
       {open &&
         (node.children.length > 0 ? (
@@ -136,6 +134,33 @@ function EndpointRow({
   handlers: TreeHandlers
 }) {
   const t = useT()
+  const menu = useRowMenu()
+
+  const items: MenuItem[] = [
+    {
+      label: t('tree.addExample'),
+      icon: <BookOpen className="size-3.5" />,
+      onClick: () => handlers.onAddExample(endpoint),
+    },
+    {
+      label: t('tree.duplicate'),
+      icon: <Copy className="size-3.5" />,
+      onClick: () => handlers.onDuplicateEndpoint(endpoint),
+    },
+    {
+      label: t('common.edit'),
+      icon: <Pencil className="size-3.5" />,
+      onClick: () => handlers.onEditEndpoint(endpoint),
+      separated: true,
+    },
+    {
+      label: t('common.delete'),
+      icon: <Trash2 className="size-3.5" />,
+      onClick: () => handlers.onDeleteEndpoint(endpoint.id),
+      danger: true,
+    },
+  ]
+
   return (
     <div
       className={cn(
@@ -143,6 +168,7 @@ function EndpointRow({
         endpoint.id === handlers.activeId ? 'bg-accent' : 'hover:bg-accent/50',
       )}
       style={{ paddingLeft: `${depth * 12 + 20}px` }}
+      onContextMenu={menu.openAtCursor}
     >
       <button
         type="button"
@@ -153,18 +179,16 @@ function EndpointRow({
         <span className="truncate text-xs">{endpoint.name}</span>
       </button>
 
-      <div className="flex shrink-0 items-center opacity-0 transition group-hover:opacity-100">
-        <IconButton label={t('common.edit')} onClick={() => handlers.onEditEndpoint(endpoint)}>
-          <Pencil className="size-3" />
-        </IconButton>
-        <IconButton
-          label={t('common.delete')}
-          danger
-          onClick={() => handlers.onDeleteEndpoint(endpoint.id)}
-        >
-          <Trash2 className="size-3" />
-        </IconButton>
+      <div
+        className={cn(
+          'flex shrink-0 items-center transition group-hover:opacity-100',
+          menu.at ? 'opacity-100' : 'opacity-0',
+        )}
+      >
+        <MenuTrigger label={t('tree.actions')} onOpen={menu.openAtTrigger} />
       </div>
+
+      <RowMenu at={menu.at} items={items} onClose={menu.close} />
     </div>
   )
 }

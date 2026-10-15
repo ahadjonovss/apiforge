@@ -61,6 +61,7 @@ interface CollectionsState {
     folderId: string | null,
   ) => Promise<RequestDef | null>
   saveEndpoint: (workspaceId: string, endpoint: RequestDef) => Promise<boolean>
+  duplicateEndpoint: (workspaceId: string, endpoint: RequestDef) => Promise<RequestDef | null>
   removeEndpoint: (workspaceId: string, endpointId: string) => Promise<boolean>
   moveEndpoint: (
     workspaceId: string,
@@ -279,6 +280,29 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => {
           ),
         }))
       }),
+
+    duplicateEndpoint: async (workspaceId, endpoint) => {
+      const collection = get().current
+      if (!collection) return null
+
+      let created: RequestDef | null = null
+      await run(async () => {
+        const now = Date.now()
+        const copy: RequestDef = {
+          ...endpoint,
+          id: newId(),
+          name: `${endpoint.name} copy`,
+          collectionId: collection.id,
+          order: get().endpoints.length,
+          createdAt: now,
+          updatedAt: now,
+        }
+        await collectionService.saveEndpoint(workspaceId, collection.id, copy)
+        set((state) => ({ endpoints: [...state.endpoints, copy] }))
+        created = copy
+      })
+      return created
+    },
 
     removeEndpoint: (workspaceId, endpointId) =>
       run(async () => {
