@@ -6,7 +6,7 @@ import { cn } from '@/core/lib/cn'
 import { Button } from '@/shared/ui/button'
 import { DataErrorNote } from '@/shared/ui/data-error-note'
 import type { RequestDef } from '@/features/request/domain/request'
-import { useTabsStore } from '@/features/tabs'
+import { readOpenTabs, useTabsStore, writeOpenTabs } from '@/features/tabs'
 import { useWorkspacesStore } from '@/features/workspaces'
 import {
   describeScope,
@@ -60,6 +60,7 @@ export function CollectionPage({
   const { ask, dialog } = useConfirm()
   const [view, setView] = useState<'home' | 'endpoint'>('home')
   const [panel, setPanel] = useState<'none' | 'responses' | 'docs'>('none')
+  const [restoredId, setRestoredId] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [folderModal, setFolderModal] = useState<{ folder: Folder | null; parentId: string | null } | null>(null)
   const [endpointModal, setEndpointModal] = useState<{ endpoint: RequestDef | null; parentId: string | null } | null>(null)
@@ -75,6 +76,7 @@ export function CollectionPage({
     void openCollection(workspaceId, collectionId)
     setView('home')
     setPanel('none')
+    setRestoredId(null)
   }, [workspaceId, collectionId, openCollection])
 
   useEffect(() => {
@@ -146,6 +148,56 @@ export function CollectionPage({
   useEffect(() => {
     if (current && inherited) syncInherited(current.id, inherited)
   }, [current, inherited, syncInherited])
+
+  useEffect(() => {
+    if (!current || current.id !== collectionId || loading) return
+    if (restoredId === current.id) return
+    setRestoredId(current.id)
+
+    const saved = readOpenTabs(current.id)
+    if (!saved) return
+
+    const found = saved.ids
+      .map((id) => endpoints.find((endpoint) => endpoint.id === id))
+      .filter((endpoint): endpoint is RequestDef => endpoint !== undefined)
+    if (found.length === 0) return
+
+    const open = useTabsStore.getState()
+    for (const endpoint of found) {
+      if (!open.tabs.some((tab) => tab.id === endpoint.id)) openTab(endpoint, inherited)
+    }
+
+    const active = saved.activeId && found.some((endpoint) => endpoint.id === saved.activeId)
+    if (active && saved.activeId) setActiveTab(saved.activeId)
+    if (saved.onEndpoint) setView('endpoint')
+  }, [
+    current,
+    collectionId,
+    loading,
+    endpoints,
+    restoredId,
+    inherited,
+    openTab,
+    setActiveTab,
+  ])
+
+  const openIds = useMemo(
+    () =>
+      tabs
+        .filter((tab) => tab.request.collectionId === (current?.id ?? null))
+        .map((tab) => tab.id)
+        .join(','),
+    [tabs, current],
+  )
+
+  useEffect(() => {
+    if (!current || restoredId !== current.id) return
+    writeOpenTabs(current.id, {
+      ids: openIds ? openIds.split(',') : [],
+      activeId: activeTabId,
+      onEndpoint: view === 'endpoint',
+    })
+  }, [current, restoredId, openIds, activeTabId, view])
 
   const openSettings = () =>
     navigate({
