@@ -1,4 +1,5 @@
 import { auth } from '@/core/config/firebase'
+import { firebaseConfig } from '@/core/config/firebase-config'
 import { DataFailure } from '@/core/domain/data-error'
 import type { McpGateway } from '../domain/mcp-gateway'
 
@@ -25,7 +26,7 @@ export const firebaseMcpGateway: McpGateway = {
           authorization: `Bearer ${idToken}`,
           'content-type': 'application/json',
         },
-        body: JSON.stringify({ refreshToken }),
+        body: JSON.stringify({ refreshToken, apiKey: firebaseConfig.apiKey }),
       })
     } catch {
       fail('mcp.error.unreachable')

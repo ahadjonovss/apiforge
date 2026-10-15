@@ -50,7 +50,6 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     send(status, { jsonrpc: '2.0', id: id ?? null, error: { code, message } })
 
   if (req.method === 'GET' || req.method === 'DELETE') {
-    // Streamable HTTP allows a server to decline the optional SSE stream.
     res.statusCode = 405
     res.setHeader('allow', 'POST')
     res.end()
@@ -108,7 +107,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
   if (method !== 'tools/call') return rpcError(id, -32601, `unknown method ${method}`)
 
-  const apiKey = apiKeyFor(identity.pid)
+  const apiKey = identity.ak ?? apiKeyFor(identity.pid)
   if (!apiKey) return rpcError(id, -32603, 'server is missing a Firebase API key')
 
   const exchange = await idTokenFor(identity.rt, apiKey)
@@ -116,7 +115,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     return rpcError(
       id,
       -32001,
-      `this token no longer works (${exchange.reason}) — sign in again and make a new one`,
+      `this token no longer works for project ${identity.pid} (${exchange.reason}) — ` +
+        'create a new one in your APIForge profile',
       401,
     )
   }

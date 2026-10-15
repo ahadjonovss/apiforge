@@ -10,6 +10,7 @@ export interface McpIdentity {
   rt: string
   uid: string
   pid: string
+  ak?: string
 }
 
 function secretKey(): Buffer | null {
@@ -51,9 +52,9 @@ export function openToken(token: string | undefined): McpIdentity | null {
     const parsed: unknown = JSON.parse(plain)
     if (typeof parsed !== 'object' || parsed === null) return null
 
-    const { rt, uid, pid } = parsed as Partial<McpIdentity>
+    const { rt, uid, pid, ak } = parsed as Partial<McpIdentity>
     if (typeof rt !== 'string' || typeof uid !== 'string' || typeof pid !== 'string') return null
-    return { rt, uid, pid }
+    return { rt, uid, pid, ak: typeof ak === 'string' && ak ? ak : undefined }
   } catch {
     return null
   }
@@ -83,15 +84,6 @@ export interface ExchangeResult {
   reason: string
 }
 
-/**
- * Firebase refresh tokens are long lived, ID tokens last an hour. The MCP
- * connection outlives both, so every call trades the refresh token for a fresh
- * ID token and reuses it until it is nearly expired.
- *
- * The upstream reason is passed back rather than swallowed: INVALID_REFRESH_TOKEN,
- * API_KEY_INVALID and PROJECT_NUMBER_MISMATCH each need a different fix, and
- * without the code they are indistinguishable from the client side.
- */
 export async function idTokenFor(
   refreshToken: string,
   apiKey: string,

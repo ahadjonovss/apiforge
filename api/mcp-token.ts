@@ -44,9 +44,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   const user = await verifyIdToken(idToken)
   if (!user) return send(401, { error: 'sign in first' })
 
-  let body: { refreshToken?: unknown }
+  let body: { refreshToken?: unknown; apiKey?: unknown }
   try {
-    body = JSON.parse(await readBody(req)) as { refreshToken?: unknown }
+    body = JSON.parse(await readBody(req)) as { refreshToken?: unknown; apiKey?: unknown }
   } catch {
     return send(400, { error: 'invalid body' })
   }
@@ -54,7 +54,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   const refreshToken = typeof body.refreshToken === 'string' ? body.refreshToken : ''
   if (!refreshToken) return send(400, { error: 'refreshToken is required' })
 
-  const token = sealToken({ rt: refreshToken, uid: user.uid, pid: user.projectId })
+  const apiKey = typeof body.apiKey === 'string' ? body.apiKey : undefined
+
+  const token = sealToken({ rt: refreshToken, uid: user.uid, pid: user.projectId, ak: apiKey })
   if (!token) return send(500, { error: 'server is missing APIFORGE_MCP_SECRET' })
 
   return send(200, { token })
