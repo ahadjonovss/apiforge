@@ -272,6 +272,7 @@ export const en: typeof uz = {
   'request.auth': 'Auth',
   'request.capture': 'Capture',
   'request.script': 'Script',
+  'request.responses': 'Responses',
   'request.scriptTitle': 'Post-response script',
   'request.scriptHint':
     'For this endpoint only. Runs after the workspace script; on a name clash this one wins. With an environment active, af.vars.set writes to the environment.',
@@ -369,6 +370,15 @@ export const en: typeof uz = {
   'response.empty': 'Send a request — the response appears here',
   'response.body': 'Body',
   'response.headers': 'Headers',
+  'responses.title': 'Response examples',
+  'responses.hint':
+    'Sample responses per status code — used in the docs and in the response panel. Groups such as 4xx are fine.',
+  'responses.add': 'Add example',
+  'responses.empty': 'No response examples yet',
+  'responses.emptyHint':
+    'When a real response arrives, the save button turns it into an example.',
+  'responses.statusLabel': 'Status code',
+  'responses.confirmDelete': 'Delete the {status} example?',
   'response.examples': 'Response examples',
   'response.examplesEmpty': 'none yet',
   'response.saveAs': 'Save response as {status}',

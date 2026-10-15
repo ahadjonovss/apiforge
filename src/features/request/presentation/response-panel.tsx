@@ -5,7 +5,6 @@ import { oneDark } from '@codemirror/theme-one-dark'
 import { AlertCircle, Clock, HardDrive, Lightbulb } from 'lucide-react'
 import { CaptureNote } from './capture-note'
 import { ScriptNote } from './script-note'
-import { ResponseExamples } from './response-examples'
 import { cn } from '@/core/lib/cn'
 import { useTheme } from '@/app/providers/theme-provider'
 import type { Tab } from '@/features/tabs'
@@ -49,7 +48,6 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
   if (error) {
     return (
       <div className="flex h-full flex-col">
-        <ResponseExamples tab={tab} />
         <div className="flex flex-1 items-center justify-center p-6">
         <div className="w-full max-w-md rounded-lg border border-destructive/30 bg-destructive/5 p-5">
           <div className="flex items-start gap-3">
@@ -79,7 +77,6 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
   if (!response) {
     return (
       <div className="flex h-full flex-col">
-        <ResponseExamples tab={tab} />
         <div className="flex flex-1 items-center justify-center p-6">
           <p className="text-xs text-muted-foreground">
             {t('response.empty')}
@@ -91,7 +88,6 @@ export function ResponsePanel({ tab }: { tab: Tab }) {
 
   return (
     <div className="flex h-full flex-col">
-      <ResponseExamples tab={tab} />
       <CaptureNote tab={tab} misses={captureMisses} />
       <ScriptNote outcome={tab.script} />
       <div className="flex items-center gap-4 border-b border-border px-3 py-2">

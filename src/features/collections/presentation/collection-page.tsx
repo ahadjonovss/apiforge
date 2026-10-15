@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Group, Panel, Separator } from 'react-resizable-panels'
-import { ArrowLeft, BookText, FilePlus2, FolderPlus, Home, Settings } from 'lucide-react'
+import { ArrowLeft, BookOpen, BookText, FilePlus2, FolderPlus, Home, Settings } from 'lucide-react'
 import { cn } from '@/core/lib/cn'
 import { Button } from '@/shared/ui/button'
 import { DataErrorNote } from '@/shared/ui/data-error-note'
@@ -18,6 +18,7 @@ import {
 import { RequestPanel } from '@/features/request/presentation/request-panel'
 import { ResponsePanel } from '@/features/request/presentation/response-panel'
 import { EndpointDocs } from '@/features/request/presentation/endpoint-docs'
+import { EndpointResponses } from '@/features/request/presentation/endpoint-responses'
 import { buildTree } from '../application/tree'
 import type { Folder } from '../domain/folder'
 import { useConfirm } from '@/shared/ui/confirm-dialog'
@@ -57,7 +58,7 @@ export function CollectionPage({
   const navigate = useNavigate()
   const { ask, dialog } = useConfirm()
   const [view, setView] = useState<'home' | 'endpoint'>('home')
-  const [docsOpen, setDocsOpen] = useState(false)
+  const [panel, setPanel] = useState<'none' | 'responses' | 'docs'>('none')
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [folderModal, setFolderModal] = useState<{ folder: Folder | null; parentId: string | null } | null>(null)
   const [endpointModal, setEndpointModal] = useState<{ endpoint: RequestDef | null; parentId: string | null } | null>(null)
@@ -72,7 +73,7 @@ export function CollectionPage({
   useEffect(() => {
     void openCollection(workspaceId, collectionId)
     setView('home')
-    setDocsOpen(false)
+    setPanel('none')
   }, [workspaceId, collectionId, openCollection])
 
   useEffect(() => {
@@ -314,10 +315,30 @@ export function CollectionPage({
                 <SaveStatus tab={activeTab} />
                 <button
                   type="button"
-                  onClick={() => setDocsOpen((open) => !open)}
+                  onClick={() =>
+                    setPanel((open) => (open === 'responses' ? 'none' : 'responses'))
+                  }
                   className={cn(
                     'flex items-center gap-1 rounded border px-2 py-1 text-[11px] transition',
-                    docsOpen
+                    panel === 'responses'
+                      ? 'border-primary bg-accent text-foreground'
+                      : 'border-border text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  <BookOpen className="size-3" />
+                  {t('request.responses')}
+                  {(activeTab.request.responseDocs?.length ?? 0) > 0 && (
+                    <span className="rounded-full bg-muted px-1.5 text-[10px] leading-4 text-muted-foreground">
+                      {activeTab.request.responseDocs.length}
+                    </span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPanel((open) => (open === 'docs' ? 'none' : 'docs'))}
+                  className={cn(
+                    'flex items-center gap-1 rounded border px-2 py-1 text-[11px] transition',
+                    panel === 'docs'
                       ? 'border-primary bg-accent text-foreground'
                       : 'border-border text-muted-foreground hover:text-foreground',
                   )}
@@ -328,9 +349,13 @@ export function CollectionPage({
               </div>
             </div>
 
-            {docsOpen ? (
+            {panel !== 'none' ? (
               <div className="min-h-0 flex-1">
-                <EndpointDocs tab={activeTab} />
+                {panel === 'docs' ? (
+                  <EndpointDocs tab={activeTab} />
+                ) : (
+                  <EndpointResponses tab={activeTab} />
+                )}
               </div>
             ) : (
             <Group orientation="vertical" className="min-h-0 flex-1">

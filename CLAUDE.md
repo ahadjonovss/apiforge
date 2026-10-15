@@ -414,7 +414,7 @@ Uch daraja, hammasi markdown:
 |---|---|---|
 | To'plam | `ApiCollection.docs` | Collection bosh sahifasi — to'plam ochilganda birinchi shu chiqadi |
 | Endpoint | `RequestDef.docs` | **Docs** tugmasi — alohida to'liq sahifa |
-| Status kod | `RequestDef.responseDocs[]` | Javob panelining tepasida, **doim ko'rinadi** |
+| Status kod | `RequestDef.responseDocs[]` | **Javoblar** tugmasi — Docs yonida, alohida to'liq sahifa |
 
 `responseDocs` da `status` **matn**, chunki `4xx` kabi guruhlar ham yoziladi.
 
@@ -426,14 +426,13 @@ har doim ham to'g'ri JSON bo'lavermaydi).
 Eski yozuvlar markdown ``` bloklari ichida edi; `stripFence` ularni o'qishda
 ochib beradi, ya'ni migratsiya kerak emas.
 
-Javob paneli **faqat tanasi yozilgan** misollarni ko'rsatadi (`hasExampleData`),
-oxirida `+` tugmasi bilan. Yangi kod qo'shilayotganda yozuv hali bo'sh bo'ladi —
-shuning uchun ochiq turgani istisno qilinadi, aks holda yozayotganingizda
-qatordan yo'qolib ketardi. Yopilganda bo'sh yozuv `pruneEmptyExample` bilan
-o'chiriladi, ya'ni tasodifiy bosishlardan bo'sh yozuvlar to'planib qolmaydi.
-Javob kelganda mos kod ajratiladi, «Javobni saqlash» tugmasi esa haqiqiy javobni
-o'sha kod misoliga aylantiradi (JSON bo'lsa chiroyli formatlab, ```json blokka o'rab).
-Tahrirlash ham shu yerda — hujjat tasvirlayotgan javobning yonida.
+Misollar **Javoblar** sahifasida (`endpoint-responses.tsx`), endpoint sarlavhasidagi
+tugma ostida. Ilgari ular javob panelining tepasidagi tor chiziqda edi: har bir
+misolni ochib-yopib ko'rish kerak edi, javobning o'ziga esa joy qolmasdi.
+Sahifada har bir misol — karta: status, sarlavha va JSON tanasi **bevosita
+tahrirlanadi**, edit rejimi yo'q (saqlash avtomatik). Javob kelgan bo'lsa
+«Javobni saqlash» tugmasi uni o'sha status kodli misolga aylantiradi, mos
+keladigan karta esa ramka bilan ajratiladi.
 
 Endpoint hujjati esa **Docs** tugmasi ostida alohida to'liq sahifada: nomi, metodi,
 hal qilingan manzili, markdown matn va pastda barcha javob misollari birga.

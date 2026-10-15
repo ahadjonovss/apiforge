@@ -272,6 +272,7 @@ export const ru: typeof uz = {
   'request.auth': 'Auth',
   'request.capture': 'Capture',
   'request.script': 'Скрипт',
+  'request.responses': 'Ответы',
   'request.scriptTitle': 'Скрипт после ответа',
   'request.scriptHint':
     'Только для этого эндпоинта. Выполняется после скрипта пространства; при совпадении имён побеждает этот. Если окружение активно, af.vars.set пишет в окружение.',
@@ -369,6 +370,15 @@ export const ru: typeof uz = {
   'response.empty': 'Отправьте запрос — ответ появится здесь',
   'response.body': 'Body',
   'response.headers': 'Headers',
+  'responses.title': 'Примеры ответов',
+  'responses.hint':
+    'Образцы ответов по статус-кодам — используются в документации и в панели ответа. Можно писать группы вроде 4xx.',
+  'responses.add': 'Добавить пример',
+  'responses.empty': 'Примеров ответа пока нет',
+  'responses.emptyHint':
+    'Когда придёт настоящий ответ, кнопка «Сохранить ответ» превратит его в пример.',
+  'responses.statusLabel': 'Статус-код',
+  'responses.confirmDelete': 'Удалить пример {status}?',
   'response.examples': 'Примеры ответов',
   'response.examplesEmpty': 'пока нет',
   'response.saveAs': 'Сохранить ответ как {status}',

@@ -270,6 +270,7 @@ export const uz = {
   'request.auth': 'Auth',
   'request.capture': 'Capture',
   'request.script': 'Skript',
+  'request.responses': 'Javoblar',
   'request.scriptTitle': 'Javobdan keyingi skript',
   'request.scriptHint':
     "Faqat shu endpoint uchun. Ish maydoni skriptidan keyin ishlaydi; bir xil o'zgaruvchi yozilsa shu yerdagisi g'olib. Muhit faol bo'lsa af.vars.set muhitga yozadi.",
@@ -366,6 +367,15 @@ export const uz = {
   'response.empty': "So'rov yuboring — javob shu yerda ko'rinadi",
   'response.body': 'Body',
   'response.headers': 'Headers',
+  'responses.title': 'Javob misollari',
+  'responses.hint':
+    "Status kod bo'yicha javob namunalari — hujjatda va javob panelida ishlatiladi. 4xx kabi guruhlar ham yoziladi.",
+  'responses.add': "Misol qo'shish",
+  'responses.empty': "Hali javob misoli yo'q",
+  'responses.emptyHint':
+    "Haqiqiy javob kelganda «Javobni saqlash» tugmasi uni misolga aylantiradi.",
+  'responses.statusLabel': 'Status kod',
+  'responses.confirmDelete': "{status} misoli o'chirilsinmi?",
   'response.examples': 'Javob misollari',
   'response.examplesEmpty': "hali yo'q",
   'response.saveAs': 'Javobni {status} ga saqlash',
