@@ -78,32 +78,53 @@ interface CachedToken {
 
 const idTokens = new Map<string, CachedToken>()
 
+export interface ExchangeResult {
+  idToken: string | null
+  reason: string
+}
+
 /**
  * Firebase refresh tokens are long lived, ID tokens last an hour. The MCP
  * connection outlives both, so every call trades the refresh token for a fresh
  * ID token and reuses it until it is nearly expired.
+ *
+ * The upstream reason is passed back rather than swallowed: INVALID_REFRESH_TOKEN,
+ * API_KEY_INVALID and PROJECT_NUMBER_MISMATCH each need a different fix, and
+ * without the code they are indistinguishable from the client side.
  */
 export async function idTokenFor(
   refreshToken: string,
   apiKey: string,
-): Promise<string | null> {
+): Promise<ExchangeResult> {
   const cacheKey = createHash('sha256').update(refreshToken).digest('hex')
   const cached = idTokens.get(cacheKey)
-  if (cached && cached.expiresAt > Date.now()) return cached.idToken
+  if (cached && cached.expiresAt > Date.now()) return { idToken: cached.idToken, reason: '' }
 
-  const response = await fetch(`https://securetoken.googleapis.com/v1/token?key=${apiKey}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: refreshToken }),
-  })
+  let response: Response
+  try {
+    response = await fetch(`https://securetoken.googleapis.com/v1/token?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: refreshToken }),
+    })
+  } catch (error) {
+    return { idToken: null, reason: error instanceof Error ? error.message : 'network error' }
+  }
 
   if (!response.ok) {
     idTokens.delete(cacheKey)
-    return null
+    const text = await response.text()
+    let code = ''
+    try {
+      code = (JSON.parse(text) as { error?: { message?: string } }).error?.message ?? ''
+    } catch {
+      code = text.slice(0, 120)
+    }
+    return { idToken: null, reason: `${response.status} ${code || 'token exchange refused'}` }
   }
 
   const payload = (await response.json()) as { id_token?: string; expires_in?: string }
-  if (!payload.id_token) return null
+  if (!payload.id_token) return { idToken: null, reason: 'no id_token in the response' }
 
   const seconds = Number(payload.expires_in ?? '3600')
   idTokens.set(cacheKey, {
@@ -111,5 +132,5 @@ export async function idTokenFor(
     expiresAt: Date.now() + Math.max(60, seconds - 120) * 1000,
   })
 
-  return payload.id_token
+  return { idToken: payload.id_token, reason: '' }
 }

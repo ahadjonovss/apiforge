@@ -111,16 +111,21 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   const apiKey = apiKeyFor(identity.pid)
   if (!apiKey) return rpcError(id, -32603, 'server is missing a Firebase API key')
 
-  const idToken = await idTokenFor(identity.rt, apiKey)
-  if (!idToken) {
-    return rpcError(id, -32001, 'this token no longer works — sign in again and make a new one', 401)
+  const exchange = await idTokenFor(identity.rt, apiKey)
+  if (!exchange.idToken) {
+    return rpcError(
+      id,
+      -32001,
+      `this token no longer works (${exchange.reason}) — sign in again and make a new one`,
+      401,
+    )
   }
 
   const name = typeof params.name === 'string' ? params.name : ''
   const args = (params.arguments ?? {}) as Record<string, unknown>
 
   try {
-    const result = await callTool(createFirestore(identity.pid, idToken), identity.uid, name, args)
+    const result = await callTool(createFirestore(identity.pid, exchange.idToken), identity.uid, name, args)
     return send(200, {
       jsonrpc: '2.0',
       id,
