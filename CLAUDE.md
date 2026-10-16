@@ -424,7 +424,15 @@ Postman import'i skriptlarni hamon ogohlantirish bilan tashlab yuboradi: ular `p
 API'siga yozilgan, bizniki esa `af.*` — jimgina ko'chirish ishlamaydigan kod hosil
 qilardi.
 
-## Avtomatik saqlash
+## Ochilish bo'limi va avtomatik saqlash
+
+Endpoint ochilganda so'rov paneli metodga qarab bo'lim tanlaydi: tanasi bo'lishi
+mumkin bo'lgan metodlarda **Body**, GET va HEAD da **Params**. Qoida bitta joyda —
+`core/domain/http.ts` dagi `carriesBody`, uni `build-http-call` ham ishlatadi, ya'ni
+"GET da body yo'q" mantig'i ikki nusxada yurmaydi. Almashish faqat **boshqa tab
+ochilganda** bo'ladi (render paytida `tab.id` solishtiriladi, effekt emas —
+ortiqcha chizish yo'q); metod qo'lda o'zgartirilganda bo'lim joyida qoladi, aks
+holda yozib turgan odamni panel tashlab ketardi.
 
 Endpoint tahrirlanganda 800ms tinchlikdan keyin o'zi saqlanadi. Qo'lda "Saqlash"
 tugmasi yo'q, o'rniga holat ko'rsatiladi: Saqlanmagan → Saqlanmoqda → Saqlandi.

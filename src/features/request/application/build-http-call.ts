@@ -1,4 +1,4 @@
-import type { KeyValue } from '@/core/domain/http'
+import { carriesBody, type KeyValue } from '@/core/domain/http'
 import type { VariableScope } from '@/core/domain/variables'
 import type { AuthConfig, InheritedConfig, RequestDef } from '../domain/request'
 import type { HttpCall } from '../domain/request-gateway'
@@ -126,7 +126,7 @@ function buildBody(
 ): BodyInit | null {
   const body = request.body
 
-  if (request.method === 'GET' || request.method === 'HEAD') return null
+  if (!carriesBody(request.method)) return null
 
   switch (body.mode) {
     case 'none':

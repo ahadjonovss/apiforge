@@ -6,7 +6,7 @@ import { html } from '@codemirror/lang-html'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { Send, Loader2 } from 'lucide-react'
 import { cn } from '@/core/lib/cn'
-import { HTTP_METHODS, type HttpMethod } from '@/core/domain/http'
+import { carriesBody, HTTP_METHODS, type HttpMethod } from '@/core/domain/http'
 import { KeyValueEditor } from '@/shared/ui/key-value-editor'
 import { VariableInput } from '@/shared/ui/variable-input'
 import { useTheme } from '@/app/providers/theme-provider'
@@ -29,6 +29,10 @@ type Section = (typeof SECTIONS)[number]
 
 const BODY_MODES: BodyMode[] = ['none', 'json', 'raw', 'urlencoded', 'form-data', 'binary']
 
+function openingSection(method: HttpMethod): Section {
+  return carriesBody(method) ? 'Body' : 'Params'
+}
+
 const RAW_LANGUAGES = ['json', 'xml', 'html', 'text'] as const
 type RawLanguage = (typeof RAW_LANGUAGES)[number]
 
@@ -47,10 +51,16 @@ export function RequestPanel({
   onEditVariable?: (name: string) => void
 }) {
   const t = useT()
-  const [section, setSection] = useState<Section>('Params')
+  const [section, setSection] = useState<Section>(() => openingSection(tab.request.method))
+  const [openedId, setOpenedId] = useState(tab.id)
   const patchRequest = useTabsStore((state) => state.patchRequest)
   const send = useTabsStore((state) => state.send)
   const { resolved } = useTheme()
+
+  if (openedId !== tab.id) {
+    setOpenedId(tab.id)
+    setSection(openingSection(tab.request.method))
+  }
 
   const { request } = tab
   const scope = tab.inherited?.variables ?? {}
