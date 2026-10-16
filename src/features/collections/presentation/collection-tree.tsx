@@ -10,18 +10,22 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react'
+import type { DragEvent } from 'react'
 import { cn } from '@/core/lib/cn'
 import { MethodBadge } from '@/shared/ui/method-badge'
 import type { RequestDef } from '@/features/request/domain/request'
+import type { DropPosition, NodeRef } from '../application/reorder'
 import type { TreeNode } from '../application/tree'
 import type { Folder as FolderModel } from '../domain/folder'
 import { MenuTrigger, RowMenu, type MenuItem } from './row-menu'
 import { useRowMenu } from './use-row-menu'
+import type { TreeDrag } from './use-tree-drag'
 import { useT } from '@/app/providers/i18n-provider'
 
 export interface TreeHandlers {
   activeId: string | null
   expanded: Set<string>
+  drag: TreeDrag
   onToggle: (folderId: string) => void
   onOpenEndpoint: (endpoint: RequestDef) => void
   onCreateFolder: (parentId: string | null) => void
@@ -32,6 +36,52 @@ export interface TreeHandlers {
   onDeleteEndpoint: (endpointId: string) => void
   onDuplicateEndpoint: (endpoint: RequestDef) => void
   onAddExample: (endpoint: RequestDef) => void
+}
+
+function positionAt(event: DragEvent<HTMLElement>, nestable: boolean): DropPosition {
+  const box = event.currentTarget.getBoundingClientRect()
+  const offset = (event.clientY - box.top) / (box.height || 1)
+  if (!nestable) return offset < 0.5 ? 'before' : 'after'
+  if (offset < 0.3) return 'before'
+  if (offset > 0.7) return 'after'
+  return 'inside'
+}
+
+function dragProps(ref: NodeRef, drag: TreeDrag, nestable: boolean) {
+  const hint = drag.hint && drag.hint.target?.id === ref.id ? drag.hint.position : null
+
+  return {
+    draggable: true,
+    className: cn(
+      drag.active?.id === ref.id && 'opacity-50',
+      hint === 'before' && 'shadow-[inset_0_2px_0_0_var(--color-primary)]',
+      hint === 'after' && 'shadow-[inset_0_-2px_0_0_var(--color-primary)]',
+      hint === 'inside' && 'ring-1 ring-primary',
+    ),
+    onDragStart: (event: DragEvent<HTMLElement>) => {
+      event.dataTransfer.effectAllowed = 'move'
+      event.dataTransfer.setData('text/plain', ref.id)
+      drag.onStart(ref)
+    },
+    onDragOver: (event: DragEvent<HTMLElement>) => {
+      if (!drag.active) return
+      event.preventDefault()
+      event.stopPropagation()
+      event.dataTransfer.dropEffect = 'move'
+      drag.onOver(ref, positionAt(event, nestable))
+    },
+    onDragLeave: (event: DragEvent<HTMLElement>) => {
+      const next = event.relatedTarget as Node | null
+      if (next && event.currentTarget.contains(next)) return
+      drag.onLeave(ref.id)
+    },
+    onDrop: (event: DragEvent<HTMLElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+      drag.onDrop()
+    },
+    onDragEnd: () => drag.onEnd(),
+  }
 }
 
 function FolderRow({
@@ -46,6 +96,7 @@ function FolderRow({
   const t = useT()
   const open = handlers.expanded.has(node.folder.id)
   const menu = useRowMenu()
+  const dnd = dragProps({ kind: 'folder', id: node.folder.id }, handlers.drag, true)
 
   const items: MenuItem[] = [
     {
@@ -75,7 +126,11 @@ function FolderRow({
   return (
     <>
       <div
-        className="group flex items-center gap-1 rounded-md py-1 pr-1 transition hover:bg-accent/50"
+        {...dnd}
+        className={cn(
+          'group flex items-center gap-1 rounded-md py-1 pr-1 transition hover:bg-accent/50',
+          dnd.className,
+        )}
         style={{ paddingLeft: `${depth * 12 + 4}px` }}
         onContextMenu={menu.openAtCursor}
       >
@@ -135,6 +190,7 @@ function EndpointRow({
 }) {
   const t = useT()
   const menu = useRowMenu()
+  const dnd = dragProps({ kind: 'endpoint', id: endpoint.id }, handlers.drag, false)
 
   const items: MenuItem[] = [
     {
@@ -163,9 +219,11 @@ function EndpointRow({
 
   return (
     <div
+      {...dnd}
       className={cn(
         'group flex items-center gap-1 rounded-md py-1 pr-1 transition',
         endpoint.id === handlers.activeId ? 'bg-accent' : 'hover:bg-accent/50',
+        dnd.className,
       )}
       style={{ paddingLeft: `${depth * 12 + 20}px` }}
       onContextMenu={menu.openAtCursor}

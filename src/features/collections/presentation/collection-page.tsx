@@ -1,7 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { Group, Panel, Separator } from 'react-resizable-panels'
-import { ArrowLeft, BookOpen, BookText, FilePlus2, FolderPlus, Home, Settings } from 'lucide-react'
+import { Group, Panel, Separator, usePanelRef } from 'react-resizable-panels'
+import {
+  ArrowLeft,
+  BookOpen,
+  BookText,
+  FilePlus2,
+  FolderPlus,
+  Home,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Settings,
+} from 'lucide-react'
 import { cn } from '@/core/lib/cn'
 import { Button } from '@/shared/ui/button'
 import { DataErrorNote } from '@/shared/ui/data-error-note'
@@ -27,6 +37,7 @@ import { CollectionHome } from './collection-home'
 import { SaveStatus } from './save-status'
 import { useAutoSave } from './use-auto-save'
 import { CollectionTree, type TreeHandlers } from './collection-tree'
+import { useTreeDrag } from './use-tree-drag'
 import { EndpointModal } from './endpoint-modal'
 import { VariableEditModal } from './variable-edit-modal'
 import { FolderModal } from './folder-modal'
@@ -49,6 +60,7 @@ export function CollectionPage({
   const removeEndpoint = useCollectionsStore((state) => state.removeEndpoint)
   const removeFolder = useCollectionsStore((state) => state.removeFolder)
   const duplicateEndpoint = useCollectionsStore((state) => state.duplicateEndpoint)
+  const reorderNode = useCollectionsStore((state) => state.reorderNode)
 
   const tabs = useTabsStore((state) => state.tabs)
   const activeTabId = useTabsStore((state) => state.activeTabId)
@@ -65,6 +77,15 @@ export function CollectionPage({
   const [folderModal, setFolderModal] = useState<{ folder: Folder | null; parentId: string | null } | null>(null)
   const [endpointModal, setEndpointModal] = useState<{ endpoint: RequestDef | null; parentId: string | null } | null>(null)
   const [variableEdit, setVariableEdit] = useState<string | null>(null)
+  const [collapsed, setCollapsed] = useState(false)
+  const sidebarRef = usePanelRef()
+
+  const drag = useTreeDrag((dragged, target, position) => {
+    if (position === 'inside' && target?.kind === 'folder') {
+      setExpanded((open) => new Set(open).add(target.id))
+    }
+    void reorderNode(workspaceId, dragged, target, position)
+  })
 
   const activeEnvironment = useActiveEnvironment()
   const ensureWorkspace = useWorkspacesStore((state) => state.ensureWorkspace)
@@ -215,6 +236,7 @@ export function CollectionPage({
   const handlers: TreeHandlers = {
     activeId: activeTabId,
     expanded,
+    drag,
     onToggle: (folderId) =>
       setExpanded((current) => {
         const next = new Set(current)
@@ -283,8 +305,16 @@ export function CollectionPage({
 
   return (
     <Group orientation="horizontal" className="h-full">
-      <Panel defaultSize="26" minSize="18" maxSize="45">
-        <aside className="flex h-full flex-col bg-card">
+      <Panel
+        panelRef={sidebarRef}
+        collapsible
+        collapsedSize="40px"
+        defaultSize="26"
+        minSize="18"
+        maxSize="45"
+        onResize={() => setCollapsed(sidebarRef.current?.isCollapsed() ?? false)}
+      >
+        <aside className={cn('flex h-full flex-col bg-card', collapsed && 'hidden')}>
           <div className="border-b border-border px-3 py-2">
             <Link
               to="/workspace/$workspaceId"
@@ -326,9 +356,31 @@ export function CollectionPage({
             >
               <Settings className="size-3.5" />
             </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              aria-label={t('tree.collapse')}
+              onClick={() => sidebarRef.current?.collapse()}
+            >
+              <PanelLeftClose className="size-3.5" />
+            </Button>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-auto p-1">
+          <div
+            className={cn(
+              'min-h-0 flex-1 overflow-auto p-1',
+              drag.hint && !drag.hint.target && 'ring-1 ring-inset ring-primary',
+            )}
+            onDragOver={(event) => {
+              if (!drag.active) return
+              event.preventDefault()
+              drag.onOver(null, 'inside')
+            }}
+            onDrop={(event) => {
+              event.preventDefault()
+              drag.onDrop()
+            }}
+          >
             <button
               type="button"
               onClick={() => setView('home')}
@@ -356,6 +408,19 @@ export function CollectionPage({
             </div>
           )}
         </aside>
+
+        {collapsed && (
+          <div className="flex h-full flex-col items-center overflow-hidden bg-card py-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              aria-label={t('tree.expand')}
+              onClick={() => sidebarRef.current?.expand()}
+            >
+              <PanelLeftOpen className="size-4" />
+            </Button>
+          </div>
+        )}
       </Panel>
 
       <Separator className="w-px shrink-0 bg-border transition-colors hover:bg-primary data-[state=dragging]:bg-primary" />

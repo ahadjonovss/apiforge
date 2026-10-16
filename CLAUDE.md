@@ -153,6 +153,29 @@ bo'lmagan `parentId`). Ikkalasida ham tegishli tugun ildizga chiqariladi, ya'ni
 ma'lumot ko'rinmay qolmaydi va rekursiya cheksizlikka ketmaydi. Papkani o'z avlodiga
 ko'chirish `moveFolder` da rad etiladi.
 
+**Tartib — `order` maydoni.** Papkalar va endpointlar bitta ota ichida alohida
+ketma-ketlikda turadi (daraxtda avval papkalar, keyin endpointlar), shuning uchun
+`order` har bir tur uchun 0 dan qayta sanaladi. `application/reorder.ts` sof
+funksiya: ro'yxatlar + sudralgan tugun + nishon + joylashuv
+(`before` / `after` / `inside`) → **faqat o'zgargan** hujjatlar. Papkani o'z avlodiga
+yoki o'ziga tashlash jimgina rad etiladi (`isDescendant`), aks holda daraxtdan
+butun shox uzilib qolardi.
+
+Yozuv `writeBatch` bilan va 400 talik bo'laklarda (Firestore chegarasi 500): tartib
+yo butunlay o'zgaradi, yo umuman o'zgarmaydi. Faqat `order` va ota maydoni yoziladi —
+to'liq hujjat emas, aks holda sudrab tashlash boshqa joyda tahrirlangan endpointni
+eski holatiga qaytarib yuborardi. Store optimistik yangilanadi va xatoda eski
+ro'yxatni tiklaydi, chunki drag-and-drop tarmoq kechikishini ko'tarmaydi.
+
+Interfeys **HTML5 drag-and-drop**, kutubxonasiz. Qatorning yuqori/quyi cheti —
+`before`/`after`, papkaning o'rta qismi — `inside`; daraxtdan tashqaridagi bo'sh
+joyga tashlash to'plam ildiziga ko'chiradi.
+
+Chap panel yig'iladi: `Panel` ning `collapsible` va `collapsedSize="40px"` i bilan,
+ya'ni yopilganda ham 40px lik tasma qoladi va undagi tugma uni qaytaradi. Panel
+umuman olib tashlanmaydi, chunki `react-resizable-panels` da Group bolalari faqat
+Panel bo'lishi kerak — tasma shu Panel ichida yashaydi.
+
 ## To'plam konfiguratsiyasining merosi
 
 To'plamning `baseUrl`, `headers` va `auth` sozlamalari endpointga **nusxalanmaydi** —

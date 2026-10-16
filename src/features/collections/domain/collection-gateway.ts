@@ -18,6 +18,11 @@ export type CollectionPatch = Partial<
   >
 >
 
+export interface ReorderWrite {
+  folders: { id: string; parentId: string | null; order: number }[]
+  endpoints: { id: string; folderId: string | null; order: number }[]
+}
+
 export interface CollectionGateway {
   list(workspaceId: string): Promise<ApiCollection[]>
   get(workspaceId: string, collectionId: string): Promise<ApiCollection | null>
@@ -39,4 +44,6 @@ export interface CollectionGateway {
   saveFolder(workspaceId: string, collectionId: string, folder: Folder): Promise<void>
   removeFolders(workspaceId: string, collectionId: string, folderIds: string[]): Promise<void>
   removeEndpoints(workspaceId: string, collectionId: string, endpointIds: string[]): Promise<void>
+
+  reorder(workspaceId: string, collectionId: string, write: ReorderWrite): Promise<void>
 }

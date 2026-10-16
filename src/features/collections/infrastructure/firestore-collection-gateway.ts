@@ -8,6 +8,7 @@ import {
   getDocs,
   setDoc,
   updateDoc,
+  writeBatch,
   type DocumentData,
 } from 'firebase/firestore'
 import { db } from '@/core/config/firebase'
@@ -29,6 +30,7 @@ const WORKSPACES = 'workspaces'
 const COLLECTIONS = 'collections'
 const ENDPOINTS = 'endpoints'
 const FOLDERS = 'folders'
+const BATCH_LIMIT = 400
 
 function toFolder(collectionId: string, id: string, data: DocumentData): Folder {
   return {
@@ -272,6 +274,32 @@ export const firestoreCollectionGateway: CollectionGateway = {
           ),
         ),
       )
+    } catch (error) {
+      throw toDataFailure(error)
+    }
+  },
+
+  async reorder(workspaceId, collectionId, write) {
+    try {
+      const now = Date.now()
+      const writes = [
+        ...write.folders.map((folder) => ({
+          ref: doc(db, WORKSPACES, workspaceId, COLLECTIONS, collectionId, FOLDERS, folder.id),
+          data: { parentId: folder.parentId, order: folder.order, updatedAt: now },
+        })),
+        ...write.endpoints.map((endpoint) => ({
+          ref: doc(db, WORKSPACES, workspaceId, COLLECTIONS, collectionId, ENDPOINTS, endpoint.id),
+          data: { folderId: endpoint.folderId, order: endpoint.order, updatedAt: now },
+        })),
+      ]
+
+      for (let start = 0; start < writes.length; start += BATCH_LIMIT) {
+        const batch = writeBatch(db)
+        for (const entry of writes.slice(start, start + BATCH_LIMIT)) {
+          batch.update(entry.ref, entry.data)
+        }
+        await batch.commit()
+      }
     } catch (error) {
       throw toDataFailure(error)
     }

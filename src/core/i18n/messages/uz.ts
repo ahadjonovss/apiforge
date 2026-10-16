@@ -265,6 +265,8 @@ export const uz = {
   'tree.actions': 'Amallar',
   'tree.addExample': "Javob misoli qo'shish",
   'tree.duplicate': 'Nusxa olish',
+  'tree.collapse': "Ro'yxatni yopish",
+  'tree.expand': "Ro'yxatni ochish",
   'folder.addInside': 'Ichiga papka',
   'folder.error.self': "Papkani o'z ichiga ko'chirib bo'lmaydi",
   'folder.error.descendant': "Papkani o'z ichki papkasiga ko'chirib bo'lmaydi",

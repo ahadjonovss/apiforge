@@ -267,6 +267,8 @@ export const ru: typeof uz = {
   'tree.actions': 'Действия',
   'tree.addExample': 'Добавить пример ответа',
   'tree.duplicate': 'Дублировать',
+  'tree.collapse': 'Свернуть список',
+  'tree.expand': 'Развернуть список',
   'folder.addInside': 'Папку внутрь',
   'folder.error.self': 'Нельзя переместить папку внутрь себя',
   'folder.error.descendant': 'Нельзя переместить папку в свою вложенную папку',

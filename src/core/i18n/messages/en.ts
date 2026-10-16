@@ -267,6 +267,8 @@ export const en: typeof uz = {
   'tree.actions': 'Actions',
   'tree.addExample': 'Add response example',
   'tree.duplicate': 'Duplicate',
+  'tree.collapse': 'Collapse sidebar',
+  'tree.expand': 'Expand sidebar',
   'folder.addInside': 'Folder inside',
   'folder.error.self': 'A folder cannot be moved into itself',
   'folder.error.descendant': 'A folder cannot be moved into its own subfolder',

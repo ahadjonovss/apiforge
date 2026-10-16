@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { DataFailure, type DataErrorDetail } from '@/core/domain/data-error'
 import { newId } from '@/core/lib/id'
 import type { RequestDef } from '@/features/request/domain/request'
+import { isEmptyPlan, planReorder, type DropPosition, type NodeRef } from '../application/reorder'
 import { collectionService } from '../composition'
 import { grantKey, type AccessSubject, type CollectionRole } from '../domain/access'
 import type { ApiCollection } from '../domain/collection'
@@ -67,6 +68,13 @@ interface CollectionsState {
     workspaceId: string,
     endpoint: RequestDef,
     folderId: string | null,
+  ) => Promise<boolean>
+
+  reorderNode: (
+    workspaceId: string,
+    drag: NodeRef,
+    target: NodeRef | null,
+    position: DropPosition,
   ) => Promise<boolean>
 
   addFolder: (workspaceId: string, name: string, parentId: string | null) => Promise<boolean>
@@ -328,6 +336,31 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => {
           endpoints: state.endpoints.map((item) => (item.id === next.id ? next : item)),
         }))
       }),
+
+    reorderNode: async (workspaceId, drag, target, position) => {
+      const collection = get().current
+      if (!collection) return false
+
+      const { folders, endpoints } = get()
+      const plan = planReorder(folders, endpoints, drag, target, position)
+      if (isEmptyPlan(plan)) return false
+
+      const movedFolders = new Map(plan.folders.map((item) => [item.id, item]))
+      const movedEndpoints = new Map(plan.endpoints.map((item) => [item.id, item]))
+      set({
+        folders: folders.map((item) => movedFolders.get(item.id) ?? item),
+        endpoints: endpoints.map((item) => movedEndpoints.get(item.id) ?? item),
+        error: null,
+      })
+
+      try {
+        await collectionService.applyReorder(workspaceId, collection.id, plan)
+        return true
+      } catch (error) {
+        set({ folders, endpoints, error: toDetail(error) })
+        return false
+      }
+    },
 
     addFolder: (workspaceId, name, parentId) =>
       run(async () => {

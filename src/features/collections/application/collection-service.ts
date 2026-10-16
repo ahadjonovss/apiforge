@@ -10,6 +10,7 @@ import {
 import type { ApiCollection } from '../domain/collection'
 import type { CollectionGateway, CollectionPatch } from '../domain/collection-gateway'
 import type { Folder } from '../domain/folder'
+import type { ReorderPlan } from './reorder'
 import { collectionSchema, collectionSettingsSchema, endpointSchema, folderSchema } from './schemas'
 import { descendantFolderIds, isDescendant } from './tree'
 
@@ -220,6 +221,14 @@ export function createCollectionService(gateway: CollectionGateway) {
       endpoint: RequestDef,
     ): Promise<void> {
       return gateway.saveEndpoint(workspaceId, collectionId, endpoint)
+    },
+
+    applyReorder(
+      workspaceId: string,
+      collectionId: string,
+      plan: ReorderPlan,
+    ): Promise<void> {
+      return gateway.reorder(workspaceId, collectionId, plan)
     },
 
     removeEndpoint(

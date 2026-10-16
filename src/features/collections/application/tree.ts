@@ -14,11 +14,11 @@ export interface EndpointNode {
 
 export type TreeNode = FolderNode | EndpointNode
 
-function byOrder(a: { order: number; name: string }, b: { order: number; name: string }) {
+export function byOrder(a: { order: number; name: string }, b: { order: number; name: string }) {
   return a.order - b.order || a.name.localeCompare(b.name)
 }
 
-function resolveParent(folder: Folder, byId: Map<string, Folder>): string | null {
+export function resolveParent(folder: Folder, byId: Map<string, Folder>): string | null {
   if (!folder.parentId) return null
 
   const seen = new Set<string>([folder.id])
