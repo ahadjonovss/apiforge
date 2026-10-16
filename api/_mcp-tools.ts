@@ -23,6 +23,23 @@ const KEY_VALUES = {
   },
 }
 
+const RESPONSE_DOCS = {
+  type: 'array',
+  description:
+    'Saved response examples, shown in the endpoint Responses panel. ' +
+    'The whole list is replaced; omit the field to keep the current one, ' +
+    'pass [] to clear it.',
+  items: {
+    type: 'object',
+    properties: {
+      status: { type: 'string', description: 'HTTP status, e.g. 200, 400 or 4xx' },
+      title: { type: 'string', description: 'Short label, e.g. "cnic already used"' },
+      body: { type: 'string', description: 'Example body, usually a JSON string' },
+    },
+    required: ['status', 'body'],
+  },
+}
+
 export const TOOLS: ToolDefinition[] = [
   {
     name: 'list_workspaces',
@@ -91,6 +108,7 @@ export const TOOLS: ToolDefinition[] = [
         headers: KEY_VALUES,
         params: KEY_VALUES,
         jsonBody: optional('Request body as a JSON string. Sets the body mode to json.'),
+        responseDocs: RESPONSE_DOCS,
       },
       required: ['workspaceId', 'collectionId', 'name'],
     },
@@ -113,6 +131,7 @@ export const TOOLS: ToolDefinition[] = [
         headers: KEY_VALUES,
         params: KEY_VALUES,
         jsonBody: optional('Request body as a JSON string'),
+        responseDocs: RESPONSE_DOCS,
         script: optional('Post-response JavaScript, af.* API'),
       },
       required: ['workspaceId', 'collectionId', 'endpointId'],
@@ -192,6 +211,23 @@ function pairs(args: Json, key: string): { id: string; key: string; value: strin
       enabled: true,
     }))
     .filter((row) => row.key !== '')
+}
+
+function examples(
+  args: Json,
+  key: string,
+): { id: string; status: string; title: string; body: string }[] | undefined {
+  const value = args[key]
+  if (!Array.isArray(value)) return undefined
+  return value
+    .filter((row): row is Json => typeof row === 'object' && row !== null)
+    .map((row) => ({
+      id: randomUUID(),
+      status: String(row.status ?? '').trim(),
+      title: String(row.title ?? ''),
+      body: String(row.body ?? ''),
+    }))
+    .filter((row) => row.status !== '')
 }
 
 function bodyFrom(json: string | undefined): Json | undefined {
@@ -342,7 +378,7 @@ export async function callTool(
           method,
           url: text(args, 'url') ?? '',
           docs: text(args, 'docs') ?? '',
-          responseDocs: [],
+          responseDocs: examples(args, 'responseDocs') ?? [],
           captures: [],
           script: '',
           params: pairs(args, 'params') ?? [],
@@ -401,6 +437,9 @@ export async function callTool(
 
       const body = bodyFrom(text(args, 'jsonBody'))
       if (body) patch.body = body
+
+      const responseDocs = examples(args, 'responseDocs')
+      if (responseDocs) patch.responseDocs = responseDocs
 
       await db.write(path, patch)
       return { id: endpointId, updated: Object.keys(patch).filter((key) => key !== 'updatedAt') }

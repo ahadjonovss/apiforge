@@ -496,6 +496,12 @@ Postman import'da `item.description` → endpoint docs, `response[]` misollari �
 `responseDocs` (body ```json blokka o'raladi). Bular ilgari tashlab
 yuborilardi.
 
+MCP ham shu misollarni yozadi: `create_endpoint` va `update_endpoint` dagi
+`responseDocs` maydoni `{status, title, body}` ro'yxatini oladi va mavjud
+ro'yxatni **butunlay almashtiradi** (`id` serverda beriladi). Ya'ni agent avval
+`get_endpoint` bilan borini o'qib, keyin to'liq ro'yxatni yuborishi kerak;
+maydon berilmasa ro'yxat tegilmaydi, `[]` esa uni tozalaydi.
+
 ## Postman import
 
 `features/import` — Postman Collection v2.x JSON'ini o'qiydi.
